@@ -1,3 +1,6 @@
+const express = require("express");
+const router = express.Router();
+const authController = require("../controller/authControllers");
 /**
  * @swagger
  * tags:
@@ -35,9 +38,6 @@
  *       400:
  *         description: Invalid user_id or password
  */
-const express = require("express");
-const router = express.Router();
-const authController = require("../controller/authControllers");
 
 router.post("/login", authController.login);
 

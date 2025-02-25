@@ -11,7 +11,6 @@ const userController = {
     }
   },
 
-  // Get all users
   getAllUsers: async (req, res) => {
     try {
       const users = await User.find();
@@ -21,10 +20,9 @@ const userController = {
     }
   },
 
-  // Get a user by ID
   getUserById: async (req, res) => {
     try {
-      const user = await User.findById(req.params.id);
+      const user = await User.findOne({ user_id: req.params.user_id });
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -34,13 +32,13 @@ const userController = {
     }
   },
 
-  // Update a user by ID
   updateUserById: async (req, res) => {
     try {
-      const user = await User.findByIdAndUpdate(req.params.id, req.body, {
-        new: true,
-        runValidators: true,
-      });
+      const user = await User.findOneAndUpdate(
+        { user_id: req.params.id },
+        req.body,
+        { new: true, runValidators: true }
+      );
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
