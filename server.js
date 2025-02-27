@@ -5,6 +5,13 @@ const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
 const authRoutes = require("./src/routes/auth");
 const userRoutes = require("./src/routes/user");
+const paperTypeRoutes = require("./src/routes/paperType");
+const paperGroupRoutes = require("./src/routes/paperGroup");
+const workUnitRoutes = require("./src/routes/workUnit");
+const userWorkRoutes = require("./src/routes/userWork");
+const paperAuthorRoutes = require("./src/routes/paperAuthor");
+const paperViewRoutes = require("./src/routes/paperViews");
+const paperDownloadRoutes = require("./src/routes/paperDownloads");
 const { swaggerUi, specs } = require("./swagger");
 
 dotenv.config();
@@ -32,6 +39,13 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 // Routes
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
+app.use("/papertypes", paperTypeRoutes);
+app.use("/papergroups", paperGroupRoutes);
+app.use("/workunits", workUnitRoutes);
+app.use("/userwork", userWorkRoutes);
+app.use("/paperview", paperViewRoutes);
+app.use("/paperdownload", paperDownloadRoutes);
+app.use("/paperauthor", paperAuthorRoutes);
 
 const PORT = process.env.PORT || 5000;
 
