@@ -48,17 +48,7 @@ const paperAuthorController = {
     }
   },
 
-  deletePaperAuthorById: async (req, res) => {
-    try {
-      const paperAuthor = await PaperAuthor.findByIdAndDelete(req.params.id);
-      if (!paperAuthor) {
-        return res.status(404).json({ message: "PaperAuthor not found" });
-      }
-      res.status(200).json({ message: "PaperAuthor deleted successfully" });
-    } catch (error) {
-      res.status(500).json({ message: error.message });
-    }
-  }
+
 };
 
 module.exports = paperAuthorController;

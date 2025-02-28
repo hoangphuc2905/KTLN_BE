@@ -141,25 +141,5 @@ router.get("/:id", paperDownloadsController.getPaperDownloadById);
  */
 router.put("/:id", paperDownloadsController.updatePaperDownloadById);
 
-/**
- * @swagger
- * /paperDownloads/{id}:
- *   delete:
- *     summary: Delete a paper download by ID
- *     tags: [PaperDownloads]
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: string
- *         required: true
- *         description: The paper download ID
- *     responses:
- *       200:
- *         description: Paper download deleted successfully
- *       404:
- *         description: Paper download not found
- */
-router.delete("/:id", paperDownloadsController.deletePaperDownloadById);
 
 module.exports = router;

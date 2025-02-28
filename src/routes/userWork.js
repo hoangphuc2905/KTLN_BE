@@ -169,25 +169,5 @@ router.get("/:id", userWorkController.getUserWorkById);
  */
 router.put("/:id", userWorkController.updateUserWorkById);
 
-/**
- * @swagger
- * /userWorks/{id}:
- *   delete:
- *     summary: Delete a user work by ID
- *     tags: [UserWorks]
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: string
- *         required: true
- *         description: The user work ID
- *     responses:
- *       200:
- *         description: User work deleted successfully
- *       404:
- *         description: User work not found
- */
-router.delete("/:id", userWorkController.deleteUserWorkById);
 
 module.exports = router;

@@ -153,25 +153,4 @@ router.get("/:id", paperAuthorController.getPaperAuthorById);
  */
 router.put("/:id", paperAuthorController.updatePaperAuthorById);
 
-/**
- * @swagger
- * /paperAuthors/{id}:
- *   delete:
- *     summary: Delete a paper author by ID
- *     tags: [PaperAuthors]
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: string
- *         required: true
- *         description: The paper author ID
- *     responses:
- *       200:
- *         description: Paper author deleted successfully
- *       404:
- *         description: Paper author not found
- */
-router.delete("/:id", paperAuthorController.deletePaperAuthorById);
-
 module.exports = router;

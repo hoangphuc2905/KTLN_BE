@@ -57,17 +57,7 @@ const messagesController = {
     }
   },
 
-  deleteMessageById: async (req, res) => {
-    try {
-      const message = await Messages.findByIdAndDelete(req.params.id);
-      if (!message) {
-        return res.status(404).json({ message: "Message not found" });
-      }
-      res.status(200).json({ message: "Message deleted successfully" });
-    } catch (error) {
-      res.status(500).json({ message: error.message });
-    }
-  }
+
 };
 
 module.exports = messagesController;

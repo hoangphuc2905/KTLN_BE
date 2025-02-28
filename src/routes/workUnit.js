@@ -143,25 +143,5 @@ router.get("/:work_unit_id", workUnitController.getWorkUnitById);
  */
 router.put("/:work_unit_id", workUnitController.updateWorkUnitById);
 
-/**
- * @swagger
- * /workUnits/{work_unit_id}:
- *   delete:
- *     summary: Delete a work unit by ID
- *     tags: [WorkUnits]
- *     parameters:
- *       - in: path
- *         name: work_unit_id
- *         schema:
- *           type: number
- *         required: true
- *         description: The work unit ID
- *     responses:
- *       200:
- *         description: Work unit deleted successfully
- *       404:
- *         description: Work unit not found
- */
-router.delete("/:work_unit_id", workUnitController.deleteWorkUnitById);
 
 module.exports = router;

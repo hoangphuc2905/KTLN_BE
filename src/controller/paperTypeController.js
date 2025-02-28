@@ -48,17 +48,7 @@ const paperTypeController = {
     }
   },
 
-  deletePaperTypeById: async (req, res) => {
-    try {
-      const paperType = await PaperType.findOneAndDelete({ type_id: req.params.type_id });
-      if (!paperType) {
-        return res.status(404).json({ message: "PaperType not found" });
-      }
-      res.status(200).json({ message: "PaperType deleted successfully" });
-    } catch (error) {
-      res.status(500).json({ message: error.message });
-    }
-  }
+
 };
 
 module.exports = paperTypeController;

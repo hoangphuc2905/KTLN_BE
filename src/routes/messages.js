@@ -173,25 +173,5 @@ router.get("/:id", messagesController.getMessageById);
  */
 router.put("/:id", messagesController.updateMessageById);
 
-/**
- * @swagger
- * /messages/{id}:
- *   delete:
- *     summary: Delete a message by ID
- *     tags: [Messages]
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: string
- *         required: true
- *         description: The message ID
- *     responses:
- *       200:
- *         description: Message deleted successfully
- *       404:
- *         description: Message not found
- */
-router.delete("/:id", messagesController.deleteMessageById);
 
 module.exports = router;

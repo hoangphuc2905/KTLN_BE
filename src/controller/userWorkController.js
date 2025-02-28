@@ -54,17 +54,7 @@ const userWorkController = {
     }
   },
 
-  deleteUserWorkById: async (req, res) => {
-    try {
-      const userWork = await UserWork.findByIdAndDelete(req.params.id);
-      if (!userWork) {
-        return res.status(404).json({ message: "UserWork not found" });
-      }
-      res.status(200).json({ message: "UserWork deleted successfully" });
-    } catch (error) {
-      res.status(500).json({ message: error.message });
-    }
-  },
+
 };
 
 module.exports = userWorkController;

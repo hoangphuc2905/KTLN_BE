@@ -54,19 +54,6 @@ const paperDownloadsController = {
     }
   },
 
-  deletePaperDownloadById: async (req, res) => {
-    try {
-      const paperDownload = await PaperDownloads.findByIdAndDelete(
-        req.params.id
-      );
-      if (!paperDownload) {
-        return res.status(404).json({ message: "PaperDownload not found" });
-      }
-      res.status(200).json({ message: "PaperDownload deleted successfully" });
-    } catch (error) {
-      res.status(500).json({ message: error.message });
-    }
-  },
 };
 
 module.exports = paperDownloadsController;

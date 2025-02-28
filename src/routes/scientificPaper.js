@@ -297,25 +297,5 @@ router.get("/:id", scientificPaperController.getScientificPaperById);
  */
 router.put("/:id", scientificPaperController.updateScientificPaperById);
 
-/**
- * @swagger
- * /scientificPapers/{id}:
- *   delete:
- *     summary: Delete a scientific paper by ID
- *     tags: [ScientificPapers]
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: string
- *         required: true
- *         description: The scientific paper ID
- *     responses:
- *       200:
- *         description: Scientific paper deleted successfully
- *       404:
- *         description: Scientific paper not found
- */
-router.delete("/:id", scientificPaperController.deleteScientificPaperById);
 
 module.exports = router;

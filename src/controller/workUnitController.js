@@ -50,19 +50,7 @@ const workUnitController = {
     }
   },
 
-  deleteWorkUnitById: async (req, res) => {
-    try {
-      const workUnit = await WorkUnit.findOneAndDelete({
-        work_unit_id: req.params.work_unit_id,
-      });
-      if (!workUnit) {
-        return res.status(404).json({ message: "WorkUnit not found" });
-      }
-      res.status(200).json({ message: "WorkUnit deleted successfully" });
-    } catch (error) {
-      res.status(500).json({ message: error.message });
-    }
-  },
+
 };
 
 module.exports = workUnitController;

@@ -127,25 +127,5 @@ router.get("/:group_id", paperGroupController.getPaperGroupById);
  */
 router.put("/:group_id", paperGroupController.updatePaperGroupById);
 
-/**
- * @swagger
- * /paperGroups/{group_id}:
- *   delete:
- *     summary: Delete a paper group by ID
- *     tags: [PaperGroups]
- *     parameters:
- *       - in: path
- *         name: group_id
- *         schema:
- *           type: string
- *         required: true
- *         description: The paper group ID
- *     responses:
- *       200:
- *         description: Paper group deleted successfully
- *       404:
- *         description: Paper group not found
- */
-router.delete("/:group_id", paperGroupController.deletePaperGroupById);
 
 module.exports = router;

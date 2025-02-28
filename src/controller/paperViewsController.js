@@ -48,17 +48,7 @@ const paperViewsController = {
     }
   },
 
-  deletePaperViewById: async (req, res) => {
-    try {
-      const paperView = await PaperViews.findByIdAndDelete(req.params.id);
-      if (!paperView) {
-        return res.status(404).json({ message: "PaperView not found" });
-      }
-      res.status(200).json({ message: "PaperView deleted successfully" });
-    } catch (error) {
-      res.status(500).json({ message: error.message });
-    }
-  }
+
 };
 
 module.exports = paperViewsController;

@@ -127,25 +127,5 @@ router.get("/:type_id", paperTypeController.getPaperTypeById);
  */
 router.put("/:type_id", paperTypeController.updatePaperTypeById);
 
-/**
- * @swagger
- * /paperTypes/{type_id}:
- *   delete:
- *     summary: Delete a paper type by ID
- *     tags: [PaperTypes]
- *     parameters:
- *       - in: path
- *         name: type_id
- *         schema:
- *           type: string
- *         required: true
- *         description: The paper type ID
- *     responses:
- *       200:
- *         description: Paper type deleted successfully
- *       404:
- *         description: Paper type not found
- */
-router.delete("/:type_id", paperTypeController.deletePaperTypeById);
 
 module.exports = router;

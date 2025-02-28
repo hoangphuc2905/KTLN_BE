@@ -141,25 +141,4 @@ router.get("/:id", paperViewsController.getPaperViewById);
  */
 router.put("/:id", paperViewsController.updatePaperViewById);
 
-/**
- * @swagger
- * /paperViews/{id}:
- *   delete:
- *     summary: Delete a paper view by ID
- *     tags: [PaperViews]
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: string
- *         required: true
- *         description: The paper view ID
- *     responses:
- *       200:
- *         description: Paper view deleted successfully
- *       404:
- *         description: Paper view not found
- */
-router.delete("/:id", paperViewsController.deletePaperViewById);
-
 module.exports = router;
