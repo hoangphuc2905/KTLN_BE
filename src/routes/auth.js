@@ -41,4 +41,31 @@ const authController = require("../controller/authControllers");
 
 router.post("/login", authController.login);
 
+/**
+ * @swagger
+ * /auth/change-password:
+ *   post:
+ *     summary: Change a user's password
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               user_id:
+ *                 type: string
+ *               oldPassword:
+ *                 type: string
+ *               newPassword:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Password changed successfully
+ *       400:
+ *         description: Invalid user_id or password
+ */
+router.post("/change-password", authController.changePassword);
+
 module.exports = router;

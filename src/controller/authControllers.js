@@ -46,6 +46,38 @@ const authController = {
       res.status(400).json({ message: "Invalid token" });
     }
   },
+
+  changePassword: async (req, res) => {
+    try {
+      const { user_id, oldPassword, newPassword } = req.body;
+
+      const user = await User.findOne({ user_id });
+      if (!user) {
+        return res.status(400).json({ message: "Invalid user_id" });
+      }
+
+      const account = await Account.findOne({ user_id: user._id });
+      const isPasswordValid = await bcrypt.compare(
+        oldPassword,
+        account.password
+      );
+      if (!isPasswordValid) {
+        return res.status(400).json({ message: "Invalid password" });
+      }
+
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+      await Account.updateOne(
+        { user_id: user._id },
+        { password: hashedPassword }
+      );
+
+      res.status(200).json({ message: "Password updated successfully" });
+    } catch (error) {
+      res.status(400).json({ message: error.message });
+    }
+  },
 };
 
 module.exports = authController;
