@@ -19,12 +19,16 @@ const authController = {
         return res.status(400).json({ message: "Invalid user_id or password" });
       }
 
-      // Generate a JWT token
       const token = jwt.sign({ userId: user._id }, process.env.MYSECRET, {
         expiresIn: "1h",
       });
 
-      res.status(200).json({ token });
+      res.status(200).json({
+        token,
+        user_id: user.user_id,
+        role: user.role_id,
+        email: user.email,
+      });
     } catch (error) {
       res.status(400).json({ message: error.message });
     }
