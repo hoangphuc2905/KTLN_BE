@@ -11,7 +11,7 @@ const workUnitController = require("../controller/workUnitController");
 
 /**
  * @swagger
- * /workUnits:
+ * /workunits:
  *   post:
  *     summary: Create a new work unit
  *     tags: [WorkUnits]
@@ -42,7 +42,7 @@ router.post("/", workUnitController.createWorkUnit);
 
 /**
  * @swagger
- * /workUnits:
+ * /workunits:
  *   get:
  *     summary: Get all work units
  *     tags: [WorkUnits]
@@ -71,7 +71,7 @@ router.get("/", workUnitController.getAllWorkUnits);
 
 /**
  * @swagger
- * /workUnits/{work_unit_id}:
+ * /workunits/{work_unit_id}:
  *   get:
  *     summary: Get a work unit by ID
  *     tags: [WorkUnits]
@@ -107,7 +107,7 @@ router.get("/:work_unit_id", workUnitController.getWorkUnitById);
 
 /**
  * @swagger
- * /workUnits/{work_unit_id}:
+ * /workunits/{work_unit_id}:
  *   put:
  *     summary: Update a work unit by ID
  *     tags: [WorkUnits]

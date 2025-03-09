@@ -11,7 +11,7 @@ const userWorkController = require("../controller/userWorkController");
 
 /**
  * @swagger
- * /userWorks:
+ * /userworks:
  *   post:
  *     summary: Create a new user work
  *     tags: [UserWorks]
@@ -48,7 +48,7 @@ router.post("/", userWorkController.createUserWork);
 
 /**
  * @swagger
- * /userWorks:
+ * /userworks:
  *   get:
  *     summary: Get all user works
  *     tags: [UserWorks]
@@ -83,49 +83,51 @@ router.get("/", userWorkController.getAllUserWorks);
 
 /**
  * @swagger
- * /userWorks/{id}:
+ * /userworks/{user_id}:
  *   get:
- *     summary: Get a user work by ID
+ *     summary: Get user works by user ID
  *     tags: [UserWorks]
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: user_id
  *         schema:
  *           type: string
  *         required: true
- *         description: The user work ID
+ *         description: The user ID
  *     responses:
  *       200:
- *         description: User work details
+ *         description: List of user works for the specified user ID
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 work_unit_id:
- *                   type: string
- *                 user_id:
- *                   type: string
- *                 start_date:
- *                   type: string
- *                   format: date
- *                 end_date:
- *                   type: string
- *                   format: date
- *                 role_vi:
- *                   type: string
- *                 role_en:
- *                   type: string
- *                 department:
- *                   type: string
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   work_unit_id:
+ *                     type: string
+ *                   user_id:
+ *                     type: string
+ *                   start_date:
+ *                     type: string
+ *                     format: date
+ *                   end_date:
+ *                     type: string
+ *                     format: date
+ *                   role_vi:
+ *                     type: string
+ *                   role_en:
+ *                     type: string
+ *                   department:
+ *                     type: string
  *       404:
- *         description: User work not found
+ *         description: No user works found for this user ID
  */
-router.get("/:id", userWorkController.getUserWorkById);
+router.get("/:user_id", userWorkController.getUserWorksByUserId);
 
 /**
  * @swagger
- * /userWorks/{id}:
+ * /userworks/{id}:
  *   put:
  *     summary: Update a user work by ID
  *     tags: [UserWorks]
@@ -169,5 +171,25 @@ router.get("/:id", userWorkController.getUserWorkById);
  */
 router.put("/:id", userWorkController.updateUserWorkById);
 
+/**
+ * @swagger
+ * /userworks/{id}:
+ *   delete:
+ *     summary: Delete a user work by ID
+ *     tags: [UserWorks]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The user work ID
+ *     responses:
+ *       200:
+ *         description: User work deleted successfully
+ *       404:
+ *         description: User work not found
+ */
+router.delete("/:id", userWorkController.deleteUserWorkById);
 
 module.exports = router;

@@ -44,7 +44,7 @@ app.use("/users", userRoutes);
 app.use("/papertypes", paperTypeRoutes);
 app.use("/papergroups", paperGroupRoutes);
 app.use("/workunits", workUnitRoutes);
-app.use("/userwork", userWorkRoutes);
+app.use("/userworks", userWorkRoutes);
 app.use("/paperview", paperViewRoutes);
 app.use("/paperdownload", paperDownloadRoutes);
 app.use("/paperauthor", paperAuthorRoutes);

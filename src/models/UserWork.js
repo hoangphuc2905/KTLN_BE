@@ -4,12 +4,12 @@ const Schema = mongoose.Schema;
 const userWorkSchema = new Schema(
   {
     work_unit_id: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: String,
       ref: "WorkUnit",
       required: true,
     },
     user_id: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: String,
       ref: "User",
       required: true,
     },

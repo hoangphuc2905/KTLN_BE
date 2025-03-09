@@ -22,15 +22,15 @@ const userWorkController = {
     }
   },
 
-  getUserWorkById: async (req, res) => {
+  getUserWorksByUserId: async (req, res) => {
     try {
-      const userWork = await UserWork.findById(req.params.id)
-        .populate("work_unit_id")
-        .populate("user_id");
-      if (!userWork) {
-        return res.status(404).json({ message: "UserWork not found" });
+      const userWorks = await UserWork.find({ user_id: req.params.user_id })
+      if (userWorks.length === 0) {
+        return res
+          .status(404)
+          .json({ message: "No user works found for this user_id" });
       }
-      res.status(200).json(userWork);
+      res.status(200).json(userWorks);
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
@@ -54,7 +54,17 @@ const userWorkController = {
     }
   },
 
-
+  deleteUserWorkById: async (req, res) => {
+    try {
+      const userWork = await UserWork.findByIdAndDelete(req.params.id);
+      if (!userWork) {
+        return res.status(404).json({ message: "UserWork not found" });
+      }
+      res.status(200).json({ message: "UserWork deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  },
 };
 
 module.exports = userWorkController;
