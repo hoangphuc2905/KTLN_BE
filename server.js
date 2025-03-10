@@ -14,6 +14,7 @@ const paperAuthorRoutes = require("./src/routes/paperAuthor");
 const paperViewRoutes = require("./src/routes/paperViews");
 const paperDownloadRoutes = require("./src/routes/paperDownloads");
 const messagesRoutes = require("./src/routes/messages");
+const formulaRoutes = require("./src/routes/formulas");
 const { swaggerUi, specs } = require("./swagger");
 
 dotenv.config();
@@ -50,6 +51,8 @@ app.use("/paperdownload", paperDownloadRoutes);
 app.use("/paperauthor", paperAuthorRoutes);
 app.use("/scientificPapers", scientificPaperRoutes);
 app.use("/messages", messagesRoutes);
+app.use("/formulas", formulaRoutes);
+
 
 const PORT = process.env.PORT || 5000;
 
