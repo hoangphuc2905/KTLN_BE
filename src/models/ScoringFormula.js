@@ -1,15 +1,15 @@
 const mongoose = require("mongoose");
 
 const FormulaSchema = new mongoose.Schema({
-  name: { type: String, required: true }, // Tên tiêu chí (ví dụ: journal_group, author_role)
-  description: { type: String }, // Mô tả tiêu chí
-  weight: { type: Number, required: true }, // Trọng số
-  values: { type: Map, of: Number, required: true }, // Danh sách giá trị và hệ số
+  name: { type: String, required: true },
+  description: { type: String }, 
+  weight: { type: Number, required: true },
+  values: { type: Map, of: Number, required: true }, 
 });
 
 const ScoringFormulaSchema = new mongoose.Schema({
-  year: { type: Number, required: true, unique: true }, // Năm áp dụng
-  formula: { type: [FormulaSchema], required: true }, // Danh sách tiêu chí
+  year: { type: Number, required: true, unique: true },
+  formula: { type: [FormulaSchema], required: true }, 
 });
 
 const ScoringFormula = mongoose.model("ScoringFormula", ScoringFormulaSchema);
