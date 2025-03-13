@@ -13,7 +13,9 @@ const formulaController = {
 
   getFormulaByYear: async (req, res) => {
     try {
-      const formula = await ScoringFormula.findOne({ year: req.params.year });
+      const formula = await ScoringFormula.findOne({
+        year: req.params.year,
+      }).populate("formula.attribute", "name");
       if (!formula) {
         return res.status(404).json({ message: "Formula not found" });
       }
@@ -41,7 +43,9 @@ const formulaController = {
 
   deleteFormulaByYear: async (req, res) => {
     try {
-      const formula = await ScoringFormula.findOneAndDelete({ year: req.params.year });
+      const formula = await ScoringFormula.findOneAndDelete({
+        year: req.params.year,
+      });
       if (!formula) {
         return res.status(404).json({ message: "Formula not found" });
       }

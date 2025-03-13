@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const formulaController = require("../controller/formulaController");
+const attributeController = require("../controller/attributeController");
 
 /**
  * @swagger
@@ -29,16 +30,10 @@ const formulaController = require("../controller/formulaController");
  *                 items:
  *                   type: object
  *                   properties:
- *                     name:
- *                       type: string
- *                     description:
+ *                     attribute:
  *                       type: string
  *                     weight:
  *                       type: number
- *                     values:
- *                       type: object
- *                       additionalProperties:
- *                         type: number
  *     responses:
  *       201:
  *         description: Formula created successfully
@@ -93,16 +88,10 @@ router.get("/:year", formulaController.getFormulaByYear);
  *                 items:
  *                   type: object
  *                   properties:
- *                     name:
- *                       type: string
- *                     description:
+ *                     attribute:
  *                       type: string
  *                     weight:
  *                       type: number
- *                     values:
- *                       type: object
- *                       additionalProperties:
- *                         type: number
  *     responses:
  *       200:
  *         description: Formula updated successfully
@@ -133,5 +122,4 @@ router.put("/:year", formulaController.updateFormulaByYear);
  *         description: Formula not found
  */
 router.delete("/:year", formulaController.deleteFormulaByYear);
-
 module.exports = router;
