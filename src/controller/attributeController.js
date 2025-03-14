@@ -13,11 +13,11 @@ const attributeController = {
 
   getAttributeByYear: async (req, res) => {
     try {
-      const attribute = await Attribute.findOne({ year: req.params.year });
-      if (!attribute) {
-        return res.status(404).json({ message: "Attribute not found" });
+      const attributes = await Attribute.find({ year: req.params.year });
+      if (attributes.length === 0) {
+        return res.status(404).json({ message: "Attributes not found" });
       }
-      res.status(200).json(attribute);
+      res.status(200).json(attributes);
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
