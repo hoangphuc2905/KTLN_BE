@@ -11,7 +11,7 @@ const paperTypeController = require("../controller/paperTypeController");
 
 /**
  * @swagger
- * /paperTypes:
+ * /papertypes:
  *   post:
  *     summary: Create a new paper type
  *     tags: [PaperTypes]
@@ -22,12 +22,8 @@ const paperTypeController = require("../controller/paperTypeController");
  *           schema:
  *             type: object
  *             properties:
- *               type_id:
- *                 type: string
  *               type_name:
  *                 type: string
- *               type_score:
- *                 type: number
  *     responses:
  *       201:
  *         description: Paper type created successfully
@@ -38,7 +34,7 @@ router.post("/", paperTypeController.createPaperType);
 
 /**
  * @swagger
- * /paperTypes:
+ * /papertypes:
  *   get:
  *     summary: Get all paper types
  *     tags: [PaperTypes]
@@ -52,18 +48,16 @@ router.post("/", paperTypeController.createPaperType);
  *               items:
  *                 type: object
  *                 properties:
- *                   type_id:
+ *                   _id:
  *                     type: string
  *                   type_name:
  *                     type: string
- *                   type_score:
- *                     type: number
  */
 router.get("/", paperTypeController.getAllPaperTypes);
 
 /**
  * @swagger
- * /paperTypes/{type_id}:
+ * /papertypes/{type_id}:
  *   get:
  *     summary: Get a paper type by ID
  *     tags: [PaperTypes]
@@ -82,12 +76,10 @@ router.get("/", paperTypeController.getAllPaperTypes);
  *             schema:
  *               type: object
  *               properties:
- *                 type_id:
+ *                 _id:
  *                   type: string
  *                 type_name:
  *                   type: string
- *                 type_score:
- *                   type: number
  *       404:
  *         description: Paper type not found
  */
@@ -95,7 +87,7 @@ router.get("/:type_id", paperTypeController.getPaperTypeById);
 
 /**
  * @swagger
- * /paperTypes/{type_id}:
+ * /papertypes/{type_id}:
  *   put:
  *     summary: Update a paper type by ID
  *     tags: [PaperTypes]
@@ -115,8 +107,6 @@ router.get("/:type_id", paperTypeController.getPaperTypeById);
  *             properties:
  *               type_name:
  *                 type: string
- *               type_score:
- *                 type: number
  *     responses:
  *       200:
  *         description: Paper type updated successfully
@@ -126,6 +116,5 @@ router.get("/:type_id", paperTypeController.getPaperTypeById);
  *         description: Paper type not found
  */
 router.put("/:type_id", paperTypeController.updatePaperTypeById);
-
 
 module.exports = router;

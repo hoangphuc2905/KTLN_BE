@@ -22,9 +22,9 @@ const paperTypeController = {
 
   getPaperTypeById: async (req, res) => {
     try {
-      const paperType = await PaperType.findOne({ type_id: req.params.type_id });
+      const paperType = await PaperType.findById(req.params.type_id);
       if (!paperType) {
-        return res.status(404).json({ message: "PaperType not found" });
+        return res.status(404).json({ message: "Paper type not found" });
       }
       res.status(200).json(paperType);
     } catch (error) {
@@ -34,21 +34,19 @@ const paperTypeController = {
 
   updatePaperTypeById: async (req, res) => {
     try {
-      const paperType = await PaperType.findOneAndUpdate(
-        { type_id: req.params.type_id },
+      const paperType = await PaperType.findByIdAndUpdate(
+        req.params.type_id,
         req.body,
         { new: true, runValidators: true }
       );
       if (!paperType) {
-        return res.status(404).json({ message: "PaperType not found" });
+        return res.status(404).json({ message: "Paper type not found" });
       }
       res.status(200).json(paperType);
     } catch (error) {
       res.status(400).json({ message: error.message });
     }
   },
-
-
 };
 
 module.exports = paperTypeController;

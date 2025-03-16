@@ -22,9 +22,9 @@ const paperGroupController = {
 
   getPaperGroupById: async (req, res) => {
     try {
-      const paperGroup = await PaperGroup.findOne({ group_id: req.params.group_id });
+      const paperGroup = await PaperGroup.findById(req.params.group_id);
       if (!paperGroup) {
-        return res.status(404).json({ message: "PaperGroup not found" });
+        return res.status(404).json({ message: "Paper group not found" });
       }
       res.status(200).json(paperGroup);
     } catch (error) {
@@ -34,20 +34,19 @@ const paperGroupController = {
 
   updatePaperGroupById: async (req, res) => {
     try {
-      const paperGroup = await PaperGroup.findOneAndUpdate(
-        { group_id: req.params.group_id },
+      const paperGroup = await PaperGroup.findByIdAndUpdate(
+        req.params.group_id,
         req.body,
         { new: true, runValidators: true }
       );
       if (!paperGroup) {
-        return res.status(404).json({ message: "PaperGroup not found" });
+        return res.status(404).json({ message: "Paper group not found" });
       }
       res.status(200).json(paperGroup);
     } catch (error) {
       res.status(400).json({ message: error.message });
     }
   },
-
 };
 
 module.exports = paperGroupController;

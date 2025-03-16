@@ -11,7 +11,7 @@ const paperGroupController = require("../controller/paperGroupController");
 
 /**
  * @swagger
- * /paperGroups:
+ * /papergroups:
  *   post:
  *     summary: Create a new paper group
  *     tags: [PaperGroups]
@@ -22,12 +22,8 @@ const paperGroupController = require("../controller/paperGroupController");
  *           schema:
  *             type: object
  *             properties:
- *               group_id:
- *                 type: string
  *               group_name:
  *                 type: string
- *               group_score:
- *                 type: number
  *     responses:
  *       201:
  *         description: Paper group created successfully
@@ -38,7 +34,7 @@ router.post("/", paperGroupController.createPaperGroup);
 
 /**
  * @swagger
- * /paperGroups:
+ * /papergroups:
  *   get:
  *     summary: Get all paper groups
  *     tags: [PaperGroups]
@@ -52,18 +48,16 @@ router.post("/", paperGroupController.createPaperGroup);
  *               items:
  *                 type: object
  *                 properties:
- *                   group_id:
+ *                   _id:
  *                     type: string
  *                   group_name:
  *                     type: string
- *                   group_score:
- *                     type: number
  */
 router.get("/", paperGroupController.getAllPaperGroups);
 
 /**
  * @swagger
- * /paperGroups/{group_id}:
+ * /papergroups/{group_id}:
  *   get:
  *     summary: Get a paper group by ID
  *     tags: [PaperGroups]
@@ -82,12 +76,10 @@ router.get("/", paperGroupController.getAllPaperGroups);
  *             schema:
  *               type: object
  *               properties:
- *                 group_id:
+ *                 _id:
  *                   type: string
  *                 group_name:
  *                   type: string
- *                 group_score:
- *                   type: number
  *       404:
  *         description: Paper group not found
  */
@@ -95,7 +87,7 @@ router.get("/:group_id", paperGroupController.getPaperGroupById);
 
 /**
  * @swagger
- * /paperGroups/{group_id}:
+ * /papergroups/{group_id}:
  *   put:
  *     summary: Update a paper group by ID
  *     tags: [PaperGroups]
@@ -115,8 +107,6 @@ router.get("/:group_id", paperGroupController.getPaperGroupById);
  *             properties:
  *               group_name:
  *                 type: string
- *               group_score:
- *                 type: number
  *     responses:
  *       200:
  *         description: Paper group updated successfully
@@ -126,6 +116,5 @@ router.get("/:group_id", paperGroupController.getPaperGroupById);
  *         description: Paper group not found
  */
 router.put("/:group_id", paperGroupController.updatePaperGroupById);
-
 
 module.exports = router;
