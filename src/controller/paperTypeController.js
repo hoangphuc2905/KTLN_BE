@@ -22,7 +22,7 @@ const paperTypeController = {
 
   getPaperTypeById: async (req, res) => {
     try {
-      const paperType = await PaperType.findById(req.params.type_id);
+      const paperType = await PaperType.findById(req.params._id);
       if (!paperType) {
         return res.status(404).json({ message: "Paper type not found" });
       }
@@ -35,7 +35,7 @@ const paperTypeController = {
   updatePaperTypeById: async (req, res) => {
     try {
       const paperType = await PaperType.findByIdAndUpdate(
-        req.params.type_id,
+        req.params._id,
         req.body,
         { new: true, runValidators: true }
       );
@@ -45,6 +45,18 @@ const paperTypeController = {
       res.status(200).json(paperType);
     } catch (error) {
       res.status(400).json({ message: error.message });
+    }
+  },
+
+  deletePaperTypeById: async (req, res) => {
+    try {
+      const paperType = await PaperType.findByIdAndDelete(req.params._id);
+      if (!paperType) {
+        return res.status(404).json({ message: "Paper type not found" });
+      }
+      res.status(200).json({ message: "Paper type deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
     }
   },
 };

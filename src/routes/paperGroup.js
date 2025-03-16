@@ -57,13 +57,13 @@ router.get("/", paperGroupController.getAllPaperGroups);
 
 /**
  * @swagger
- * /papergroups/{group_id}:
+ * /papergroups/{_id}:
  *   get:
  *     summary: Get a paper group by ID
  *     tags: [PaperGroups]
  *     parameters:
  *       - in: path
- *         name: group_id
+ *         name: _id
  *         schema:
  *           type: string
  *         required: true
@@ -83,17 +83,17 @@ router.get("/", paperGroupController.getAllPaperGroups);
  *       404:
  *         description: Paper group not found
  */
-router.get("/:group_id", paperGroupController.getPaperGroupById);
+router.get("/:_id", paperGroupController.getPaperGroupById);
 
 /**
  * @swagger
- * /papergroups/{group_id}:
+ * /papergroups/{_id}:
  *   put:
  *     summary: Update a paper group by ID
  *     tags: [PaperGroups]
  *     parameters:
  *       - in: path
- *         name: group_id
+ *         name: _id
  *         schema:
  *           type: string
  *         required: true
@@ -115,6 +115,27 @@ router.get("/:group_id", paperGroupController.getPaperGroupById);
  *       404:
  *         description: Paper group not found
  */
-router.put("/:group_id", paperGroupController.updatePaperGroupById);
+router.put("/:_id", paperGroupController.updatePaperGroupById);
+
+/**
+ * @swagger
+ * /papergroups/{_id}:
+ *   delete:
+ *     summary: Delete a paper group by ID
+ *     tags: [PaperGroups]
+ *     parameters:
+ *       - in: path
+ *         name: _id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The paper group ID
+ *     responses:
+ *       200:
+ *         description: Paper group deleted successfully
+ *       404:
+ *         description: Paper group not found
+ */
+router.delete("/:_id", paperGroupController.deletePaperGroupById);
 
 module.exports = router;

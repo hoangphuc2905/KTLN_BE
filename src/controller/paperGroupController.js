@@ -22,7 +22,7 @@ const paperGroupController = {
 
   getPaperGroupById: async (req, res) => {
     try {
-      const paperGroup = await PaperGroup.findById(req.params.group_id);
+      const paperGroup = await PaperGroup.findById(req.params._id);
       if (!paperGroup) {
         return res.status(404).json({ message: "Paper group not found" });
       }
@@ -35,7 +35,7 @@ const paperGroupController = {
   updatePaperGroupById: async (req, res) => {
     try {
       const paperGroup = await PaperGroup.findByIdAndUpdate(
-        req.params.group_id,
+        req.params._id,
         req.body,
         { new: true, runValidators: true }
       );
@@ -45,6 +45,18 @@ const paperGroupController = {
       res.status(200).json(paperGroup);
     } catch (error) {
       res.status(400).json({ message: error.message });
+    }
+  },
+
+  deletePaperGroupById: async (req, res) => {
+    try {
+      const paperGroup = await PaperGroup.findByIdAndDelete(req.params._id);
+      if (!paperGroup) {
+        return res.status(404).json({ message: "Paper group not found" });
+      }
+      res.status(200).json({ message: "Paper group deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
     }
   },
 };
