@@ -1,4 +1,5 @@
-const User = require("../models/User");
+const Student = require("../models/Student");
+const Lecturer = require("../models/Lecturer");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const Account = require("../models/Account");
@@ -8,7 +9,15 @@ const authController = {
     try {
       const { user_id, password } = req.body;
 
-      const user = await User.findOne({ user_id });
+      // Tìm kiếm trong cả hai mô hình Student và Lecturer
+      let user = await Student.findOne({ student_id: user_id });
+      let role = "student";
+
+      if (!user) {
+        user = await Lecturer.findOne({ lecturer_id: user_id });
+        role = "lecturer";
+      }
+
       if (!user) {
         return res.status(400).json({ message: "Invalid user_id or password" });
       }
@@ -19,14 +28,18 @@ const authController = {
         return res.status(400).json({ message: "Invalid user_id or password" });
       }
 
-      const token = jwt.sign({ userId: user._id }, process.env.MYSECRET, {
-        expiresIn: "1h",
-      });
+      const token = jwt.sign(
+        { userId: user._id, role },
+        process.env.JWT_SECRET,
+        {
+          expiresIn: "1h",
+        }
+      );
 
       res.status(200).json({
         token,
-        user_id: user.user_id,
-        role: user.role_id,
+        user_id: user_id,
+        role: role,
         email: user.email,
       });
     } catch (error) {
@@ -34,28 +47,16 @@ const authController = {
     }
   },
 
-  // Middleware to protect routes
-  authenticate: (req, res, next) => {
-    const token = req.header("Authorization").replace("Bearer ", "");
-
-    if (!token) {
-      return res.status(401).json({ message: "Access denied" });
-    }
-
-    try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      req.user = decoded;
-      next();
-    } catch (error) {
-      res.status(400).json({ message: "Invalid token" });
-    }
-  },
-
   changePassword: async (req, res) => {
     try {
       const { user_id, oldPassword, newPassword } = req.body;
 
-      const user = await User.findOne({ user_id });
+      // Tìm kiếm trong cả hai mô hình Student và Lecturer
+      let user = await Student.findOne({ student_id: user_id });
+      if (!user) {
+        user = await Lecturer.findOne({ lecturer_id: user_id });
+      }
+
       if (!user) {
         return res.status(400).json({ message: "Invalid user_id" });
       }
