@@ -4,7 +4,7 @@ const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
 const authRoutes = require("./src/routes/auth");
-const userRoutes = require("./src/routes/user");
+const studentRoutes = require("./src/routes/students");
 const paperTypeRoutes = require("./src/routes/paperType");
 const paperGroupRoutes = require("./src/routes/paperGroup");
 const scientificPaperRoutes = require("./src/routes/scientificPaper");
@@ -42,7 +42,7 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 
 // Routes
 app.use("/auth", authRoutes);
-app.use("/users", userRoutes);
+app.use("/students", studentRoutes);
 app.use("/papertypes", paperTypeRoutes);
 app.use("/papergroups", paperGroupRoutes);
 app.use("/workunits", workUnitRoutes);

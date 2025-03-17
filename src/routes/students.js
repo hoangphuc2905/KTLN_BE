@@ -1,20 +1,20 @@
 const express = require("express");
 const router = express.Router();
-const userController = require("../controller/userControllers");
+const studentController = require("../controller/studentControllers");
 
 /**
  * @swagger
  * tags:
- *   name: Users
- *   description: User management endpoints
+ *   name: Students
+ *   description: Student management endpoints
  */
 
 /**
  * @swagger
- * /users:
+ * /students:
  *   post:
- *     summary: Create a new user
- *     tags: [Users]
+ *     summary: Create a new student
+ *     tags: [Students]
  *     requestBody:
  *       required: true
  *       content:
@@ -22,7 +22,7 @@ const userController = require("../controller/userControllers");
  *           schema:
  *             type: object
  *             properties:
- *               user_id:
+ *               student_id:
  *                 type: string
  *               full_name:
  *                 type: string
@@ -43,32 +43,32 @@ const userController = require("../controller/userControllers");
  *               start_date:
  *                 type: string
  *                 format: date
- *               role_id:
+ *               department:
  *                 type: string
- *                 enum: [admin, student, lecturer]
  *               score_year:
  *                 type: number
  *               avatar:
  *                 type: string
- *               password:
+ *               role:
  *                 type: string
+ *                 enum: [admin, student, lecturer]
  *     responses:
  *       201:
- *         description: User created successfully
+ *         description: Student created successfully
  *       400:
  *         description: Bad request
  */
-router.post("/", userController.createUser);
+router.post("/", studentController.createStudent);
 
 /**
  * @swagger
- * /users:
+ * /students:
  *   get:
- *     summary: Get all users
- *     tags: [Users]
+ *     summary: Get all students
+ *     tags: [Students]
  *     responses:
  *       200:
- *         description: List of users
+ *         description: List of students
  *         content:
  *           application/json:
  *             schema:
@@ -76,7 +76,7 @@ router.post("/", userController.createUser);
  *               items:
  *                 type: object
  *                 properties:
- *                   user_id:
+ *                   student_id:
  *                     type: string
  *                   full_name:
  *                     type: string
@@ -97,38 +97,39 @@ router.post("/", userController.createUser);
  *                   start_date:
  *                     type: string
  *                     format: date
- *                   role_id:
+ *                   department:
  *                     type: string
- *                     enum: [admin, student, lecturer]
  *                   score_year:
  *                     type: number
  *                   avatar:
  *                     type: string
+ *                   role:
+ *                     type: string
  */
-router.get("/", userController.getAllUsers);
+router.get("/", studentController.getAllStudents);
 
 /**
  * @swagger
- * /users/{user_id}:
+ * /students/{student_id}:
  *   get:
- *     summary: Get a user by ID
- *     tags: [Users]
+ *     summary: Get a student by ID
+ *     tags: [Students]
  *     parameters:
  *       - in: path
- *         name: user_id
+ *         name: student_id
  *         schema:
  *           type: string
  *         required: true
- *         description: The user ID
+ *         description: The student ID
  *     responses:
  *       200:
- *         description: User details
+ *         description: Student details
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 user_id:
+ *                 student_id:
  *                   type: string
  *                 full_name:
  *                   type: string
@@ -149,31 +150,32 @@ router.get("/", userController.getAllUsers);
  *                 start_date:
  *                   type: string
  *                   format: date
- *                 role_id:
+ *                 department:
  *                   type: string
- *                   enum: [admin, student, lecturer]
  *                 score_year:
  *                   type: number
  *                 avatar:
  *                   type: string
+ *                 role:
+ *                   type: string
  *       404:
- *         description: User not found
+ *         description: Student not found
  */
-router.get("/:user_id", userController.getUserById);
+router.get("/:student_id", studentController.getStudentById);
 
 /**
  * @swagger
- * /users/{id}:
+ * /students/{student_id}:
  *   put:
- *     summary: Update a user by ID
- *     tags: [Users]
+ *     summary: Update a student by ID
+ *     tags: [Students]
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: student_id
  *         schema:
  *           type: string
  *         required: true
- *         description: The user ID
+ *         description: The student ID
  *     requestBody:
  *       required: true
  *       content:
@@ -200,22 +202,22 @@ router.get("/:user_id", userController.getUserById);
  *               start_date:
  *                 type: string
  *                 format: date
- *               role_id:
+ *               department:
  *                 type: string
- *                 enum: [admin, student, lecturer]
  *               score_year:
  *                 type: number
  *               avatar:
  *                 type: string
+ *               role:
+ *                 type: string
  *     responses:
  *       200:
- *         description: User updated successfully
+ *         description: Student updated successfully
  *       400:
  *         description: Bad request
  *       404:
- *         description: User not found
+ *         description: Student not found
  */
-
-router.put("/:id", userController.updateUserById);
+router.put("/:student_id", studentController.updateStudentById);
 
 module.exports = router;

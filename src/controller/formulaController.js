@@ -54,6 +54,30 @@ const formulaController = {
       res.status(500).json({ message: error.message });
     }
   },
+
+  getAllYearsByFormula: async (req, res) => {
+    try {
+      const years = await ScoringFormula.distinct("year");
+      res.status(200).json(years);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  },
+
+  addNewYear: async (req, res) => {
+    try {
+      const { year } = req.body;
+      const existingYear = await ScoringFormula.findOne({ year });
+      if (existingYear) {
+        return res.status(400).json({ message: "Year already exists" });
+      }
+      const newYear = new ScoringFormula({ year, formula: [] });
+      await newYear.save();
+      res.status(201).json(newYear);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  },
 };
 
 module.exports = formulaController;

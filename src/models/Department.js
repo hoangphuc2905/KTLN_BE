@@ -1,9 +1,9 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const paperGroupSchema = new Schema(
+const departmentSchema = new Schema(
   {
-    group_name: {
+    department_name: {
       type: String,
       required: true,
       unique: true,
@@ -12,4 +12,4 @@ const paperGroupSchema = new Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("PaperGroup", paperGroupSchema);
+module.exports = mongoose.model("Department", departmentSchema);

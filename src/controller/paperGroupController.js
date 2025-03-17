@@ -3,6 +3,11 @@ const PaperGroup = require("../models/PaperGroup");
 const paperGroupController = {
   createPaperGroup: async (req, res) => {
     try {
+      const { group_name } = req.body;
+      const existingGroup = await PaperGroup.findOne({ group_name });
+      if (existingGroup) {
+        return res.status(400).json({ message: "Group name already exists" });
+      }
       const paperGroup = new PaperGroup(req.body);
       await paperGroup.save();
       res.status(201).json(paperGroup);

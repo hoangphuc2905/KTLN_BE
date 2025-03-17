@@ -3,6 +3,13 @@ const Attribute = require("../models/Attribute");
 const attributeController = {
   createAttribute: async (req, res) => {
     try {
+      const { name } = req.body;
+      const existingAttribute = await Attribute.findOne({ name });
+      if (existingAttribute) {
+        return res
+          .status(400)
+          .json({ message: "Attribute name already exists" });
+      }
       const attribute = new Attribute(req.body);
       await attribute.save();
       res.status(201).json(attribute);

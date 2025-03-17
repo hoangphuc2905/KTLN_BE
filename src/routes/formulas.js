@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const formulaController = require("../controller/formulaController");
-const attributeController = require("../controller/attributeController");
 
 /**
  * @swagger
@@ -42,6 +41,46 @@ const attributeController = require("../controller/attributeController");
  */
 router.post("/", formulaController.createFormula);
 
+/**
+ * @swagger
+ * /formulas/years:
+ *   get:
+ *     summary: Get all years
+ *     tags: [Formulas]
+ *     responses:
+ *       200:
+ *         description: List of years
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: number
+ */
+router.get("/years", formulaController.getAllYearsByFormula);
+
+/**
+ * @swagger
+ * /formulas/add-year:
+ *   post:
+ *     summary: Add a new year
+ *     tags: [Formulas]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               year:
+ *                 type: number
+ *     responses:
+ *       201:
+ *         description: Year added successfully
+ *       400:
+ *         description: Year already exists
+ */
+router.post("/add-year", formulaController.addNewYear);
 /**
  * @swagger
  * /formulas/{year}:
@@ -122,4 +161,5 @@ router.put("/:year", formulaController.updateFormulaByYear);
  *         description: Formula not found
  */
 router.delete("/:year", formulaController.deleteFormulaByYear);
+
 module.exports = router;
