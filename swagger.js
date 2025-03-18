@@ -1,26 +1,36 @@
-const swaggerJsdoc = require('swagger-jsdoc');
-const swaggerUi = require('swagger-ui-express');
+const swaggerJsDoc = require("swagger-jsdoc");
 
-const options = {
-  definition: {
-    openapi: '3.0.0',
+const swaggerOptions = {
+  swaggerDefinition: {
+    openapi: "3.0.0",
     info: {
-      title: 'API Documentation',
-      version: '1.0.0',
-      description: 'API documentation for the project',
+      title: "Authentication API",
+      version: "1.0.0",
+      description: "API for authentication and user management",
     },
     servers: [
       {
-        url: 'http://localhost:5000',
+        url: "http://localhost:5000", 
+      },
+    ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT", 
+        },
+      },
+    },
+    security: [
+      {
+        bearerAuth: [], 
       },
     ],
   },
-  apis: ['./src/routes/*.js', './src/models/*.js'], 
+  apis: ["./src/routes/*.js"], 
 };
 
-const specs = swaggerJsdoc(options);
+const specs = swaggerJsDoc(swaggerOptions);
 
-module.exports = {
-  swaggerUi,
-  specs,
-};
+module.exports = specs;

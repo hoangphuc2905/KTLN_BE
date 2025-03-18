@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const authController = require("../controller/authControllers");
+const authMiddleware = require("../middleware/authMiddleware"); // Import middleware để xác thực token
+
 /**
  * @swagger
  * tags:
@@ -38,7 +40,6 @@ const authController = require("../controller/authControllers");
  *       400:
  *         description: Invalid user_id or password
  */
-
 router.post("/login", authController.login);
 
 /**
@@ -67,5 +68,38 @@ router.post("/login", authController.login);
  *         description: Invalid user_id or password
  */
 router.post("/change-password", authController.changePassword);
+
+/**
+ * @swagger
+ * /auth/userinfo:
+ *   get:
+ *     summary: Get user information
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: [] # Yêu cầu Bearer Token
+ *     responses:
+ *       200:
+ *         description: User information retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 user_id:
+ *                   type: string
+ *                 full_name:
+ *                   type: string
+ *                 email:
+ *                   type: string
+ *                 role:
+ *                   type: string
+ *       401:
+ *         description: Unauthorized
+ */
+router.get(
+  "/userinfo",
+  authMiddleware.authenticate,
+  authController.getUserInfo
+);
 
 module.exports = router;

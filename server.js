@@ -19,7 +19,8 @@ const paperDownloadRoutes = require("./src/routes/paperDownloads");
 const messagesRoutes = require("./src/routes/messages");
 const formulaRoutes = require("./src/routes/formulas");
 const attributeRoutes = require("./src/routes/attributes");
-const { swaggerUi, specs } = require("./swagger");
+const swaggerUi = require("swagger-ui-express");
+const specs = require("./swagger"); 
 
 dotenv.config();
 const app = express();
