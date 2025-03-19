@@ -13,7 +13,10 @@ const paperAuthorController = {
 
   getAllPaperAuthors: async (req, res) => {
     try {
-      const paperAuthors = await PaperAuthor.find().populate('paper_id').populate('user_id').populate('work_unit_id');
+      const paperAuthors = await PaperAuthor.find()
+        .populate("paper_id")
+        .populate("user_id")
+        .populate("work_unit_id");
       res.status(200).json(paperAuthors);
     } catch (error) {
       res.status(500).json({ message: error.message });
@@ -22,7 +25,10 @@ const paperAuthorController = {
 
   getPaperAuthorById: async (req, res) => {
     try {
-      const paperAuthor = await PaperAuthor.findById(req.params.id).populate('paper_id').populate('user_id').populate('work_unit_id');
+      const paperAuthor = await PaperAuthor.findById(req.params.id)
+        .populate("paper_id")
+        .populate("user_id")
+        .populate("work_unit_id");
       if (!paperAuthor) {
         return res.status(404).json({ message: "PaperAuthor not found" });
       }
@@ -38,7 +44,10 @@ const paperAuthorController = {
         req.params.id,
         req.body,
         { new: true, runValidators: true }
-      ).populate('paper_id').populate('user_id').populate('work_unit_id');
+      )
+        .populate("paper_id")
+        .populate("user_id")
+        .populate("work_unit_id");
       if (!paperAuthor) {
         return res.status(404).json({ message: "PaperAuthor not found" });
       }
@@ -48,7 +57,18 @@ const paperAuthorController = {
     }
   },
 
-
+  deletePaperAuthorById: async (req, res) => {
+    try {
+      const { author_id } = req.params;
+      const result = await PaperAuthor.deleteOne({ author_id });
+      if (result.deletedCount === 0) {
+        return res.status(404).json({ message: "Paper author not found" });
+      }
+      res.status(200).json({ message: "Paper author deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error", error });
+    }
+  },
 };
 
 module.exports = paperAuthorController;

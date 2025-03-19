@@ -60,6 +60,18 @@ const lecturerSchema = new Schema(
       type: String,
       required: true,
     },
+    degree: {
+      type: String,
+      enum: [
+        "Bachelor",
+        "Master",
+        "Doctor",
+        "Egineer",
+        "Professor",
+        "Ossociate_Professor",
+      ],
+      required: true,
+    },
   },
   { timestamps: true }
 );

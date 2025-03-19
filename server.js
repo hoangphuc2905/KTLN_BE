@@ -13,14 +13,14 @@ const paperGroupRoutes = require("./src/routes/paperGroup");
 const scientificPaperRoutes = require("./src/routes/scientificPaper");
 const workUnitRoutes = require("./src/routes/workUnit");
 const userWorkRoutes = require("./src/routes/userWork");
-const paperAuthorRoutes = require("./src/routes/paperAuthor");
+const paperAuthorRoutes = require("./src/routes/paperAuthors");
 const paperViewRoutes = require("./src/routes/paperViews");
 const paperDownloadRoutes = require("./src/routes/paperDownloads");
 const messagesRoutes = require("./src/routes/messages");
 const formulaRoutes = require("./src/routes/formulas");
 const attributeRoutes = require("./src/routes/attributes");
 const swaggerUi = require("swagger-ui-express");
-const specs = require("./swagger"); 
+const specs = require("./swagger");
 
 dotenv.config();
 const app = express();

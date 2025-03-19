@@ -30,6 +30,18 @@ const paperAuthorSchema = new Schema(
       ref: "WorkUnit",
       required: true,
     },
+    degree: {
+      type: String,
+      enum: [
+        "Bachelor",
+        "Master",
+        "Doctor",
+        "Egineer",
+        "Professor",
+        "Ossociate_Professor",
+      ],
+      required: false,
+    },
   },
   { timestamps: true }
 );

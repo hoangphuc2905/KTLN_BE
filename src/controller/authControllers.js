@@ -13,7 +13,7 @@ const authController = {
 
       // Tìm kiếm trong bảng Student
       let user = await Student.findOne({ student_id: user_id });
-      let roleName = "Student"; // Mặc định là Student
+      let roleNames = ["Student"]; // Mặc định là Student
 
       if (!user) {
         // Nếu không tìm thấy trong Student, tìm trong Lecturer
@@ -21,10 +21,10 @@ const authController = {
           path: "roles", // Nếu Lecturer có bảng roles liên kết
           select: "role_name",
         });
-        roleName = user?.roles?.[0]?.role_name || "Lecturer"; // Lấy role từ Lecturer
+        roleNames = user?.roles?.map((role) => role.role_name) || ["Lecturer"]; // Lấy tất cả roles từ Lecturer
       } else {
         // Nếu là Student, lấy role trực tiếp từ trường role
-        roleName = user.role || "Student";
+        roleNames = [user.role || "Student"];
       }
 
       if (!user) {
@@ -45,7 +45,7 @@ const authController = {
 
       // Tạo token JWT
       const token = jwt.sign(
-        { userId: user._id, roles: [roleName], user_type: account.user_type }, // Thêm user_type vào token
+        { userId: user._id, roles: roleNames, user_type: account.user_type }, // Thêm tất cả roles vào token
         process.env.MYSECRET,
         {
           expiresIn: "1h",
@@ -55,7 +55,7 @@ const authController = {
       res.status(200).json({
         token,
         user_id: user_id,
-        roles: [roleName],
+        roles: roleNames,
         email: user.email,
         user_type: account.user_type,
       });

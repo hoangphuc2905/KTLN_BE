@@ -52,6 +52,9 @@ const studentController = require("../controller/studentControllers");
  *               role:
  *                 type: string
  *                 enum: [admin, student, lecturer]
+ *               degree:
+ *                 type: string
+ *                 enum: [Bachelor, Master, Doctor, Engineer, Professor, Associate_Professor]
  *     responses:
  *       201:
  *         description: Student created successfully
@@ -105,6 +108,9 @@ router.post("/", studentController.createStudent);
  *                     type: string
  *                   role:
  *                     type: string
+ *                   degree:
+ *                     type: string
+ *                     enum: [Bachelor, Master, Doctor, Engineer, Professor, Associate_Professor]
  */
 router.get("/", studentController.getAllStudents);
 
@@ -158,6 +164,9 @@ router.get("/", studentController.getAllStudents);
  *                   type: string
  *                 role:
  *                   type: string
+ *                 degree:
+ *                   type: string
+ *                   enum: [Bachelor, Master, Doctor, Engineer, Professor, Associate_Professor]
  *       404:
  *         description: Student not found
  */
@@ -210,6 +219,9 @@ router.get("/:student_id", studentController.getStudentById);
  *                 type: string
  *               role:
  *                 type: string
+ *               degree:
+ *                 type: string
+ *                 enum: [Bachelor, Master, Doctor, Engineer, Professor, Associate_Professor]
  *     responses:
  *       200:
  *         description: Student updated successfully

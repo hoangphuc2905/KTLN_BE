@@ -1,6 +1,8 @@
 const Lecturer = require("../models/Lecturer");
+const Student = require("../models/Student");
 const Account = require("../models/Account");
 const bcrypt = require("bcryptjs");
+const mongoose = require("mongoose");
 
 const lecturerController = {
   createLecturer: async (req, res) => {
@@ -72,6 +74,40 @@ const lecturerController = {
       res.status(200).json(lecturer);
     } catch (error) {
       res.status(400).json({ message: error.message });
+    }
+  },
+
+  getLecturerAndStudentByDepartment: async (req, res) => {
+    try {
+      const departmentId = req.params.department_id;
+
+      // Kiểm tra xem departmentId có phải là ObjectId hợp lệ không
+      if (!mongoose.Types.ObjectId.isValid(departmentId)) {
+        return res.status(400).json({ message: "Invalid department ID" });
+      }
+
+      // Tìm giảng viên thuộc khoa
+      const lecturers = await Lecturer.find({ department: departmentId })
+        .select(
+          "lecturer_id full_name email phone gender date_of_birth department roles score_year avatar degree"
+        )
+        .populate("department", "department_name")
+        .populate("roles", "role_name");
+
+      // Tìm sinh viên thuộc khoa
+      const students = await Student.find({ department: departmentId })
+        .select(
+          "student_id full_name email phone gender date_of_birth department score_year avatar role degree"
+        )
+        .populate("department", "department_name");
+
+      // Trả về danh sách giảng viên và sinh viên
+      res.status(200).json({
+        lecturers,
+        students,
+      });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
     }
   },
 

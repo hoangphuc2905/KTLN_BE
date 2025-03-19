@@ -1,20 +1,20 @@
 const express = require("express");
 const router = express.Router();
-const lecturerController = require("../controller/lecturerController");
+const paperAuthorController = require("../controller/paperAuthorController");
 
 /**
  * @swagger
  * tags:
- *   name: Lecturers
- *   description: Lecturer management endpoints
+ *   name: PaperAuthors
+ *   description: Paper Author management endpoints
  */
 
 /**
  * @swagger
- * /lecturers:
+ * /paperAuthors:
  *   post:
- *     summary: Create a new lecturer
- *     tags: [Lecturers]
+ *     summary: Create a new paper author
+ *     tags: [PaperAuthors]
  *     requestBody:
  *       required: true
  *       content:
@@ -22,7 +22,7 @@ const lecturerController = require("../controller/lecturerController");
  *           schema:
  *             type: object
  *             properties:
- *               lecturer_id:
+ *               author_id:
  *                 type: string
  *               full_name:
  *                 type: string
@@ -45,34 +45,33 @@ const lecturerController = require("../controller/lecturerController");
  *                 format: date
  *               department:
  *                 type: string
- *               roles:
- *                 type: array
- *                 items:
- *                   type: string
  *               score_year:
  *                 type: number
  *               avatar:
  *                 type: string
+ *               role:
+ *                 type: string
+ *                 enum: [admin, student, lecturer]
  *               degree:
  *                 type: string
  *                 enum: [Bachelor, Master, Doctor, Engineer, Professor, Associate_Professor]
  *     responses:
  *       201:
- *         description: Lecturer created successfully
+ *         description: Paper author created successfully
  *       400:
  *         description: Bad request
  */
-router.post("/", lecturerController.createLecturer);
+router.post("/", paperAuthorController.createPaperAuthor);
 
 /**
  * @swagger
- * /lecturers:
+ * /paperAuthors:
  *   get:
- *     summary: Get all lecturers
- *     tags: [Lecturers]
+ *     summary: Get all paper authors
+ *     tags: [PaperAuthors]
  *     responses:
  *       200:
- *         description: List of lecturers
+ *         description: List of paper authors
  *         content:
  *           application/json:
  *             schema:
@@ -80,7 +79,7 @@ router.post("/", lecturerController.createLecturer);
  *               items:
  *                 type: object
  *                 properties:
- *                   lecturer_id:
+ *                   author_id:
  *                     type: string
  *                   full_name:
  *                     type: string
@@ -103,42 +102,40 @@ router.post("/", lecturerController.createLecturer);
  *                     format: date
  *                   department:
  *                     type: string
- *                   roles:
- *                     type: array
- *                     items:
- *                       type: string
  *                   score_year:
  *                     type: number
  *                   avatar:
+ *                     type: string
+ *                   role:
  *                     type: string
  *                   degree:
  *                     type: string
  *                     enum: [Bachelor, Master, Doctor, Engineer, Professor, Associate_Professor]
  */
-router.get("/", lecturerController.getAllLecturers);
+router.get("/", paperAuthorController.getAllPaperAuthors);
 
 /**
  * @swagger
- * /lecturers/{lecturer_id}:
+ * /paperAuthors/{author_id}:
  *   get:
- *     summary: Get a lecturer by ID
- *     tags: [Lecturers]
+ *     summary: Get a paper author by ID
+ *     tags: [PaperAuthors]
  *     parameters:
  *       - in: path
- *         name: lecturer_id
+ *         name: author_id
  *         schema:
  *           type: string
  *         required: true
- *         description: The lecturer ID
+ *         description: The author ID
  *     responses:
  *       200:
- *         description: Lecturer details
+ *         description: Paper author details
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 lecturer_id:
+ *                 author_id:
  *                   type: string
  *                 full_name:
  *                   type: string
@@ -161,35 +158,33 @@ router.get("/", lecturerController.getAllLecturers);
  *                   format: date
  *                 department:
  *                   type: string
- *                 roles:
- *                   type: array
- *                   items:
- *                     type: string
  *                 score_year:
  *                   type: number
  *                 avatar:
+ *                   type: string
+ *                 role:
  *                   type: string
  *                 degree:
  *                   type: string
  *                   enum: [Bachelor, Master, Doctor, Engineer, Professor, Associate_Professor]
  *       404:
- *         description: Lecturer not found
+ *         description: Paper author not found
  */
-router.get("/:lecturer_id", lecturerController.getLecturerById);
+router.get("/:author_id", paperAuthorController.getPaperAuthorById);
 
 /**
  * @swagger
- * /lecturers/{lecturer_id}:
+ * /paperAuthors/{author_id}:
  *   put:
- *     summary: Update a lecturer by ID
- *     tags: [Lecturers]
+ *     summary: Update a paper author by ID
+ *     tags: [PaperAuthors]
  *     parameters:
  *       - in: path
- *         name: lecturer_id
+ *         name: author_id
  *         schema:
  *           type: string
  *         required: true
- *         description: The lecturer ID
+ *         description: The author ID
  *     requestBody:
  *       required: true
  *       content:
@@ -218,117 +213,44 @@ router.get("/:lecturer_id", lecturerController.getLecturerById);
  *                 format: date
  *               department:
  *                 type: string
- *               roles:
- *                 type: array
- *                 items:
- *                   type: string
  *               score_year:
  *                 type: number
  *               avatar:
+ *                 type: string
+ *               role:
  *                 type: string
  *               degree:
  *                 type: string
  *                 enum: [Bachelor, Master, Doctor, Engineer, Professor, Associate_Professor]
  *     responses:
  *       200:
- *         description: Lecturer updated successfully
+ *         description: Paper author updated successfully
  *       400:
  *         description: Bad request
  *       404:
- *         description: Lecturer not found
+ *         description: Paper author not found
  */
-router.put("/:lecturer_id", lecturerController.updateLecturerById);
+router.put("/:author_id", paperAuthorController.updatePaperAuthorById);
 
 /**
  * @swagger
- * /lecturers/lecturers-and-students/{department_id}:
- *   get:
- *     summary: Get all lecturers and students of a specific department
- *     tags: [Lecturers, Students]
- *     parameters:
- *       - in: path
- *         name: department_id
- *         schema:
- *           type: string
- *         required: true
- *         description: The department ID
- *     responses:
- *       200:
- *         description: List of lecturers and students
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 lecturers:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties:
- *                       lecturer_id:
- *                         type: string
- *                       full_name:
- *                         type: string
- *                       email:
- *                         type: string
- *                       phone:
- *                         type: string
- *                       gender:
- *                         type: string
- *                         enum: [male, female, other]
- *                       date_of_birth:
- *                         type: string
- *                         format: date
- *                       department:
- *                         type: string
- *                 students:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties:
- *                       student_id:
- *                         type: string
- *                       full_name:
- *                         type: string
- *                       email:
- *                         type: string
- *                       phone:
- *                         type: string
- *                       gender:
- *                         type: string
- *                         enum: [male, female, other]
- *                       date_of_birth:
- *                         type: string
- *                         format: date
- *                       department:
- *                         type: string
- *     404:
- *       description: Department not found
- */
-router.get(
-  "/lecturers-and-students/:department_id",
-  lecturerController.getLecturerAndStudentByDepartment
-);
-
-/**
- * @swagger
- * /lecturers/{lecturer_id}:
+ * /paperAuthors/{author_id}:
  *   delete:
- *     summary: Delete a lecturer by ID
- *     tags: [Lecturers]
+ *     summary: Delete a paper author by ID
+ *     tags: [PaperAuthors]
  *     parameters:
  *       - in: path
- *         name: lecturer_id
+ *         name: author_id
  *         schema:
  *           type: string
  *         required: true
- *         description: The lecturer ID
+ *         description: The author ID
  *     responses:
  *       200:
- *         description: Lecturer deleted successfully
+ *         description: Paper author deleted successfully
  *       404:
- *         description: Lecturer not found
+ *         description: Paper author not found
  */
-router.delete("/:lecturer_id", lecturerController.deleteLecturerById);
+router.delete("/:author_id", paperAuthorController.deletePaperAuthorById);
 
 module.exports = router;
