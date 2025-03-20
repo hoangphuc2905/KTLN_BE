@@ -77,31 +77,43 @@ const lecturerController = {
     }
   },
 
+  updateStatusLecturerById: async (req, res) => {
+    try {
+      const lecturer = await Lecturer.findOneAndUpdate(
+        { lecturer_id: req.params.lecturer_id },
+        { isActive: req.body.isActive },
+        { new: true, runValidators: true }
+      ).populate("department roles");
+      if (!lecturer) {
+        return res.status(404).json({ message: "Lecturer not found" });
+      }
+      res.status(200).json(lecturer);
+    } catch (error) {
+      res.status(400).json({ message: error.message });
+    }
+  },
+
   getLecturerAndStudentByDepartment: async (req, res) => {
     try {
       const departmentId = req.params.department_id;
 
-      // Kiểm tra xem departmentId có phải là ObjectId hợp lệ không
       if (!mongoose.Types.ObjectId.isValid(departmentId)) {
         return res.status(400).json({ message: "Invalid department ID" });
       }
 
-      // Tìm giảng viên thuộc khoa
       const lecturers = await Lecturer.find({ department: departmentId })
         .select(
-          "lecturer_id full_name email phone gender date_of_birth department roles score_year avatar degree"
+          "lecturer_id full_name email phone gender date_of_birth department roles score_year avatar degree isActive"
         )
         .populate("department", "department_name")
         .populate("roles", "role_name");
 
-      // Tìm sinh viên thuộc khoa
       const students = await Student.find({ department: departmentId })
         .select(
-          "student_id full_name email phone gender date_of_birth department score_year avatar role degree"
+          "student_id full_name email phone gender date_of_birth department score_year avatar role degree isActive"
         )
         .populate("department", "department_name");
 
-      // Trả về danh sách giảng viên và sinh viên
       res.status(200).json({
         lecturers,
         students,
@@ -120,7 +132,6 @@ const lecturerController = {
         return res.status(404).json({ message: "Lecturer not found" });
       }
 
-      // Xóa tài khoản liên quan đến giảng viên
       await Account.findOneAndDelete({ user_id: lecturer._id });
 
       res

@@ -72,6 +72,22 @@ const studentController = {
     }
   },
 
+  updateStatusStudentById: async (req, res) => {
+    try {
+      const student = await Student.findOneAndUpdate(
+        { student_id: req.params.student_id },
+        { isActive: req.body.isActive },
+        { new: true, runValidators: true }
+      );
+      if (!student) {
+        return res.status(404).json({ message: "Student not found" });
+      }
+      res.status(200).json(student);
+    } catch (error) {
+      res.status(400).json({ message: error.message });
+    }
+  },
+
   deleteStudentById: async (req, res) => {
     try {
       const student = await Student.findOneAndDelete({

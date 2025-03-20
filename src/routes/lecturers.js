@@ -289,6 +289,8 @@ router.put("/:lecturer_id", lecturerController.updateLecturerById);
  *                         format: date
  *                       department:
  *                         type: string
+ *                       isActive:
+ *                         type: boolean
  *                 students:
  *                   type: array
  *                   items:
@@ -319,6 +321,48 @@ router.get(
   "/lecturers-and-students/:department_id",
   lecturerController.getLecturerAndStudentByDepartment
 );
+
+/**
+ * @swagger
+ * /lecturers/status/{lecturer_id}:
+ *   put:
+ *     summary: Update the active status of a lecturer
+ *     tags: [Lecturers]
+ *     parameters:
+ *       - in: path
+ *         name: lecturer_id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the lecturer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               isActive:
+ *                 type: boolean
+ *                 description: The active status of the lecturer
+ *     responses:
+ *       200:
+ *         description: Lecturer status updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 lecturer_id:
+ *                   type: string
+ *                 isActive:
+ *                   type: boolean
+ *       404:
+ *         description: Lecturer not found
+ *       400:
+ *         description: Bad request
+ */
+router.put("/status/:lecturer_id", lecturerController.updateStatusLecturerById);
 
 /**
  * @swagger

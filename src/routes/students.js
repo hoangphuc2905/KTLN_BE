@@ -240,4 +240,46 @@ router.get("/:student_id", studentController.getStudentById);
  */
 router.put("/:student_id", studentController.updateStudentById);
 
+/**
+ * @swagger
+ * /students/status/{student_id}:
+ *   put:
+ *     summary: Update the active status of a student
+ *     tags: [Students]
+ *     parameters:
+ *       - in: path
+ *         name: student_id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the student
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               isActive:
+ *                 type: boolean
+ *                 description: The active status of the student
+ *     responses:
+ *       200:
+ *         description: Student status updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 student_id:
+ *                   type: string
+ *                 isActive:
+ *                   type: boolean
+ *       404:
+ *         description: Student not found
+ *       400:
+ *         description: Bad request
+ */
+router.put("/status/:student_id", studentController.updateStatusStudentById);
+
 module.exports = router;
