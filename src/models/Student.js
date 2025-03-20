@@ -70,6 +70,10 @@ const studentSchema = new Schema(
       ],
       required: false,
     },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
   },
   { timestamps: true }
 );

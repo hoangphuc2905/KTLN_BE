@@ -72,6 +72,10 @@ const lecturerSchema = new Schema(
       ],
       required: true,
     },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
   },
   { timestamps: true }
 );

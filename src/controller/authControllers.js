@@ -11,27 +11,33 @@ const authController = {
     try {
       const { user_id, password } = req.body;
 
-      // Tìm kiếm trong bảng Student
-      let user = await Student.findOne({ student_id: user_id });
-      let roleNames = ["Student"]; // Mặc định là Student
+      // Tìm kiếm trong mô hình Student
+      let user = await Student.findOne({ student_id: user_id, isActive: true });
+      let roleNames = ["Student"];
 
       if (!user) {
         // Nếu không tìm thấy trong Student, tìm trong Lecturer
-        user = await Lecturer.findOne({ lecturer_id: user_id }).populate({
-          path: "roles", // Nếu Lecturer có bảng roles liên kết
+        user = await Lecturer.findOne({
+          lecturer_id: user_id,
+          isActive: true,
+        }).populate({
+          path: "roles",
           select: "role_name",
         });
-        roleNames = user?.roles?.map((role) => role.role_name) || ["Lecturer"]; // Lấy tất cả roles từ Lecturer
+        roleNames = user?.roles?.map((role) => role.role_name) || ["Lecturer"];
       } else {
-        // Nếu là Student, lấy role trực tiếp từ trường role
         roleNames = [user.role || "Student"];
       }
 
       if (!user) {
-        return res.status(400).json({ message: "Invalid user_id or password" });
+        return res
+          .status(400)
+          .json({
+            message: "Invalid user_id, password, or account is inactive",
+          });
       }
 
-      // Tìm tài khoản trong bảng Account
+      // Tìm tài khoản trong mô hình Account
       const account = await Account.findOne({ user_id: user._id });
       if (!account) {
         return res.status(400).json({ message: "Account not found" });
@@ -45,7 +51,12 @@ const authController = {
 
       // Tạo token JWT
       const token = jwt.sign(
-        { userId: user._id, roles: roleNames, user_type: account.user_type }, // Thêm tất cả roles vào token
+        {
+          userId: user._id,
+          roles: roleNames,
+          user_type: account.user_type,
+          department: user.department,
+        },
         process.env.MYSECRET,
         {
           expiresIn: "1h",
@@ -58,6 +69,7 @@ const authController = {
         roles: roleNames,
         email: user.email,
         user_type: account.user_type,
+        department: user.department,
       });
     } catch (error) {
       res.status(400).json({ message: error.message });
