@@ -30,11 +30,9 @@ const authController = {
       }
 
       if (!user) {
-        return res
-          .status(400)
-          .json({
-            message: "Invalid user_id, password, or account is inactive",
-          });
+        return res.status(400).json({
+          message: "Invalid user_id, password, or account is inactive",
+        });
       }
 
       // Tìm tài khoản trong mô hình Account
@@ -127,6 +125,22 @@ const authController = {
       await account.save();
 
       res.status(200).json({ message: "Password updated successfully" });
+    } catch (error) {
+      res.status(400).json({ message: error.message });
+    }
+  },
+
+  updateUserInfo: async (req, res) => {
+    try {
+      console.log("Decoded user from token:", req.user); // Log thông tin từ token
+
+      if (req.user.user_type === "Student") {
+        return studentControllers.updateStudentById(req, res);
+      } else if (req.user.user_type === "Lecturer") {
+        return lecturerController.updateLecturerById(req, res);
+      } else {
+        return res.status(400).json({ message: "Invalid user_type" });
+      }
     } catch (error) {
       res.status(400).json({ message: error.message });
     }

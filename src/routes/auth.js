@@ -102,4 +102,51 @@ router.get(
   authController.getUserInfo
 );
 
+/**
+ * @swagger
+ * /auth/update-info:
+ *   put:
+ *     summary: Update user information
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               full_name:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               phone:
+ *                 type: string
+ *               address:
+ *                 type: string
+ *               date_of_birth:
+ *                 type: string
+ *                 format: date
+ *     responses:
+ *       200:
+ *         description: User information updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: Invalid user_type or bad request
+ *       401:
+ *         description: Unauthorized
+ */
+router.put(
+  "/update-info",
+  authMiddleware.authenticate,
+  authController.updateUserInfo
+);
+
 module.exports = router;

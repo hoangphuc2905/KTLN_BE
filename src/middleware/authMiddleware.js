@@ -12,7 +12,15 @@ const authMiddleware = {
 
     try {
       const decoded = jwt.verify(token, process.env.MYSECRET); // Giải mã token
-      req.user = decoded; // Gắn thông tin từ token vào req.user
+      req.user = decoded;
+
+      // Kiểm tra quyền hạn (nếu cần)
+      if (!req.user.userId || !req.user.user_type) {
+        return res
+          .status(403)
+          .json({ message: "Access denied. Invalid token." });
+      }
+
       next();
     } catch (error) {
       res.status(401).json({ message: "Invalid token" });
