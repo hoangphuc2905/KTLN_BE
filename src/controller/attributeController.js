@@ -1,6 +1,7 @@
 const Attribute = require("../models/Attribute");
 
 const attributeController = {
+  // createAttribute: async (req, res) => {
   createAttribute: async (req, res) => {
     try {
       const { name } = req.body;
