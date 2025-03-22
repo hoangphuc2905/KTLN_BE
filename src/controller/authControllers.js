@@ -11,12 +11,13 @@ const authController = {
     try {
       const { user_id, password } = req.body;
 
-      // Tìm kiếm trong mô hình Student
       let user = await Student.findOne({ student_id: user_id, isActive: true });
       let roleNames = ["Student"];
+      let userType = "Student";
+      let userIdentifier = user?.student_id;
+      let userIdField = "student_id";
 
       if (!user) {
-        // Nếu không tìm thấy trong Student, tìm trong Lecturer
         user = await Lecturer.findOne({
           lecturer_id: user_id,
           isActive: true,
@@ -25,8 +26,9 @@ const authController = {
           select: "role_name",
         });
         roleNames = user?.roles?.map((role) => role.role_name) || ["Lecturer"];
-      } else {
-        roleNames = [user.role || "Student"];
+        userType = "Lecturer";
+        userIdentifier = user?.lecturer_id;
+        userIdField = "lecturer_id";
       }
 
       if (!user) {
@@ -35,7 +37,6 @@ const authController = {
         });
       }
 
-      // Tìm tài khoản trong mô hình Account
       const account = await Account.findOne({ user_id: user._id });
       if (!account) {
         return res.status(400).json({ message: "Account not found" });
@@ -50,9 +51,9 @@ const authController = {
       // Tạo token JWT
       const token = jwt.sign(
         {
-          userId: user._id,
+          userId: userIdentifier,
           roles: roleNames,
-          user_type: account.user_type,
+          user_type: userType,
           department: user.department,
         },
         process.env.MYSECRET,
@@ -63,10 +64,10 @@ const authController = {
 
       res.status(200).json({
         token,
-        user_id: user_id,
+        [userIdField]: userIdentifier,
         roles: roleNames,
         email: user.email,
-        user_type: account.user_type,
+        user_type: userType,
         department: user.department,
       });
     } catch (error) {
@@ -77,8 +78,10 @@ const authController = {
   getUserInfo: async (req, res) => {
     try {
       if (req.user.user_type === "Student") {
+        req.params.student_id = req.user.userId;
         return studentControllers.getStudentById(req, res);
       } else if (req.user.user_type === "Lecturer") {
+        req.params.lecturer_id = req.user.userId;
         return lecturerController.getLecturerById(req, res);
       } else {
         return res.status(400).json({ message: "Invalid user_type" });
@@ -132,7 +135,7 @@ const authController = {
 
   updateUserInfo: async (req, res) => {
     try {
-      console.log("Decoded user from token:", req.user); // Log thông tin từ token
+      console.log("Decoded user from token:", req.user);
 
       if (req.user.user_type === "Student") {
         return studentControllers.updateStudentById(req, res);

@@ -48,7 +48,9 @@ const lecturerController = {
 
   getLecturerById: async (req, res) => {
     try {
-      const lecturer = await Lecturer.findById(req.user.userId).populate({
+      const lecturer = await Lecturer.findOne({
+        lecturer_id: req.params.lecturer_id,
+      }).populate({
         path: "roles",
         select: "role_name",
       });

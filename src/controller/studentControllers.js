@@ -46,7 +46,9 @@ const studentController = {
 
   getStudentById: async (req, res) => {
     try {
-      const student = await Student.findById(req.user.userId);
+      const student = await Student.findOne({
+        student_id: req.params.student_id,
+      });
       if (!student) {
         return res.status(404).json({ message: "Student not found" });
       }
