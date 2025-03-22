@@ -66,7 +66,7 @@ const lecturerController = {
   updateLecturerById: async (req, res) => {
     try {
       const lecturer = await Lecturer.findOneAndUpdate(
-        { _id: req.user.userId },
+        { lecturer_id: req.params.lecturer_id },
         req.body,
         { new: true, runValidators: true }
       ).populate("department roles");

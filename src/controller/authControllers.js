@@ -138,8 +138,10 @@ const authController = {
       console.log("Decoded user from token:", req.user);
 
       if (req.user.user_type === "Student") {
+        req.params.student_id = req.user.userId;
         return studentControllers.updateStudentById(req, res);
       } else if (req.user.user_type === "Lecturer") {
+        req.params.lecturer_id = req.user.userId;
         return lecturerController.updateLecturerById(req, res);
       } else {
         return res.status(400).json({ message: "Invalid user_type" });

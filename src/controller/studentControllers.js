@@ -61,7 +61,7 @@ const studentController = {
   updateStudentById: async (req, res) => {
     try {
       const student = await Student.findOneAndUpdate(
-        { _id: req.user.userId },
+        { student_id: req.params.student_id },
         req.body,
         { new: true, runValidators: true }
       );
