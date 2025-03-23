@@ -95,6 +95,22 @@ const lecturerController = {
     }
   },
 
+  updateRoleLecturerById: async (req, res) => {
+    try {
+      const lecturer = await Lecturer.findOneAndUpdate(
+        { lecturer_id: req.params.lecturer_id },
+        { roles: req.body.roles },
+        { new: true, runValidators: true }
+      ).populate("department roles");
+      if (!lecturer) {
+        return res.status(404).json({ message: "Lecturer not found" });
+      }
+      res.status(200).json(lecturer);
+    } catch (error) {
+      res.status(400).json({ message: error.message });
+    }
+  },
+
   getLecturerAndStudentByDepartment: async (req, res) => {
     try {
       const departmentId = req.params.department_id;

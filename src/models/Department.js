@@ -8,6 +8,12 @@ const departmentSchema = new Schema(
       required: true,
       unique: true,
     },
+    roles: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Role",
+      },
+    ],
   },
   { timestamps: true }
 );

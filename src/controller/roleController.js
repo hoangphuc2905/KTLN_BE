@@ -13,7 +13,7 @@ const roleController = {
 
   getAllRoles: async (req, res) => {
     try {
-      const roles = await Role.find().populate("department");
+      const roles = await Role.find();
       res.status(200).json(roles);
     } catch (error) {
       res.status(500).json({ message: error.message });
@@ -22,7 +22,7 @@ const roleController = {
 
   getRoleById: async (req, res) => {
     try {
-      const role = await Role.findById(req.params.id).populate("department");
+      const role = await Role.findById(req.params.id);
       if (!role) {
         return res.status(404).json({ message: "Role not found" });
       }
@@ -34,11 +34,10 @@ const roleController = {
 
   updateRoleById: async (req, res) => {
     try {
-      const role = await Role.findByIdAndUpdate(
-        req.params.id,
-        req.body,
-        { new: true, runValidators: true }
-      ).populate("department");
+      const role = await Role.findByIdAndUpdate(req.params.id, req.body, {
+        new: true,
+        runValidators: true,
+      });
       if (!role) {
         return res.status(404).json({ message: "Role not found" });
       }

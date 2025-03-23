@@ -18,13 +18,6 @@ const roleSchema = new Schema(
       type: String,
       required: true,
     },
-    department: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Department",
-      required: function () {
-        return this.role_name !== "admin";
-      },
-    },
   },
   { timestamps: true }
 );

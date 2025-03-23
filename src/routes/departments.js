@@ -24,6 +24,12 @@ const departmentController = require("../controller/departmentController");
  *             properties:
  *               department_name:
  *                 type: string
+ *               roles:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *             required:
+ *               - department_name
  *     responses:
  *       201:
  *         description: Department created successfully
@@ -52,6 +58,10 @@ router.post("/", departmentController.createDepartment);
  *                     type: string
  *                   department_name:
  *                     type: string
+ *                   roles:
+ *                     type: array
+ *                     items:
+ *                       type: string
  */
 router.get("/", departmentController.getAllDepartments);
 
@@ -80,6 +90,10 @@ router.get("/", departmentController.getAllDepartments);
  *                   type: string
  *                 department_name:
  *                   type: string
+ *                 roles:
+ *                   type: array
+ *                   items:
+ *                     type: string
  *       404:
  *         description: Department not found
  */
@@ -107,6 +121,10 @@ router.get("/:id", departmentController.getDepartmentById);
  *             properties:
  *               department_name:
  *                 type: string
+ *               roles:
+ *                 type: array
+ *                 items:
+ *                   type: string
  *     responses:
  *       200:
  *         description: Department updated successfully

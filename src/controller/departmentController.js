@@ -3,7 +3,13 @@ const Department = require("../models/Department");
 const departmentController = {
   createDepartment: async (req, res) => {
     try {
-      const department = new Department(req.body);
+      const { department_name, roles } = req.body;
+
+      if (roles && !Array.isArray(roles)) {
+        return res.status(400).json({ message: "Roles must be an array" });
+      }
+
+      const department = new Department({ department_name, roles });
       await department.save();
       res.status(201).json(department);
     } catch (error) {
@@ -13,7 +19,7 @@ const departmentController = {
 
   getAllDepartments: async (req, res) => {
     try {
-      const departments = await Department.find();
+      const departments = await Department.find().populate("roles");
       res.status(200).json(departments);
     } catch (error) {
       res.status(500).json({ message: error.message });
@@ -22,7 +28,9 @@ const departmentController = {
 
   getDepartmentById: async (req, res) => {
     try {
-      const department = await Department.findById(req.params.id);
+      const department = await Department.findById(req.params.id).populate(
+        "roles"
+      );
       if (!department) {
         return res.status(404).json({ message: "Department not found" });
       }
@@ -34,9 +42,16 @@ const departmentController = {
 
   updateDepartmentById: async (req, res) => {
     try {
+      const { department_name, roles } = req.body;
+
+      // Validate roles as an array of ObjectIds
+      if (roles && !Array.isArray(roles)) {
+        return res.status(400).json({ message: "Roles must be an array" });
+      }
+
       const department = await Department.findByIdAndUpdate(
         req.params.id,
-        req.body,
+        { department_name, roles },
         { new: true, runValidators: true }
       );
       if (!department) {

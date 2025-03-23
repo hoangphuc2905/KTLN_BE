@@ -27,8 +27,6 @@ const roleController = require("../controller/roleController");
  *                 enum: [admin, lecturer, head_of_department, deputy_head_of_department, department_in_charge]
  *               description:
  *                 type: string
- *               department:
- *                 type: string
  *     responses:
  *       201:
  *         description: Role created successfully
@@ -59,8 +57,6 @@ router.post("/", roleController.createRole);
  *                     type: string
  *                     enum: [admin, lecturer, head_of_department, deputy_head_of_department, department_in_charge]
  *                   description:
- *                     type: string
- *                   department:
  *                     type: string
  */
 router.get("/", roleController.getAllRoles);
@@ -93,8 +89,6 @@ router.get("/", roleController.getAllRoles);
  *                   enum: [admin, lecturer, head_of_department, deputy_head_of_department, department_in_charge]
  *                 description:
  *                   type: string
- *                 department:
- *                   type: string
  *       404:
  *         description: Role not found
  */
@@ -124,8 +118,6 @@ router.get("/:id", roleController.getRoleById);
  *                 type: string
  *                 enum: [admin, lecturer, head_of_department, deputy_head_of_department, department_in_charge]
  *               description:
- *                 type: string
- *               department:
  *                 type: string
  *     responses:
  *       200:
