@@ -22,8 +22,12 @@ const attributeController = require("../controller/attributeController");
  *           schema:
  *             type: object
  *             properties:
- *               year:
- *                 type: number
+ *               startDate:
+ *                 type: string
+ *                 format: date
+ *               endDate:
+ *                 type: string
+ *                 format: date
  *               name:
  *                 type: string
  *               values:
@@ -33,7 +37,8 @@ const attributeController = require("../controller/attributeController");
  *           examples:
  *             example:
  *               value:
- *                 year: 2024
+ *                 startDate: "2025-01-01"
+ *                 endDate: "2025-12-31"
  *                 name: "theonhom"
  *                 values:
  *                   Q1: 1
@@ -49,58 +54,41 @@ router.post("/", attributeController.createAttribute);
 
 /**
  * @swagger
- * /attributes/{year}:
+ * /attributes:
  *   get:
- *     summary: Get attributes by year
+ *     summary: Lấy tất cả các attributes
  *     tags: [Attributes]
- *     parameters:
- *       - in: path
- *         name: year
- *         schema:
- *           type: number
- *         required: true
- *         description: The year of the attributes
  *     responses:
  *       200:
- *         description: Attribute details
+ *         description: Danh sách tất cả các attributes
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 year:
- *                   type: number
- *                 name:
- *                   type: string
- *                 values:
- *                   type: object
- *                   additionalProperties:
- *                     type: number
- *             examples:
- *               example:
- *                 value:
- *                   year: 2024
- *                   name: "theonhom"
- *                   values:
- *                     Q1: 1
- *                     Q2: 2
- *                     Q3: 3
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   _id:
+ *                     type: string
+ *                   name:
+ *                     type: string
+ *                   createdAt:
+ *                     type: string
+ *                     format: date-time
+ *                   updatedAt:
+ *                     type: string
+ *                     format: date-time
+ *       500:
+ *         description: Lỗi server
  */
-router.get("/:year", attributeController.getAttributeByYear);
+router.get("/", attributeController.getAllAttributes);
 
 /**
  * @swagger
- * /attributes/{year}:
- *   put:
- *     summary: Update attributes by year
+ * /attributes/id:
+ *   post:
+ *     summary: Lấy tên của Attribute theo id
  *     tags: [Attributes]
- *     parameters:
- *       - in: path
- *         name: year
- *         schema:
- *           type: number
- *         required: true
- *         description: The year of the attributes
  *     requestBody:
  *       required: true
  *       content:
@@ -108,12 +96,69 @@ router.get("/:year", attributeController.getAttributeByYear);
  *           schema:
  *             type: object
  *             properties:
- *               name:
+ *               id:
  *                 type: string
+ *                 description: ID của Attribute
+ *           examples:
+ *             example:
+ *               value:
+ *                 id: "67dfbf7f2271a42ac8d8beee"
+ *     responses:
+ *       200:
+ *         description: Tên của Attribute
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 name:
+ *                   type: string
+ *       404:
+ *         description: Không tìm thấy Attribute
+ *       500:
+ *         description: Lỗi server
+ */
+router.post("/id", attributeController.getAttributeById);
+
+/**
+ * @swagger
+ * /attributes/{name}:
+ *   put:
+ *     summary: Update attributes by name
+ *     tags: [Attributes]
+ *     parameters:
+ *       - in: path
+ *         name: name
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The name of the attribute
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               startDate:
+ *                 type: string
+ *                 format: date
+ *               endDate:
+ *                 type: string
+ *                 format: date
  *               values:
  *                 type: object
  *                 additionalProperties:
  *                   type: number
+ *           examples:
+ *             example:
+ *               value:
+ *                 startDate: "2025-01-01"
+ *                 endDate: "2025-12-31"
+ *                 values:
+ *                   Q1: 1
+ *                   Q2: 2
+ *                   Q3: 3
  *     responses:
  *       200:
  *         description: Attribute updated successfully
@@ -121,36 +166,41 @@ router.get("/:year", attributeController.getAttributeByYear);
  *         description: Bad request
  *       404:
  *         description: Attribute not found
- *     examples:
- *       application/json:
- *         value:
- *           year: 2025
- *           name: "journal_group"
- *           values:
- *             Q1: 600
- *             Q2: 400
  */
-router.put("/:year", attributeController.updateAttributeByYear);
+router.put("/:name", attributeController.updateAttributeByName);
 
 /**
  * @swagger
- * /attributes/{year}:
+ * /attributes/{name}:
  *   delete:
- *     summary: Delete attributes by year
+ *     summary: Delete attributes by name
  *     tags: [Attributes]
  *     parameters:
  *       - in: path
- *         name: year
+ *         name: name
  *         schema:
- *           type: number
+ *           type: string
  *         required: true
- *         description: The year of the attributes
+ *         description: The name of the attribute
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               confirmation:
+ *                 type: boolean
+ *           examples:
+ *             example:
+ *               value:
+ *                 confirmation: true
  *     responses:
  *       200:
  *         description: Attribute deleted successfully
  *       404:
  *         description: Attribute not found
  */
-router.delete("/:year", attributeController.deleteAttributeByYear);
+router.delete("/:name", attributeController.deleteAttributeByName);
 
 module.exports = router;

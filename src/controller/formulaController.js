@@ -1,6 +1,7 @@
 const ScoringFormula = require("../models/ScoringFormula");
 
 const formulaController = {
+  // Tạo mới công thức
   createFormula: async (req, res) => {
     try {
       const formula = new ScoringFormula(req.body);
@@ -11,69 +12,116 @@ const formulaController = {
     }
   },
 
-  getFormulaByYear: async (req, res) => {
+  // Lấy công thức theo khoảng thời gian
+  getFormulaByDateRange: async (req, res) => {
     try {
-      const formula = await ScoringFormula.findOne({
-        year: req.params.year,
-      }).populate("formula.attribute", "name");
-      if (!formula) {
+      const { startDate, endDate } = req.body;
+
+      const query = {
+        startDate: { $gte: new Date(startDate) },
+      };
+      if (endDate) {
+        query.endDate = { $lte: new Date(endDate) };
+      }
+
+      const formula = await ScoringFormula.find(query).populate(
+        "formula.attribute",
+        "name"
+      );
+
+      if (!formula || formula.length === 0) {
         return res.status(404).json({ message: "Formula not found" });
       }
+
       res.status(200).json(formula);
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
   },
 
-  updateFormulaByYear: async (req, res) => {
+  // Cập nhật công thức theo khoảng thời gian
+  updateFormulaByDateRange: async (req, res) => {
     try {
-      const formula = await ScoringFormula.findOneAndUpdate(
-        { year: req.params.year },
-        req.body,
-        { new: true, runValidators: true }
-      );
+      const { startDate, endDate, ...updateData } = req.body;
+
+      const query = {
+        startDate: { $gte: new Date(startDate) },
+      };
+      if (endDate) {
+        query.endDate = { $lte: new Date(endDate) };
+      }
+
+      const formula = await ScoringFormula.findOneAndUpdate(query, updateData, {
+        new: true,
+        runValidators: true,
+      });
+
       if (!formula) {
         return res.status(404).json({ message: "Formula not found" });
       }
+
       res.status(200).json(formula);
     } catch (error) {
       res.status(400).json({ message: error.message });
     }
   },
 
-  deleteFormulaByYear: async (req, res) => {
+  // Xóa công thức theo khoảng thời gian
+  deleteFormulaByDateRange: async (req, res) => {
     try {
-      const formula = await ScoringFormula.findOneAndDelete({
-        year: req.params.year,
-      });
+      const { startDate, endDate } = req.body;
+
+      const query = {
+        startDate: { $gte: new Date(startDate) },
+      };
+      if (endDate) {
+        query.endDate = { $lte: new Date(endDate) };
+      }
+
+      const formula = await ScoringFormula.findOneAndDelete(query);
+
       if (!formula) {
         return res.status(404).json({ message: "Formula not found" });
       }
+
       res.status(200).json({ message: "Formula deleted successfully" });
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
   },
 
-  getAllYearsByFormula: async (req, res) => {
+  // Lấy tất cả
+  getAllFormula: async (req, res) => {
     try {
-      const years = await ScoringFormula.distinct("year");
-      res.status(200).json(years);
+      const dateRanges = await ScoringFormula.find();
+      res.status(200).json(dateRanges);
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
   },
 
-  addNewYear: async (req, res) => {
+  // Thêm một khoảng thời gian mới
+  addNewDateRange: async (req, res) => {
     try {
-      const { year } = req.body;
-      const existingYear = await ScoringFormula.findOne({ year });
-      if (existingYear) {
-        return res.status(400).json({ message: "Year already exists" });
+      const { startDate, endDate } = req.body;
+
+      const existingFormula = await ScoringFormula.findOne({
+        startDate: new Date(startDate),
+        endDate: new Date(endDate),
+      });
+
+      if (existingFormula) {
+        return res.status(400).json({ message: "Date range already exists" });
       }
-      const newYear = new ScoringFormula({ year, formula: [] });
-      await newYear.save();
-      res.status(201).json(newYear);
+
+      const newFormula = new ScoringFormula({
+        startDate: new Date(startDate),
+        endDate: endDate ? new Date(endDate) : null,
+        formula: [],
+      });
+
+      await newFormula.save();
+      res.status(201).json(newFormula);
     } catch (error) {
       res.status(500).json({ message: error.message });
     }

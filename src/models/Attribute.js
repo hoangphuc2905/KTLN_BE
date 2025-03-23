@@ -1,7 +1,8 @@
 const mongoose = require("mongoose");
 
 const AttributeSchema = new mongoose.Schema({
-  year: { type: Number, required: true },
+  startDate: { type: Date, required: true },
+  endDate: { type: Date, required: false },
   name: { type: String, required: true },
   values: { type: Map, of: Number, required: true },
 });

@@ -22,8 +22,12 @@ const formulaController = require("../controller/formulaController");
  *           schema:
  *             type: object
  *             properties:
- *               year:
- *                 type: number
+ *               startDate:
+ *                 type: string
+ *                 format: date
+ *               endDate:
+ *                 type: string
+ *                 format: date
  *               formula:
  *                 type: array
  *                 items:
@@ -43,78 +47,59 @@ router.post("/", formulaController.createFormula);
 
 /**
  * @swagger
- * /formulas/years:
- *   get:
- *     summary: Get all years
+ * /formulas/get-by-date-range:
+ *   post:
+ *     summary: Get formulas by date range
  *     tags: [Formulas]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               startDate:
+ *                 type: string
+ *                 format: date
+ *               endDate:
+ *                 type: string
+ *                 format: date
  *     responses:
  *       200:
- *         description: List of years
+ *         description: Formula details
  *         content:
  *           application/json:
  *             schema:
  *               type: array
  *               items:
- *                 type: number
- */
-router.get("/years", formulaController.getAllYearsByFormula);
-
-/**
- * @swagger
- * /formulas/add-year:
- *   post:
- *     summary: Add a new year
- *     tags: [Formulas]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               year:
- *                 type: number
- *     responses:
- *       201:
- *         description: Year added successfully
- *       400:
- *         description: Year already exists
- */
-router.post("/add-year", formulaController.addNewYear);
-/**
- * @swagger
- * /formulas/{year}:
- *   get:
- *     summary: Get a formula by year
- *     tags: [Formulas]
- *     parameters:
- *       - in: path
- *         name: year
- *         schema:
- *           type: number
- *         required: true
- *         description: The year of the formula
- *     responses:
- *       200:
- *         description: Formula details
+ *                 type: object
+ *                 properties:
+ *                   startDate:
+ *                     type: string
+ *                     format: date
+ *                   endDate:
+ *                     type: string
+ *                     format: date
+ *                   formula:
+ *                     type: array
+ *                     items:
+ *                       type: object
+ *                       properties:
+ *                         attribute:
+ *                           type: string
+ *                         weight:
+ *                           type: number
  *       404:
  *         description: Formula not found
  */
-router.get("/:year", formulaController.getFormulaByYear);
+router.post("/get-by-date-range", formulaController.getFormulaByDateRange);
 
 /**
  * @swagger
- * /formulas/{year}:
+ * /formulas/update-by-date-range:
  *   put:
- *     summary: Update a formula by year
+ *     summary: Update a formula by date range
  *     tags: [Formulas]
- *     parameters:
- *       - in: path
- *         name: year
- *         schema:
- *           type: number
- *         required: true
- *         description: The year of the formula
  *     requestBody:
  *       required: true
  *       content:
@@ -122,6 +107,12 @@ router.get("/:year", formulaController.getFormulaByYear);
  *           schema:
  *             type: object
  *             properties:
+ *               startDate:
+ *                 type: string
+ *                 format: date
+ *               endDate:
+ *                 type: string
+ *                 format: date
  *               formula:
  *                 type: array
  *                 items:
@@ -139,27 +130,88 @@ router.get("/:year", formulaController.getFormulaByYear);
  *       404:
  *         description: Formula not found
  */
-router.put("/:year", formulaController.updateFormulaByYear);
+router.put("/update-by-date-range", formulaController.updateFormulaByDateRange);
 
 /**
  * @swagger
- * /formulas/{year}:
+ * /formulas/delete-by-date-range:
  *   delete:
- *     summary: Delete a formula by year
+ *     summary: Delete a formula by date range
  *     tags: [Formulas]
- *     parameters:
- *       - in: path
- *         name: year
- *         schema:
- *           type: number
- *         required: true
- *         description: The year of the formula
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               startDate:
+ *                 type: string
+ *                 format: date
+ *               endDate:
+ *                 type: string
+ *                 format: date
  *     responses:
  *       200:
  *         description: Formula deleted successfully
  *       404:
  *         description: Formula not found
  */
-router.delete("/:year", formulaController.deleteFormulaByYear);
+router.delete(
+  "/delete-by-date-range",
+  formulaController.deleteFormulaByDateRange
+);
+
+/**
+ * @swagger
+ * /formulas:
+ *   get:
+ *     summary: Get all date ranges with formulas
+ *     tags: [Formulas]
+ *     responses:
+ *       200:
+ *         description: List of date ranges
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   startDate:
+ *                     type: string
+ *                     format: date
+ *                   endDate:
+ *                     type: string
+ *                     format: date
+ */
+router.get("/", formulaController.getAllFormula);
+
+/**
+ * @swagger
+ * /formulas/add-date-range:
+ *   post:
+ *     summary: Add a new date range
+ *     tags: [Formulas]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               startDate:
+ *                 type: string
+ *                 format: date
+ *               endDate:
+ *                 type: string
+ *                 format: date
+ *     responses:
+ *       201:
+ *         description: Date range added successfully
+ *       400:
+ *         description: Date range already exists
+ */
+router.post("/add-date-range", formulaController.addNewDateRange);
 
 module.exports = router;

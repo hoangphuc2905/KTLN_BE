@@ -1,7 +1,7 @@
 const Attribute = require("../models/Attribute");
 
 const attributeController = {
-  // createAttribute: async (req, res) => {
+  // Tạo mới một Attribute
   createAttribute: async (req, res) => {
     try {
       const { name } = req.body;
@@ -19,25 +19,42 @@ const attributeController = {
     }
   },
 
-  getAttributeByYear: async (req, res) => {
+  // Lấy all
+  getAllAttributes: async (req, res) => {
     try {
-      const attributes = await Attribute.find({ year: req.params.year });
-      if (attributes.length === 0) {
-        return res.status(404).json({ message: "Attributes not found" });
-      }
+      const attributes = await Attribute.find();
       res.status(200).json(attributes);
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
   },
 
-  updateAttributeByYear: async (req, res) => {
+  getAttributeById: async (req, res) => {
     try {
-      const attribute = await Attribute.findOneAndUpdate(
-        { year: req.params.year },
-        req.body,
-        { new: true, runValidators: true }
-      );
+      const { id } = req.body;
+      if (!id) {
+        return res.status(400).json({ message: "ID is required" });
+      }
+
+      const attribute = await Attribute.findById(id);
+      if (!attribute) {
+        return res.status(404).json({ message: "Attribute not found" });
+      }
+
+      // Trả về toàn bộ thông tin của Attribute
+      res.status(200).json(attribute);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  },
+  // Cập nhật Attribute theo tên
+  updateAttributeByName: async (req, res) => {
+    try {
+      const { name, ...updateData } = req.body;
+      const attribute = await Attribute.findOneAndUpdate({ name }, updateData, {
+        new: true,
+        runValidators: true,
+      });
       if (!attribute) {
         return res.status(404).json({ message: "Attribute not found" });
       }
@@ -47,11 +64,11 @@ const attributeController = {
     }
   },
 
-  deleteAttributeByYear: async (req, res) => {
+  // Xóa Attribute theo tên
+  deleteAttributeByName: async (req, res) => {
     try {
-      const attribute = await Attribute.findOneAndDelete({
-        year: req.params.year,
-      });
+      const { name } = req.body;
+      const attribute = await Attribute.findOneAndDelete({ name });
       if (!attribute) {
         return res.status(404).json({ message: "Attribute not found" });
       }
