@@ -19,6 +19,7 @@ const paperDownloadRoutes = require("./src/routes/paperDownloads");
 const messagesRoutes = require("./src/routes/messages");
 const formulaRoutes = require("./src/routes/formulas");
 const attributeRoutes = require("./src/routes/attributes");
+const articleAIRoutes = require("./src/routes/articleAI");
 const swaggerUi = require("swagger-ui-express");
 const specs = require("./swagger");
 
@@ -61,10 +62,13 @@ app.use("/scientificPapers", scientificPaperRoutes);
 app.use("/messages", messagesRoutes);
 app.use("/formulas", formulaRoutes);
 app.use("/attributes", attributeRoutes);
+app.use("/articlesAI", articleAIRoutes);
+
 
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
+  
   console.log(`Server is running on port ${PORT}`);
   console.log(
     `API documentation available at http://localhost:${PORT}/api-docs`
