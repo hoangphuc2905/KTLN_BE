@@ -16,7 +16,7 @@ const paperViewsSchema = new Schema(
     user_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
+      required: false,
     },
     view_time: {
       type: Date,

@@ -85,12 +85,12 @@ const scientificPaperSchema = new Schema(
     views: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "PaperViews",
-      required: true,
+      required: false,
     },
     downloads: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "PaperDownloads",
-      required: true,
+      required: false,
     },
     summary: {
       type: String,
