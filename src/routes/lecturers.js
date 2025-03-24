@@ -366,6 +366,86 @@ router.put("/status/:lecturer_id", lecturerController.updateStatusLecturerById);
 
 /**
  * @swagger
+ * /lecturers/assign-role:
+ *   post:
+ *     summary: Assign or change a role for a lecturer
+ *     tags: [Lecturers]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               adminId:
+ *                 type: string
+ *                 description: ID of the admin performing the action
+ *               lecturerId:
+ *                 type: string
+ *                 description: ID of the lecturer to assign the role to
+ *               newRole:
+ *                 type: string
+ *                 description: The new role to assign
+ *             example:
+ *               adminId: "21000000"
+ *               lecturerId: "21000001"
+ *               newRole: "head_of_department"
+ *     responses:
+ *       200:
+ *         description: Role assigned successfully
+ *       400:
+ *         description: Invalid input or role assignment rules violated
+ *       403:
+ *         description: Permission denied
+ *       404:
+ *         description: Lecturer not found
+ *       500:
+ *         description: Server error
+ */
+router.post("/assign-role", lecturerController.assignRole);
+
+/**
+ * @swagger
+ * /lecturers/delete-role:
+ *   post:
+ *     summary: Delete a role from a lecturer
+ *     tags: [Lecturers]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               adminId:
+ *                 type: string
+ *                 description: ID of the admin performing the action
+ *               lecturerId:
+ *                 type: string
+ *                 description: ID of the lecturer
+ *               roleId:
+ *                 type: string
+ *                 description: ID of the role to remove
+ *             example:
+ *               adminId: "21000000"
+ *               lecturerId: "21111111"
+ *               roleId: "67e0034aad59fbe6e1602a4e"
+ *     responses:
+ *       200:
+ *         description: Role removed successfully
+ *       400:
+ *         description: Missing required fields or role not assigned
+ *       403:
+ *         description: Permission denied
+ *       404:
+ *         description: Lecturer not found
+ *       500:
+ *         description: Server error
+ */
+router.post("/delete-role", lecturerController.deleteRole);
+
+/**
+ * @swagger
  * /lecturers/{lecturer_id}:
  *   delete:
  *     summary: Delete a lecturer by ID
