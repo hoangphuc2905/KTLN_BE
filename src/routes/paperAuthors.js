@@ -11,7 +11,7 @@ const paperAuthorController = require("../controller/paperAuthorController");
 
 /**
  * @swagger
- * /paperAuthors:
+ * /paperauthor:
  *   post:
  *     summary: Create a new paper author
  *     tags: [PaperAuthors]
@@ -22,39 +22,21 @@ const paperAuthorController = require("../controller/paperAuthorController");
  *           schema:
  *             type: object
  *             properties:
- *               author_id:
+ *               paper_id:
  *                 type: string
- *               full_name:
+ *               user_id:
  *                 type: string
- *               email:
+ *               author_name_vi:
  *                 type: string
- *               phone:
- *                 type: string
- *               gender:
- *                 type: string
- *                 enum: [male, female, other]
- *               date_of_birth:
- *                 type: string
- *                 format: date
- *               cccd:
- *                 type: string
- *               address:
- *                 type: string
- *               start_date:
- *                 type: string
- *                 format: date
- *               department:
- *                 type: string
- *               score_year:
- *                 type: number
- *               avatar:
+ *               author_name_en:
  *                 type: string
  *               role:
  *                 type: string
- *                 enum: [admin, student, lecturer]
+ *               work_unit_id:
+ *                 type: string
  *               degree:
  *                 type: string
- *                 enum: [Bachelor, Master, Doctor, Engineer, Professor, Associate_Professor]
+ *                 enum: [Bachelor, Master, Doctor, Egineer, Professor, Ossociate_Professor]
  *     responses:
  *       201:
  *         description: Paper author created successfully
@@ -65,7 +47,7 @@ router.post("/", paperAuthorController.createPaperAuthor);
 
 /**
  * @swagger
- * /paperAuthors:
+ * /paperauthor:
  *   get:
  *     summary: Get all paper authors
  *     tags: [PaperAuthors]
@@ -79,44 +61,27 @@ router.post("/", paperAuthorController.createPaperAuthor);
  *               items:
  *                 type: object
  *                 properties:
- *                   author_id:
+ *                   paper_id:
  *                     type: string
- *                   full_name:
+ *                   user_id:
  *                     type: string
- *                   email:
+ *                   author_name_vi:
  *                     type: string
- *                   phone:
- *                     type: string
- *                   gender:
- *                     type: string
- *                     enum: [male, female, other]
- *                   date_of_birth:
- *                     type: string
- *                     format: date
- *                   cccd:
- *                     type: string
- *                   address:
- *                     type: string
- *                   start_date:
- *                     type: string
- *                     format: date
- *                   department:
- *                     type: string
- *                   score_year:
- *                     type: number
- *                   avatar:
+ *                   author_name_en:
  *                     type: string
  *                   role:
  *                     type: string
+ *                   work_unit_id:
+ *                     type: string
  *                   degree:
  *                     type: string
- *                     enum: [Bachelor, Master, Doctor, Engineer, Professor, Associate_Professor]
+ *                     enum: [Bachelor, Master, Doctor, Egineer, Professor, Ossociate_Professor]
  */
 router.get("/", paperAuthorController.getAllPaperAuthors);
 
 /**
  * @swagger
- * /paperAuthors/{author_id}:
+ * /paperauthor/{author_id}:
  *   get:
  *     summary: Get a paper author by ID
  *     tags: [PaperAuthors]
@@ -135,38 +100,21 @@ router.get("/", paperAuthorController.getAllPaperAuthors);
  *             schema:
  *               type: object
  *               properties:
- *                 author_id:
+ *                 paper_id:
  *                   type: string
- *                 full_name:
+ *                 user_id:
  *                   type: string
- *                 email:
+ *                 author_name_vi:
  *                   type: string
- *                 phone:
- *                   type: string
- *                 gender:
- *                   type: string
- *                   enum: [male, female, other]
- *                 date_of_birth:
- *                   type: string
- *                   format: date
- *                 cccd:
- *                   type: string
- *                 address:
- *                   type: string
- *                 start_date:
- *                   type: string
- *                   format: date
- *                 department:
- *                   type: string
- *                 score_year:
- *                   type: number
- *                 avatar:
+ *                 author_name_en:
  *                   type: string
  *                 role:
  *                   type: string
+ *                 work_unit_id:
+ *                   type: string
  *                 degree:
  *                   type: string
- *                   enum: [Bachelor, Master, Doctor, Engineer, Professor, Associate_Professor]
+ *                   enum: [Bachelor, Master, Doctor, Egineer, Professor, Ossociate_Professor]
  *       404:
  *         description: Paper author not found
  */
@@ -174,7 +122,7 @@ router.get("/:author_id", paperAuthorController.getPaperAuthorById);
 
 /**
  * @swagger
- * /paperAuthors/{author_id}:
+ * /paperauthor/{author_id}:
  *   put:
  *     summary: Update a paper author by ID
  *     tags: [PaperAuthors]
@@ -192,36 +140,21 @@ router.get("/:author_id", paperAuthorController.getPaperAuthorById);
  *           schema:
  *             type: object
  *             properties:
- *               full_name:
+ *               paper_id:
  *                 type: string
- *               email:
+ *               user_id:
  *                 type: string
- *               phone:
+ *               author_name_vi:
  *                 type: string
- *               gender:
- *                 type: string
- *                 enum: [male, female, other]
- *               date_of_birth:
- *                 type: string
- *                 format: date
- *               cccd:
- *                 type: string
- *               address:
- *                 type: string
- *               start_date:
- *                 type: string
- *                 format: date
- *               department:
- *                 type: string
- *               score_year:
- *                 type: number
- *               avatar:
+ *               author_name_en:
  *                 type: string
  *               role:
  *                 type: string
+ *               work_unit_id:
+ *                 type: string
  *               degree:
  *                 type: string
- *                 enum: [Bachelor, Master, Doctor, Engineer, Professor, Associate_Professor]
+ *                 enum: [Bachelor, Master, Doctor, Egineer, Professor, Ossociate_Professor]
  *     responses:
  *       200:
  *         description: Paper author updated successfully
@@ -234,7 +167,7 @@ router.put("/:author_id", paperAuthorController.updatePaperAuthorById);
 
 /**
  * @swagger
- * /paperAuthors/{author_id}:
+ * /paperauthor/{author_id}:
  *   delete:
  *     summary: Delete a paper author by ID
  *     tags: [PaperAuthors]

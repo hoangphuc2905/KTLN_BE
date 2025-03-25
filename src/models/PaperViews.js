@@ -13,11 +13,13 @@ const paperViewsSchema = new Schema(
       ref: "ScientificPaper",
       required: true,
     },
-    user_id: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: false,
-    },
+    user_id: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: false,
+      },
+    ],
     view_time: {
       type: Date,
       required: true,

@@ -27,7 +27,10 @@ const paperViewsController = require("../controller/paperViewsController");
  *               paper_id:
  *                 type: string
  *               user_id:
- *                 type: string
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Array of user IDs who viewed the paper
  *               view_time:
  *                 type: string
  *                 format: date
@@ -60,7 +63,9 @@ router.post("/", paperViewsController.createPaperView);
  *                   paper_id:
  *                     type: string
  *                   user_id:
- *                     type: string
+ *                     type: array
+ *                     items:
+ *                       type: string
  *                   view_time:
  *                     type: string
  *                     format: date
@@ -93,7 +98,9 @@ router.get("/", paperViewsController.getAllPaperViews);
  *                 paper_id:
  *                   type: string
  *                 user_id:
- *                   type: string
+ *                   type: array
+ *                   items:
+ *                     type: string
  *                 view_time:
  *                   type: string
  *                   format: date
@@ -127,7 +134,9 @@ router.get("/:id", paperViewsController.getPaperViewById);
  *               paper_id:
  *                 type: string
  *               user_id:
- *                 type: string
+ *                 type: array
+ *                 items:
+ *                   type: string
  *               view_time:
  *                 type: string
  *                 format: date
