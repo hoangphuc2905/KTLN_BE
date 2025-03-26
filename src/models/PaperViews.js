@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 const paperViewsSchema = new Schema(
   {
     view_id: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
       required: true,
       unique: true,
     },

@@ -1,69 +1,108 @@
 const ScientificPaper = require("../models/ScientificPaper");
-const PaperViews = require("../models/PaperViews"); // Import model PaperViews
-const PaperDownloads = require("../models/PaperDownloads"); // Import model PaperDownloads
-const { v4: uuidv4 } = require("uuid"); // Sử dụng để tạo view_id và download_id
+const PaperAuthor = require("../models/PaperAuthor");
+const PaperViews = require("../models/PaperViews");
+const PaperDownloads = require("../models/PaperDownloads");
+const { v4: uuidv4 } = require("uuid");
+const { default: mongoose } = require("mongoose");
 
 const scientificPaperController = {
   createScientificPaper: async (req, res) => {
+    const session = await ScientificPaper.startSession();
+    session.startTransaction();
+
     try {
-      // Lấy bài báo gần nhất dựa trên `paper_id`
+      // Lấy bài báo gần nhất dựa trên paper_id (chuyển đổi sang số)
       const lastPaper = await ScientificPaper.findOne().sort({ paper_id: -1 });
 
       // Tạo mã bài báo mới
       let newPaperId;
       if (lastPaper && lastPaper.paper_id) {
-        const lastIdNumber = parseInt(lastPaper.paper_id, 10); // Chuyển "000001" thành 1
-        newPaperId = String(lastIdNumber + 1).padStart(6, "0"); // Tăng lên 1 và định dạng lại thành "000002"
+        const lastIdNumber = parseInt(lastPaper.paper_id, 10) || 0;
+        newPaperId = String(lastIdNumber + 1).padStart(6, "0");
       } else {
-        newPaperId = "000001"; // Nếu chưa có bài báo nào, bắt đầu từ "000001"
+        newPaperId = "000001";
       }
 
-      // Lưu bài báo trước
+      // Tạo bài báo mới
       const scientificPaper = new ScientificPaper({
         ...req.body,
-        paper_id: newPaperId, // Gán mã tự động vào bài báo
+        paper_id: newPaperId,
+        author: [], // Khởi tạo rỗng, sẽ cập nhật sau
       });
-      await scientificPaper.save();
+
+      await scientificPaper.save({ session });
+
+      // Xử lý danh sách tác giả
+      const authorIds = [];
+      if (Array.isArray(req.body.author)) {
+        for (const authorData of req.body.author) {
+          const newAuthor = new PaperAuthor({
+            ...authorData,
+            paper_id: scientificPaper._id, // Gán paper_id của bài báo
+          });
+          const savedAuthor = await newAuthor.save({ session });
+          authorIds.push(savedAuthor._id); // Lưu ObjectId của tác giả
+        }
+      }
+
+      // Cập nhật danh sách tác giả vào bài báo
+      await ScientificPaper.updateOne(
+        { _id: scientificPaper._id },
+        { $set: { author: authorIds } },
+        { session }
+      );
 
       // Tạo bản ghi mới cho views
       const newViews = new PaperViews({
-        view_id: uuidv4(), // Tạo view_id ngẫu nhiên
-        paper_id: scientificPaper._id, // Liên kết với bài báo vừa tạo
-        user_id: null, // Nếu không có user_id, để null
-        view_time: new Date(), // Thời gian hiện tại
+        view_id: new mongoose.Types.ObjectId(),
+        paper_id: scientificPaper._id,
+        view_time: new Date(),
       });
-      await newViews.save();
+      await newViews.save({ session });
 
       // Tạo bản ghi mới cho downloads
       const newDownloads = new PaperDownloads({
-        download_id: uuidv4(), // Tạo download_id ngẫu nhiên
-        paper_id: scientificPaper._id, // Liên kết với bài báo vừa tạo
-        user_id: null, // Nếu không có user_id, để null
-        download_time: new Date(), // Thời gian hiện tại
+        download_id: new mongoose.Types.ObjectId(),
+        paper_id: scientificPaper._id,
+        download_time: new Date(),
       });
-      await newDownloads.save();
+      await newDownloads.save({ session });
 
-      // Cập nhật bài báo với `views` và `downloads`
-      scientificPaper.views = newViews._id;
-      scientificPaper.downloads = newDownloads._id;
-      await scientificPaper.save();
+      // Cập nhật views và downloads vào bài báo
+      await ScientificPaper.updateOne(
+        { _id: scientificPaper._id },
+        { $set: { views: newViews._id, downloads: newDownloads._id } },
+        { session }
+      );
+
+      // Commit transaction
+      await session.commitTransaction();
+      session.endSession();
 
       res.status(201).json({
         message: "Scientific paper created successfully",
-        scientificPaper,
+        scientificPaper: {
+          ...scientificPaper._doc,
+          author: authorIds,
+          views: newViews._id,
+          downloads: newDownloads._id,
+        },
         views: newViews,
         downloads: newDownloads,
       });
     } catch (error) {
+      // Rollback transaction nếu có lỗi
+      await session.abortTransaction();
+      session.endSession();
       res.status(400).json({ message: error.message });
     }
   },
-
   getAllScientificPapers: async (req, res) => {
     try {
       const scientificPapers = await ScientificPaper.find()
         .populate("article_type")
         .populate("article_group")
+        .populate("author") // Populate thông tin tác giả
         .populate("views")
         .populate("downloads");
       res.status(200).json(scientificPapers);
@@ -77,6 +116,7 @@ const scientificPaperController = {
       const scientificPaper = await ScientificPaper.findById(req.params.id)
         .populate("article_type")
         .populate("article_group")
+        .populate("author") // Populate thông tin tác giả
         .populate("views")
         .populate("downloads");
       if (!scientificPaper) {
@@ -97,6 +137,7 @@ const scientificPaperController = {
       )
         .populate("article_type")
         .populate("article_group")
+        .populate("author") // Populate thông tin tác giả
         .populate("views")
         .populate("downloads");
       if (!scientificPaper) {

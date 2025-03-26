@@ -9,8 +9,7 @@ const paperAuthorSchema = new Schema(
       required: true,
     },
     user_id: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      type: String,
       required: true,
     },
     author_name_vi: {
@@ -36,7 +35,7 @@ const paperAuthorSchema = new Schema(
         "Bachelor",
         "Master",
         "Doctor",
-        "Egineer",
+        "Engineer",
         "Professor",
         "Ossociate_Professor",
       ],

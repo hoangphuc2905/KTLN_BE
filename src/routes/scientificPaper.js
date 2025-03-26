@@ -6,7 +6,7 @@ const scientificPaperController = require("../controller/scientificPaperControll
  * @swagger
  * tags:
  *   name: ScientificPapers
- *   description: Scientific papers management endpoints
+ *   description: Endpoints for managing scientific papers
  */
 
 /**
@@ -35,8 +35,32 @@ const scientificPaperController = require("../controller/scientificPaperControll
  *                 type: string
  *                 description: Title in English
  *               author_count:
- *                 type: string
+ *                 type: number
  *                 description: Number of authors
+ *               author:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     user_id:
+ *                       type: string
+ *                       description: ID of the user (student or lecturer)
+ *                     author_name_vi:
+ *                       type: string
+ *                       description: Author's name in Vietnamese
+ *                     author_name_en:
+ *                       type: string
+ *                       description: Author's name in English
+ *                     role:
+ *                       type: string
+ *                       description: Role of the author (e.g., Main Author, Co-Author)
+ *                     work_unit_id:
+ *                       type: string
+ *                       description: ID of the work unit
+ *                     degree:
+ *                       type: string
+ *                       enum: [Bachelor, Master, Doctor, Engineer, Professor, Associate_Professor]
+ *                       description: Degree of the author
  *               publish_date:
  *                 type: string
  *                 format: date
@@ -46,7 +70,6 @@ const scientificPaperController = require("../controller/scientificPaperControll
  *                 description: Vietnamese magazine name
  *               magazine_en:
  *                 type: string
- *                 format: date
  *                 description: English magazine name
  *               magazine_type:
  *                 type: string
@@ -63,9 +86,9 @@ const scientificPaperController = require("../controller/scientificPaperControll
  *               link:
  *                 type: string
  *                 description: Link to the paper
- *               doi_number:
- *                 type: number
- *                 description: DOI number of the paper
+ *               doi:
+ *                 type: string
+ *                 description: DOI of the paper
  *               status:
  *                 type: boolean
  *                 description: Status of the paper
@@ -84,6 +107,9 @@ const scientificPaperController = require("../controller/scientificPaperControll
  *               department:
  *                 type: string
  *                 description: Department associated with the paper
+ *               cover_image:
+ *                 type: string
+ *                 description: Cover image URL or path
  *     responses:
  *       201:
  *         description: Scientific paper created successfully
@@ -98,16 +124,11 @@ const scientificPaperController = require("../controller/scientificPaperControll
  *                 scientificPaper:
  *                   type: object
  *                   description: The created scientific paper
- *                 views:
- *                   type: object
- *                   description: The created views record
- *                 downloads:
- *                   type: object
- *                   description: The created downloads record
  *       400:
  *         description: Bad request
  */
 router.post("/", scientificPaperController.createScientificPaper);
+
 /**
  * @swagger
  * /scientificPapers:
@@ -135,7 +156,12 @@ router.post("/", scientificPaperController.createScientificPaper);
  *                   title_en:
  *                     type: string
  *                   author_count:
- *                     type: string
+ *                     type: number
+ *                   author:
+ *                     type: array
+ *                     items:
+ *                       type: string
+ *                       description: IDs of authors
  *                   publish_date:
  *                     type: string
  *                     format: date
@@ -143,7 +169,6 @@ router.post("/", scientificPaperController.createScientificPaper);
  *                     type: string
  *                   magazine_en:
  *                     type: string
- *                     format: date
  *                   magazine_type:
  *                     type: string
  *                   page:
@@ -154,8 +179,8 @@ router.post("/", scientificPaperController.createScientificPaper);
  *                     type: string
  *                   link:
  *                     type: string
- *                   doi_number:
- *                     type: number
+ *                   doi:
+ *                     type: string
  *                   status:
  *                     type: boolean
  *                   order_no:
@@ -164,13 +189,11 @@ router.post("/", scientificPaperController.createScientificPaper);
  *                     type: boolean
  *                   keywords:
  *                     type: string
- *                   views:
- *                     type: string
- *                   downloads:
- *                     type: string
  *                   summary:
  *                     type: string
  *                   department:
+ *                     type: string
+ *                   cover_image:
  *                     type: string
  */
 router.get("/", scientificPaperController.getAllScientificPapers);
@@ -207,7 +230,12 @@ router.get("/", scientificPaperController.getAllScientificPapers);
  *                 title_en:
  *                   type: string
  *                 author_count:
- *                   type: string
+ *                   type: number
+ *                 author:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                     description: IDs of authors
  *                 publish_date:
  *                   type: string
  *                   format: date
@@ -215,7 +243,6 @@ router.get("/", scientificPaperController.getAllScientificPapers);
  *                   type: string
  *                 magazine_en:
  *                   type: string
- *                   format: date
  *                 magazine_type:
  *                   type: string
  *                 page:
@@ -226,8 +253,8 @@ router.get("/", scientificPaperController.getAllScientificPapers);
  *                   type: string
  *                 link:
  *                   type: string
- *                 doi_number:
- *                   type: number
+ *                 doi:
+ *                   type: string
  *                 status:
  *                   type: boolean
  *                 order_no:
@@ -236,13 +263,11 @@ router.get("/", scientificPaperController.getAllScientificPapers);
  *                   type: boolean
  *                 keywords:
  *                   type: string
- *                 views:
- *                   type: string
- *                 downloads:
- *                   type: string
  *                 summary:
  *                   type: string
  *                 department:
+ *                   type: string
+ *                 cover_image:
  *                   type: string
  *       404:
  *         description: Scientific paper not found
@@ -269,8 +294,6 @@ router.get("/:id", scientificPaperController.getScientificPaperById);
  *           schema:
  *             type: object
  *             properties:
- *               paper_id:
- *                 type: string
  *               article_type:
  *                 type: string
  *               article_group:
@@ -280,7 +303,12 @@ router.get("/:id", scientificPaperController.getScientificPaperById);
  *               title_en:
  *                 type: string
  *               author_count:
- *                 type: string
+ *                 type: number
+ *               author:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   description: IDs of authors
  *               publish_date:
  *                 type: string
  *                 format: date
@@ -288,7 +316,6 @@ router.get("/:id", scientificPaperController.getScientificPaperById);
  *                 type: string
  *               magazine_en:
  *                 type: string
- *                 format: date
  *               magazine_type:
  *                 type: string
  *               page:
@@ -299,8 +326,8 @@ router.get("/:id", scientificPaperController.getScientificPaperById);
  *                 type: string
  *               link:
  *                 type: string
- *               doi_number:
- *                 type: number
+ *               doi:
+ *                 type: string
  *               status:
  *                 type: boolean
  *               order_no:
@@ -309,13 +336,11 @@ router.get("/:id", scientificPaperController.getScientificPaperById);
  *                 type: boolean
  *               keywords:
  *                 type: string
- *               views:
- *                 type: string
- *               downloads:
- *                 type: string
  *               summary:
  *                 type: string
  *               department:
+ *                 type: string
+ *               cover_image:
  *                 type: string
  *     responses:
  *       200:

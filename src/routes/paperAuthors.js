@@ -81,17 +81,17 @@ router.get("/", paperAuthorController.getAllPaperAuthors);
 
 /**
  * @swagger
- * /paperauthor/{author_id}:
+ * /paperauthor/{id}:
  *   get:
- *     summary: Get a paper author by ID
+ *     summary: Get a paper author by user ID
  *     tags: [PaperAuthors]
  *     parameters:
  *       - in: path
- *         name: author_id
+ *         name: id
  *         schema:
  *           type: string
  *         required: true
- *         description: The author ID
+ *         description: The user ID of the author
  *     responses:
  *       200:
  *         description: Paper author details
@@ -114,21 +114,21 @@ router.get("/", paperAuthorController.getAllPaperAuthors);
  *                   type: string
  *                 degree:
  *                   type: string
- *                   enum: [Bachelor, Master, Doctor, Egineer, Professor, Ossociate_Professor]
+ *                   enum: [Bachelor, Master, Doctor, Engineer, Professor, Associate_Professor]
  *       404:
  *         description: Paper author not found
  */
-router.get("/:author_id", paperAuthorController.getPaperAuthorById);
+router.get("/:id", paperAuthorController.getPaperAuthorById);
 
 /**
  * @swagger
- * /paperauthor/{author_id}:
+ * /paperauthor/{id}:
  *   put:
  *     summary: Update a paper author by ID
  *     tags: [PaperAuthors]
  *     parameters:
  *       - in: path
- *         name: author_id
+ *         name: id
  *         schema:
  *           type: string
  *         required: true
@@ -163,17 +163,58 @@ router.get("/:author_id", paperAuthorController.getPaperAuthorById);
  *       404:
  *         description: Paper author not found
  */
-router.put("/:author_id", paperAuthorController.updatePaperAuthorById);
+router.put("/:id", paperAuthorController.updatePaperAuthorById);
 
 /**
  * @swagger
- * /paperauthor/{author_id}:
+ * /paperauthor/paper/{paper_id}:
+ *   get:
+ *     summary: Get authors by paper ID
+ *     tags: [PaperAuthors]
+ *     parameters:
+ *       - in: path
+ *         name: paper_id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The paper ID
+ *     responses:
+ *       200:
+ *         description: List of authors for the specified paper
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   user_id:
+ *                     type: string
+ *                   author_name_vi:
+ *                     type: string
+ *                   author_name_en:
+ *                     type: string
+ *                   role:
+ *                     type: string
+ *                   work_unit_id:
+ *                     type: string
+ *                   degree:
+ *                     type: string
+ *                     enum: [Bachelor, Master, Doctor, Egineer, Professor, Ossociate_Professor]
+ *       404:
+ *         description: No authors found for this paper
+ */
+router.get("/paper/:paper_id", paperAuthorController.getAuthorsByPaperId);
+
+/**
+ * @swagger
+ * /paperauthor/{id}:
  *   delete:
  *     summary: Delete a paper author by ID
  *     tags: [PaperAuthors]
  *     parameters:
  *       - in: path
- *         name: author_id
+ *         name: id
  *         schema:
  *           type: string
  *         required: true
@@ -184,6 +225,6 @@ router.put("/:author_id", paperAuthorController.updatePaperAuthorById);
  *       404:
  *         description: Paper author not found
  */
-router.delete("/:author_id", paperAuthorController.deletePaperAuthorById);
+router.delete("/:id", paperAuthorController.deletePaperAuthorById);
 
 module.exports = router;

@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 const paperDownloadsSchema = new Schema(
   {
     download_id: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
       required: true,
       unique: true,
     },

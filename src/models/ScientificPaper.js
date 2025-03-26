@@ -30,6 +30,13 @@ const scientificPaperSchema = new Schema(
       type: String,
       required: true,
     },
+    author: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "PaperAuthor",
+        required: false,
+      },
+    ],
     publish_date: {
       type: Date,
       required: true,
@@ -39,7 +46,7 @@ const scientificPaperSchema = new Schema(
       required: true,
     },
     magazine_en: {
-      type: Date,
+      type: String,
       required: true,
     },
     magazine_type: {
@@ -62,8 +69,8 @@ const scientificPaperSchema = new Schema(
       type: String,
       required: true,
     },
-    doi_number: {
-      type: Number,
+    doi: {
+      type: String,
       required: true,
     },
     status: {
@@ -97,6 +104,10 @@ const scientificPaperSchema = new Schema(
       required: true,
     },
     department: {
+      type: String,
+      required: true,
+    },
+    cover_image: {
       type: String,
       required: true,
     },
