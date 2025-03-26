@@ -116,7 +116,7 @@ const scientificPaperController = {
       const scientificPaper = await ScientificPaper.findById(req.params.id)
         .populate("article_type")
         .populate("article_group")
-        .populate("author") // Populate thông tin tác giả
+        .populate("author") 
         .populate("views")
         .populate("downloads");
       if (!scientificPaper) {
