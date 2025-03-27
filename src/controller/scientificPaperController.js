@@ -97,6 +97,7 @@ const scientificPaperController = {
       res.status(400).json({ message: error.message });
     }
   },
+
   getAllScientificPapers: async (req, res) => {
     try {
       const scientificPapers = await ScientificPaper.find()
@@ -141,20 +142,18 @@ const scientificPaperController = {
           .json({ message: "No authors found with this user_id." });
       }
 
-      // Lấy danh sách `_id` của các tác giả
       const authorIds = authors.map((author) => author._id);
 
-      // Tìm tất cả bài viết có `author` chứa các `_id` của tác giả
       const scientificPapers = await ScientificPaper.find({
         author: { $in: authorIds },
       })
         .populate("article_type")
         .populate("article_group")
         .populate({
-          path: "author", // Populate trường `author`
+          path: "author",
           populate: {
-            path: "work_unit_id", // Populate trường `work_unit_id` bên trong `author`
-            model: "WorkUnit", // Tên model của `WorkUnit`
+            path: "work_unit_id",
+            model: "WorkUnit",
           },
         })
         .populate("views")
@@ -164,6 +163,36 @@ const scientificPaperController = {
         return res
           .status(404)
           .json({ message: "No scientific papers found for this user_id." });
+      }
+
+      res.status(200).json(scientificPapers);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  },
+
+  getScientificPapersByDepartment: async (req, res) => {
+    try {
+      const { department } = req.params; // Lấy `department` từ URL params
+
+      // Tìm tất cả bài viết có `department` khớp
+      const scientificPapers = await ScientificPaper.find({ department })
+        .populate("article_type")
+        .populate("article_group")
+        .populate({
+          path: "author",
+          populate: {
+            path: "work_unit_id",
+            model: "WorkUnit",
+          },
+        })
+        .populate("views")
+        .populate("downloads");
+
+      if (!scientificPapers || scientificPapers.length === 0) {
+        return res
+          .status(404)
+          .json({ message: "No scientific papers found for this department." });
       }
 
       res.status(200).json(scientificPapers);

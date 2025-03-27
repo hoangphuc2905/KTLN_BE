@@ -359,6 +359,89 @@ router.get(
 
 /**
  * @swagger
+ * /scientificPapers/department/{department}:
+ *   get:
+ *     summary: Get all scientific papers by department
+ *     tags: [ScientificPapers]
+ *     parameters:
+ *       - in: path
+ *         name: department
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The department name
+ *     responses:
+ *       200:
+ *         description: List of scientific papers for the department
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   paper_id:
+ *                     type: string
+ *                   article_type:
+ *                     type: string
+ *                   article_group:
+ *                     type: string
+ *                   title_vn:
+ *                     type: string
+ *                   title_en:
+ *                     type: string
+ *                   author_count:
+ *                     type: number
+ *                   author:
+ *                     type: array
+ *                     items:
+ *                       type: string
+ *                       description: IDs of authors
+ *                   publish_date:
+ *                     type: string
+ *                     format: date
+ *                   magazine_vi:
+ *                     type: string
+ *                   magazine_en:
+ *                     type: string
+ *                   magazine_type:
+ *                     type: string
+ *                   page:
+ *                     type: number
+ *                   issn_isbn:
+ *                     type: string
+ *                   file:
+ *                     type: string
+ *                   link:
+ *                     type: string
+ *                   doi:
+ *                     type: string
+ *                   status:
+ *                     type: boolean
+ *                   order_no:
+ *                     type: boolean
+ *                   featured:
+ *                     type: boolean
+ *                   keywords:
+ *                     type: string
+ *                   summary:
+ *                     type: string
+ *                   department:
+ *                     type: string
+ *                   cover_image:
+ *                     type: string
+ *       404:
+ *         description: No scientific papers found for this department
+ *       500:
+ *         description: Internal server error
+ */
+router.get(
+  "/department/:department",
+  scientificPaperController.getScientificPapersByDepartment
+);
+
+/**
+ * @swagger
  * /scientificPapers/{id}:
  *   put:
  *     summary: Update a scientific paper by ID
