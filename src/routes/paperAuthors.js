@@ -32,6 +32,8 @@ const paperAuthorController = require("../controller/paperAuthorController");
  *                 type: string
  *               role:
  *                 type: string
+ *               point:
+ *                 type: number
  *               work_unit_id:
  *                 type: string
  *               degree:
@@ -71,6 +73,8 @@ router.post("/", paperAuthorController.createPaperAuthor);
  *                     type: string
  *                   role:
  *                     type: string
+ *                   point:
+ *                     type: number
  *                   work_unit_id:
  *                     type: string
  *                   degree:
@@ -110,6 +114,8 @@ router.get("/", paperAuthorController.getAllPaperAuthors);
  *                   type: string
  *                 role:
  *                   type: string
+ *                 point:
+ *                   type: number
  *                 work_unit_id:
  *                   type: string
  *                 degree:
@@ -150,6 +156,8 @@ router.get("/:id", paperAuthorController.getPaperAuthorById);
  *                 type: string
  *               role:
  *                 type: string
+ *               point:
+ *                 type: number
  *               work_unit_id:
  *                 type: string
  *               degree:
@@ -196,6 +204,8 @@ router.put("/:id", paperAuthorController.updatePaperAuthorById);
  *                     type: string
  *                   role:
  *                     type: string
+ *                   point:
+ *                     type: number
  *                   work_unit_id:
  *                     type: string
  *                   degree:

@@ -10,22 +10,36 @@ const messagesSchema = new Schema(
     },
     message_type: {
       type: String,
-      enum: ["Request for Edit", "Feedback", "Approved"],
+      enum: [
+        "Request for Edit",
+        "Feedback",
+        "Approved",
+        "Request for Approval",
+      ], // Đảm bảo giá trị hợp lệ
       required: true,
     },
     status: {
       type: String,
-      enum: ["Pending Response", "Responded", "Completed"], 
+      enum: ["Pending Response", "Responded", "Completed"],
+      required: true,
     },
     sender_id: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      type: String, // Thay đổi từ ObjectId thành String
       required: true,
     },
-    receiver_id: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+    sender_model: {
+      type: String,
       required: true,
+      enum: ["Student", "Lecturer"],
+    },
+    receiver_id: {
+      type: String, // Thay đổi từ ObjectId thành String
+      required: true,
+    },
+    receiver_model: {
+      type: String,
+      required: true,
+      enum: ["Student", "Lecturer"],
     },
     paper_id: {
       type: mongoose.Schema.Types.ObjectId,

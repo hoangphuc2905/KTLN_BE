@@ -29,6 +29,10 @@ const paperAuthorSchema = new Schema(
       ref: "WorkUnit",
       required: true,
     },
+    point: {
+      type: Number,
+      required: true,
+    },
     degree: {
       type: String,
       enum: [

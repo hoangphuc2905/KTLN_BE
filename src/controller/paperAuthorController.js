@@ -9,6 +9,7 @@ const paperAuthorController = {
         author_name_vi,
         author_name_en,
         role,
+        point,
         work_unit_id,
         degree,
       } = req.body;
@@ -32,6 +33,7 @@ const paperAuthorController = {
         author_name_vi,
         author_name_en,
         role,
+        point,
         work_unit_id,
         degree,
       });
@@ -98,6 +100,7 @@ const paperAuthorController = {
         author_name_vi,
         author_name_en,
         role,
+        point,
         work_unit_id,
         degree,
       } = req.body;
@@ -123,6 +126,7 @@ const paperAuthorController = {
           author_name_vi,
           author_name_en,
           role,
+          point,
           work_unit_id,
           degree,
         },

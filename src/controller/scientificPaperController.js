@@ -4,6 +4,10 @@ const PaperViews = require("../models/PaperViews");
 const PaperDownloads = require("../models/PaperDownloads");
 const { v4: uuidv4 } = require("uuid");
 const { default: mongoose } = require("mongoose");
+const Role = require("../models/Role");
+const Lecturer = require("../models/Lecturer");
+const messagesController = require("./messagesController"); // Import messagesController
+const { uploadFileToCloudinary } = require("./fileCloudinaryController"); // Import hàm uploadFileToCloudinary
 
 const scientificPaperController = {
   createScientificPaper: async (req, res) => {
@@ -23,17 +27,26 @@ const scientificPaperController = {
         newPaperId = "000001";
       }
 
+      // Upload file lên Cloudinary
+      let fileUrl = null;
+      if (req.file) {
+        const folderName = "scientific_papers"; // Tên thư mục trên Cloudinary
+        fileUrl = await uploadFileToCloudinary(req.file.path, folderName); // Upload file và lấy URL
+      }
+
       // Tạo bài báo mới
       const scientificPaper = new ScientificPaper({
         ...req.body,
         paper_id: newPaperId,
-        author: [], // Khởi tạo rỗng, sẽ cập nhật sau
+        file_url: fileUrl, // Lưu URL của file vào cơ sở dữ liệu
+        author: [],
       });
 
       await scientificPaper.save({ session });
 
       // Xử lý danh sách tác giả
       const authorIds = [];
+      let senderUserId = null; // Biến để lưu `user_id` của người gửi
       if (Array.isArray(req.body.author)) {
         for (const authorData of req.body.author) {
           const newAuthor = new PaperAuthor({
@@ -42,6 +55,11 @@ const scientificPaperController = {
           });
           const savedAuthor = await newAuthor.save({ session });
           authorIds.push(savedAuthor._id); // Lưu ObjectId của tác giả
+
+          // Lấy `user_id` của tác giả đầu tiên làm người gửi
+          if (!senderUserId) {
+            senderUserId = savedAuthor.user_id;
+          }
         }
       }
 
@@ -74,6 +92,43 @@ const scientificPaperController = {
         { $set: { views: newViews._id, downloads: newDownloads._id } },
         { session }
       );
+
+      // **Gửi thông báo tới các vai trò trong khoa**
+      const departmentId = req.body.department; // Lấy khoa từ request body
+      const roleNames = [
+        "head_of_department",
+        "deputy_head_of_department",
+        "department_in_charge",
+      ]; // Các vai trò cần gửi thông báo
+
+      // Tìm các vai trò tương ứng
+      const roles = await Role.find({ role_name: { $in: roleNames } });
+
+      // Tìm giảng viên thuộc khoa và có vai trò phù hợp
+      const lecturers = await Lecturer.find({
+        department: departmentId,
+        roles: { $in: roles.map((role) => role._id) },
+      });
+
+      for (const lecturer of lecturers) {
+        const messageData = {
+          message_id: uuidv4(), // Tạo ID duy nhất cho thông báo
+          message_type: "Request for Approval", // Đặt loại thông báo là "Yêu cầu duyệt"
+          status: "Pending Response",
+          sender_id: senderUserId, // Sử dụng `user_id` của tác giả đầu tiên làm người gửi
+          sender_model: "Student", // Model của người gửi là `Student`
+          receiver_id: lecturer.lecturer_id, // ID của người nhận
+          receiver_model: "Lecturer", // Vai trò của người nhận
+          paper_id: scientificPaper._id, // ID của bài báo
+          content: `A new scientific paper titled "${scientificPaper.title_en}" has been submitted for review. Please approve or reject it.`,
+          time: new Date(),
+        };
+        // Gọi hàm createMessage từ messagesController
+        await messagesController.createMessage(
+          { body: messageData }, // Giả lập req.body
+          { status: () => ({ json: () => {} }) } // Giả lập res (không cần trả về gì)
+        );
+      }
 
       // Commit transaction
       await session.commitTransaction();

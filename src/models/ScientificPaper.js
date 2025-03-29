@@ -74,7 +74,9 @@ const scientificPaperSchema = new Schema(
       required: true,
     },
     status: {
-      type: Boolean,
+      type: String,
+      enum: ["pending", "approved", "refused"],
+      default: "pending",
       required: true,
     },
     order_no: {
