@@ -120,7 +120,7 @@ const scientificPaperController = {
           receiver_id: lecturer.lecturer_id, // ID của người nhận
           receiver_model: "Lecturer", // Vai trò của người nhận
           paper_id: scientificPaper._id, // ID của bài báo
-          content: `A new scientific paper titled "${scientificPaper.title_en}" has been submitted for review. Please approve or reject it.`,
+          content: `Có một bài báo mới cần duyệt: ${scientificPaper.title}`, // Nội dung thông báo
           time: new Date(),
         };
         // Gọi hàm createMessage từ messagesController
@@ -133,6 +133,7 @@ const scientificPaperController = {
       // Commit transaction
       await session.commitTransaction();
       session.endSession();
+      console.log("Request body received in backend:", req.body);
 
       res.status(201).json({
         message: "Scientific paper created successfully",

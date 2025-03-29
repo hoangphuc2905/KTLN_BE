@@ -3,20 +3,20 @@ const Messages = require("../models/Messages");
 const messagesController = {
   // Tạo một thông báo mới
   createMessage: async (req, res) => {
-  try {
-    console.log("Data received in createMessage:", req.body); // Kiểm tra dữ liệu đầu vào
-    const message = new Messages(req.body);
-    await message.save();
-    console.log("Message saved successfully:", message); // Kiểm tra xem dữ liệu có được lưu không
-    res.status(201).json({
-      message: "Message created successfully",
-      data: message,
-    });
-  } catch (error) {
-    console.error("Error in createMessage:", error.message); // Ghi log lỗi
-    res.status(400).json({ message: error.message });
-  }
-},
+    try {
+      console.log("Data received in createMessage:", req.body); // Kiểm tra dữ liệu đầu vào
+      const message = new Messages(req.body);
+      await message.save();
+      console.log("Message saved successfully:", message); // Kiểm tra xem dữ liệu có được lưu không
+      res.status(201).json({
+        message: "Message created successfully",
+        data: message,
+      });
+    } catch (error) {
+      console.error("Error in createMessage:", error.message); // Ghi log lỗi
+      res.status(400).json({ message: error.message });
+    }
+  },
 
   // Lấy tất cả thông báo
   getAllMessages: async (req, res) => {
@@ -27,6 +27,30 @@ const messagesController = {
         .populate("paper_id"); // Populate thông tin bài báo
       res.status(200).json(messages);
     } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  },
+
+  // Lấy tất cả thông báo dành cho một người nhận cụ thể
+  getMessagesByReceiverId: async (req, res) => {
+    try {
+      const { receiverId } = req.params; // Lấy receiverId từ params
+
+      // Tìm tất cả thông báo có receiver_id khớp với receiverId
+      const messages = await Messages.find({ receiver_id: receiverId })
+        .populate("sender_id") // Populate thông tin người gửi
+        .populate("receiver_id") // Populate thông tin người nhận
+        .populate("paper_id"); // Populate thông tin bài báo
+
+      if (!messages || messages.length === 0) {
+        return res
+          .status(404)
+          .json({ message: "No messages found for this receiver" });
+      }
+
+      res.status(200).json(messages);
+    } catch (error) {
+      console.error("Error in getMessagesByReceiverId:", error.message);
       res.status(500).json({ message: error.message });
     }
   },

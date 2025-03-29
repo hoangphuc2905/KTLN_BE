@@ -1,10 +1,13 @@
 const express = require("express");
 const router = express.Router();
-const { upload, uploadFile } = require("../controller/fileCloudinaryController");
+const {
+  upload,
+  uploadFile,
+} = require("../controller/fileCloudinaryController");
 
 /**
  * @swagger
- * /api/files/upload:
+ * /files/upload:
  *   post:
  *     summary: Upload a file to Cloudinary
  *     tags:

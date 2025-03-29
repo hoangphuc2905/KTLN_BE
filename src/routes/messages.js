@@ -128,6 +128,53 @@ router.get("/:id", messagesController.getMessageById);
 
 /**
  * @swagger
+ * /messages/receiver/{receiverId}:
+ *   get:
+ *     summary: Lấy tất cả thông báo dành cho một người nhận cụ thể
+ *     tags:
+ *       - Messages
+ *     parameters:
+ *       - in: path
+ *         name: receiverId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID của người nhận
+ *     responses:
+ *       200:
+ *         description: Thành công, trả về danh sách thông báo
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   _id:
+ *                     type: string
+ *                   sender_id:
+ *                     type: object
+ *                     description: Thông tin người gửi
+ *                   receiver_id:
+ *                     type: object
+ *                     description: Thông tin người nhận
+ *                   paper_id:
+ *                     type: object
+ *                     description: Thông tin bài báo
+ *                   content:
+ *                     type: string
+ *                   time:
+ *                     type: string
+ *                     format: date-time
+ *       404:
+ *         description: Không tìm thấy thông báo cho người nhận này
+ *       500:
+ *         description: Lỗi xử lý trên server
+ */
+router.get("/receiver/:receiverId", messagesController.getMessagesByReceiverId);
+
+/**
+ * @swagger
  * /messages/{id}:
  *   put:
  *     summary: Update a message by ID
