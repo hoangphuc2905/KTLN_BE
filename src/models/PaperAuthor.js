@@ -22,6 +22,12 @@ const paperAuthorSchema = new Schema(
     },
     role: {
       type: String,
+      enum: [
+        "MainAuthor", 
+        "CorrespondingAuthor", 
+        "MainAndCorrespondingAuthor", 
+        "Participant", 
+      ],
       required: true,
     },
     work_unit_id: {
