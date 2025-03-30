@@ -121,6 +121,7 @@ const scientificPaperController = {
           receiver_model: "Lecturer", // Vai trò của người nhận
           paper_id: scientificPaper._id, // ID của bài báo
           content: `Có một bài báo mới cần duyệt: ${scientificPaper.title}`, // Nội dung thông báo
+          isread: false, 
           time: new Date(),
         };
         // Gọi hàm createMessage từ messagesController

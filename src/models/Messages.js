@@ -15,6 +15,7 @@ const messagesSchema = new Schema(
         "Feedback",
         "Approved",
         "Request for Approval",
+        "Rejection",
       ], // Đảm bảo giá trị hợp lệ
       required: true,
     },
@@ -24,7 +25,7 @@ const messagesSchema = new Schema(
       required: true,
     },
     sender_id: {
-      type: String, // Thay đổi từ ObjectId thành String
+      type: String,
       required: true,
     },
     sender_model: {
@@ -48,6 +49,11 @@ const messagesSchema = new Schema(
     },
     content: {
       type: String,
+      required: true,
+    },
+    isread: {
+      type: Boolean,
+      default: false,
       required: true,
     },
     time: {

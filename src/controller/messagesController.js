@@ -94,6 +94,31 @@ const messagesController = {
     }
   },
 
+  markMessageAsRead: async (req, res) => {
+    try {
+      const { id } = req.params; // Lấy ID của thông báo từ URL params
+
+      // Cập nhật trạng thái isread thành true
+      const message = await Messages.findByIdAndUpdate(
+        id,
+        { isread: true },
+        { new: true }
+      );
+
+      if (!message) {
+        return res.status(404).json({ message: "Message not found" });
+      }
+
+      res.status(200).json({
+        message: "Message marked as read successfully",
+        data: message,
+      });
+    } catch (error) {
+      console.error("Error in markMessageAsRead:", error.message);
+      res.status(500).json({ message: error.message });
+    }
+  },
+
   // Xóa thông báo theo ID
   deleteMessageById: async (req, res) => {
     try {

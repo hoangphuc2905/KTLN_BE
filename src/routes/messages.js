@@ -42,6 +42,10 @@ const messagesController = require("../controller/messagesController");
  *                 type: string
  *               content:
  *                 type: string
+ *               isread:
+ *                 type: boolean
+ *                 default: false
+ *                 required: true
  *               time:
  *                 type: string
  *                 format: date
@@ -89,6 +93,9 @@ router.post("/", messagesController.createMessage);
  *                     type: string
  *                   content:
  *                     type: string
+ *                   isread:
+ *                     type: boolean
+ *                     default: false
  *                   time:
  *                     type: string
  *                     format: date
@@ -136,6 +143,9 @@ router.get("/", messagesController.getAllMessages);
  *                   type: string
  *                 content:
  *                   type: string
+ *                 isread:
+ *                   type: boolean
+ *                   default: false
  *                 time:
  *                   type: string
  *                   format: date
@@ -184,6 +194,9 @@ router.get("/:id", messagesController.getMessageById);
  *                     type: string
  *                   content:
  *                     type: string
+ *                   isread:
+ *                     type: boolean
+ *                     default: false
  *                   time:
  *                     type: string
  *                     format: date-time
@@ -234,6 +247,9 @@ router.get("/receiver/:receiverId", messagesController.getMessagesByReceiverId);
  *                 type: string
  *               content:
  *                 type: string
+ *               isread:
+ *                 type: boolean
+ *                 default: false
  *               time:
  *                 type: string
  *                 format: date
@@ -247,6 +263,38 @@ router.get("/receiver/:receiverId", messagesController.getMessagesByReceiverId);
  */
 router.put("/:id", messagesController.updateMessageById);
 
+/**
+ * @swagger
+ * /messages/read/{id}:
+ *   put:
+ *     summary: Mark a message as read
+ *     tags: [Messages]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the message
+ *     responses:
+ *       200:
+ *         description: Message marked as read successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   description: The updated message
+ *       404:
+ *         description: Message not found
+ *       500:
+ *         description: Server error
+ */
+router.put("/read/:id", messagesController.markMessageAsRead);
 /**
  * @swagger
  * /messages/{id}:
