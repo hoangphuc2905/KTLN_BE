@@ -173,7 +173,13 @@ const scientificPaperController = {
       const scientificPaper = await ScientificPaper.findById(req.params.id)
         .populate("article_type")
         .populate("article_group")
-        .populate("author")
+        .populate({
+          path: "author",
+          populate: {
+            path: "work_unit_id",
+            model: "WorkUnit",
+          },
+        })
         .populate("views")
         .populate("downloads");
       if (!scientificPaper) {
@@ -253,6 +259,50 @@ const scientificPaperController = {
 
       res.status(200).json(scientificPapers);
     } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  },
+
+  updateScientificPaperStatus: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
+
+      console.log("Received status:", status);
+      console.log("Received id:", id);
+
+      const validStatuses = ["pending", "approved", "refused"];
+      if (!validStatuses.includes(status)) {
+        return res.status(400).json({ message: "Invalid status value" });
+      }
+
+      const scientificPaper = await ScientificPaper.findByIdAndUpdate(
+        id,
+        { status },
+        { new: true, runValidators: true }
+      )
+        .populate("article_type")
+        .populate("article_group")
+        .populate({
+          path: "author",
+          populate: {
+            path: "work_unit_id",
+            model: "WorkUnit",
+          },
+        })
+        .populate("views")
+        .populate("downloads");
+
+      if (!scientificPaper) {
+        return res.status(404).json({ message: "ScientificPaper not found" });
+      }
+
+      res.status(200).json({
+        message: "Scientific paper status updated successfully",
+        scientificPaper,
+      });
+    } catch (error) {
+      console.error("Error in updateScientificPaperStatus:", error.message);
       res.status(500).json({ message: error.message });
     }
   },

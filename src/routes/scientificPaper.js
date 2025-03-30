@@ -442,6 +442,55 @@ router.get(
 
 /**
  * @swagger
+ * /scientificPapers/status/{id}:
+ *   put:
+ *     summary: Update the status of a scientific paper
+ *     tags: [ScientificPapers]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the scientific paper
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [pending, approved, refused]
+ *                 description: The new status of the scientific paper
+ *     responses:
+ *       200:
+ *         description: Scientific paper status updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 scientificPaper:
+ *                   type: object
+ *                   description: The updated scientific paper
+ *       400:
+ *         description: Invalid status value
+ *       404:
+ *         description: Scientific paper not found
+ *       500:
+ *         description: Server error
+ */
+router.put(
+  "/status/:id",
+  scientificPaperController.updateScientificPaperStatus
+);
+
+/**
+ * @swagger
  * /scientificPapers/{id}:
  *   put:
  *     summary: Update a scientific paper by ID

@@ -30,8 +30,14 @@ const messagesController = require("../controller/messagesController");
  *                 type: string
  *               sender_id:
  *                 type: string
+ *               sender_model:
+ *                 type: string
+ *                 enum: [Student, Lecturer]
  *               receiver_id:
  *                 type: string
+ *               receiver_model:
+ *                 type: string
+ *                 enum: [Student, Lecturer]
  *               paper_id:
  *                 type: string
  *               content:
@@ -71,8 +77,14 @@ router.post("/", messagesController.createMessage);
  *                     type: string
  *                   sender_id:
  *                     type: string
+ *                   sender_model:
+ *                     type: string
+ *                     enum: [Student, Lecturer]
  *                   receiver_id:
  *                     type: string
+ *                   receiver_model:
+ *                     type: string
+ *                     enum: [Student, Lecturer]
  *                   paper_id:
  *                     type: string
  *                   content:
@@ -112,8 +124,14 @@ router.get("/", messagesController.getAllMessages);
  *                   type: string
  *                 sender_id:
  *                   type: string
+ *                 sender_model:
+ *                   type: string
+ *                   enum: [Student, Lecturer]
  *                 receiver_id:
  *                   type: string
+ *                 receiver_model:
+ *                   type: string
+ *                   enum: [Student, Lecturer]
  *                 paper_id:
  *                   type: string
  *                 content:
@@ -153,14 +171,17 @@ router.get("/:id", messagesController.getMessageById);
  *                   _id:
  *                     type: string
  *                   sender_id:
- *                     type: object
- *                     description: Thông tin người gửi
+ *                     type: string
+ *                   sender_model:
+ *                     type: string
+ *                     enum: [Student, Lecturer]
  *                   receiver_id:
- *                     type: object
- *                     description: Thông tin người nhận
+ *                     type: string
+ *                   receiver_model:
+ *                     type: string
+ *                     enum: [Student, Lecturer]
  *                   paper_id:
- *                     type: object
- *                     description: Thông tin bài báo
+ *                     type: string
  *                   content:
  *                     type: string
  *                   time:
@@ -201,8 +222,14 @@ router.get("/receiver/:receiverId", messagesController.getMessagesByReceiverId);
  *                 type: string
  *               sender_id:
  *                 type: string
+ *               sender_model:
+ *                 type: string
+ *                 enum: [Student, Lecturer]
  *               receiver_id:
  *                 type: string
+ *               receiver_model:
+ *                 type: string
+ *                 enum: [Student, Lecturer]
  *               paper_id:
  *                 type: string
  *               content:
