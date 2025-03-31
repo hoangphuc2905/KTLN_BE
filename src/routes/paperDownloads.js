@@ -11,7 +11,7 @@ const paperDownloadsController = require("../controller/paperDownloadsController
 
 /**
  * @swagger
- * /paperDownloads:
+ * /paperdownload:
  *   post:
  *     summary: Create a new paper download
  *     tags: [PaperDownloads]
@@ -30,6 +30,9 @@ const paperDownloadsController = require("../controller/paperDownloadsController
  *                 type: array
  *                 items:
  *                   type: string
+ *               user_type:
+ *                 type: string
+ *                 description: Type of user for dynamic population
  *               download_time:
  *                 type: string
  *                 format: date
@@ -43,10 +46,17 @@ router.post("/", paperDownloadsController.createPaperDownload);
 
 /**
  * @swagger
- * /paperDownloads:
+ * /paperdownload:
  *   get:
  *     summary: Get all paper downloads
  *     tags: [PaperDownloads]
+ *     parameters:
+ *       - in: query
+ *         name: user_type
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Type of user for dynamic population
  *     responses:
  *       200:
  *         description: List of paper downloads
@@ -73,7 +83,7 @@ router.get("/", paperDownloadsController.getAllPaperDownloads);
 
 /**
  * @swagger
- * /paperDownloads/{id}:
+ * /paperdownload/{id}:
  *   get:
  *     summary: Get a paper download by ID
  *     tags: [PaperDownloads]
@@ -84,6 +94,12 @@ router.get("/", paperDownloadsController.getAllPaperDownloads);
  *           type: string
  *         required: true
  *         description: The paper download ID
+ *       - in: query
+ *         name: user_type
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Type of user for dynamic population
  *     responses:
  *       200:
  *         description: Paper download details
@@ -110,7 +126,7 @@ router.get("/:id", paperDownloadsController.getPaperDownloadById);
 
 /**
  * @swagger
- * /paperDownloads/{id}:
+ * /paperdownload/{id}:
  *   put:
  *     summary: Update a paper download by ID
  *     tags: [PaperDownloads]
@@ -121,6 +137,12 @@ router.get("/:id", paperDownloadsController.getPaperDownloadById);
  *           type: string
  *         required: true
  *         description: The paper download ID
+ *       - in: query
+ *         name: user_type
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Type of user for dynamic population
  *     requestBody:
  *       required: true
  *       content:
@@ -151,7 +173,7 @@ router.put("/:id", paperDownloadsController.updatePaperDownloadById);
 
 /**
  * @swagger
- * /paperDownloads/{id}:
+ * /paperdownload/{id}:
  *   delete:
  *     summary: Delete a paper download by ID
  *     tags: [PaperDownloads]
@@ -169,5 +191,41 @@ router.put("/:id", paperDownloadsController.updatePaperDownloadById);
  *         description: Paper download not found
  */
 router.delete("/:id", paperDownloadsController.deletePaperDownloadById);
+
+/**
+ * @swagger
+ * /paperdownload/count/{paper_id}:
+ *   get:
+ *     summary: Get the download count for a specific paper
+ *     tags: [PaperDownloads]
+ *     parameters:
+ *       - in: path
+ *         name: paper_id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the paper to get the download count for
+ *     responses:
+ *       200:
+ *         description: Download count retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 paper_id:
+ *                   type: string
+ *                 download_count:
+ *                   type: number
+ *       404:
+ *         description: Paper not found
+ *       500:
+ *         description: Internal server error
+ */
+router.get(
+  "/count/:paper_id",
+  paperDownloadsController.getDownloadCountByPaperId
+);
+
 
 module.exports = router;

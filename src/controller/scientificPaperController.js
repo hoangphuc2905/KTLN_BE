@@ -70,29 +70,6 @@ const scientificPaperController = {
         { session }
       );
 
-      // Tạo bản ghi mới cho views
-      const newViews = new PaperViews({
-        view_id: new mongoose.Types.ObjectId(),
-        paper_id: scientificPaper._id,
-        view_time: new Date(),
-      });
-      await newViews.save({ session });
-
-      // Tạo bản ghi mới cho downloads
-      const newDownloads = new PaperDownloads({
-        download_id: new mongoose.Types.ObjectId(),
-        paper_id: scientificPaper._id,
-        download_time: new Date(),
-      });
-      await newDownloads.save({ session });
-
-      // Cập nhật views và downloads vào bài báo
-      await ScientificPaper.updateOne(
-        { _id: scientificPaper._id },
-        { $set: { views: newViews._id, downloads: newDownloads._id } },
-        { session }
-      );
-
       // **Gửi thông báo tới các vai trò trong khoa**
       const departmentId = req.body.department; // Lấy khoa từ request body
       const roleNames = [
@@ -136,22 +113,19 @@ const scientificPaperController = {
       // Commit transaction
       await session.commitTransaction();
       session.endSession();
-      console.log("Request body received in backend:", req.body);
 
       res.status(201).json({
         message: "Scientific paper created successfully",
         scientificPaper: {
           ...scientificPaper._doc,
           author: authorIds,
-          views: newViews._id,
-          downloads: newDownloads._id,
         },
-        views: newViews,
-        downloads: newDownloads,
       });
     } catch (error) {
-      // Rollback transaction nếu có lỗi
-      await session.abortTransaction();
+      // Rollback transaction nếu có lỗi và chưa commit
+      if (session.inTransaction()) {
+        await session.abortTransaction();
+      }
       session.endSession();
       res.status(400).json({ message: error.message });
     }

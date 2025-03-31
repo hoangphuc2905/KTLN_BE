@@ -11,7 +11,7 @@ const paperViewsController = require("../controller/paperViewsController");
 
 /**
  * @swagger
- * /paperViews:
+ * /paperview:
  *   post:
  *     summary: Create a new paper view
  *     tags: [PaperViews]
@@ -26,11 +26,13 @@ const paperViewsController = require("../controller/paperViewsController");
  *                 type: string
  *               paper_id:
  *                 type: string
+ *               user_type:
+ *                 type: string
+ *                 enum: ["Lecturer", "Student"]
+ *                 description: Type of user viewing the paper
  *               user_id:
- *                 type: array
- *                 items:
- *                   type: string
- *                 description: Array of user IDs who viewed the paper
+ *                 type: string
+ *                 description: ID of the user (Lecturer or Student) based on user_type
  *               view_time:
  *                 type: string
  *                 format: date
@@ -44,7 +46,7 @@ router.post("/", paperViewsController.createPaperView);
 
 /**
  * @swagger
- * /paperViews:
+ * /paperview:
  *   get:
  *     summary: Get all paper views
  *     tags: [PaperViews]
@@ -62,10 +64,13 @@ router.post("/", paperViewsController.createPaperView);
  *                     type: string
  *                   paper_id:
  *                     type: string
+ *                   user_type:
+ *                     type: string
+ *                     enum: ["Lecturer", "Student"]
+ *                     description: Type of user viewing the paper
  *                   user_id:
- *                     type: array
- *                     items:
- *                       type: string
+ *                     type: string
+ *                     description: ID of the user (Lecturer or Student) based on user_type
  *                   view_time:
  *                     type: string
  *                     format: date
@@ -74,7 +79,7 @@ router.get("/", paperViewsController.getAllPaperViews);
 
 /**
  * @swagger
- * /paperViews/{id}:
+ * /paperview/{id}:
  *   get:
  *     summary: Get a paper view by ID
  *     tags: [PaperViews]
@@ -97,10 +102,13 @@ router.get("/", paperViewsController.getAllPaperViews);
  *                   type: string
  *                 paper_id:
  *                   type: string
+ *                 user_type:
+ *                   type: string
+ *                   enum: ["Lecturer", "Student"]
+ *                   description: Type of user viewing the paper
  *                 user_id:
- *                   type: array
- *                   items:
- *                     type: string
+ *                   type: string
+ *                   description: ID of the user (Lecturer or Student) based on user_type
  *                 view_time:
  *                   type: string
  *                   format: date
@@ -111,7 +119,7 @@ router.get("/:id", paperViewsController.getPaperViewById);
 
 /**
  * @swagger
- * /paperViews/{id}:
+ * /paperview/{id}:
  *   put:
  *     summary: Update a paper view by ID
  *     tags: [PaperViews]
@@ -133,10 +141,13 @@ router.get("/:id", paperViewsController.getPaperViewById);
  *                 type: string
  *               paper_id:
  *                 type: string
+ *               user_type:
+ *                 type: string
+ *                 enum: ["Lecturer", "Student"]
+ *                 description: Type of user viewing the paper
  *               user_id:
- *                 type: array
- *                 items:
- *                   type: string
+ *                 type: string
+ *                 description: ID of the user (Lecturer or Student) based on user_type
  *               view_time:
  *                 type: string
  *                 format: date
@@ -149,5 +160,36 @@ router.get("/:id", paperViewsController.getPaperViewById);
  *         description: Paper view not found
  */
 router.put("/:id", paperViewsController.updatePaperViewById);
+
+/**
+ * @swagger
+ * /paperview/count/{paper_id}:
+ *   get:
+ *     summary: Get the view count for a specific paper
+ *     tags: [PaperViews]
+ *     parameters:
+ *       - in: path
+ *         name: paper_id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the paper to get the view count for
+ *     responses:
+ *       200:
+ *         description: View count retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 viewCount:
+ *                   type: number
+ *       404:
+ *         description: Paper not found
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/count/:paper_id", paperViewsController.getViewCountByPaperId);
+
 
 module.exports = router;
