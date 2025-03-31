@@ -110,18 +110,20 @@ const scientificPaperController = {
         roles: { $in: roles.map((role) => role._id) },
       });
 
+      senderUserId = senderUserId || authorIds[0]; // Nếu không có `user_id` của tác giả, sử dụng tác giả đầu tiên
+
       for (const lecturer of lecturers) {
         const messageData = {
           message_id: uuidv4(), // Tạo ID duy nhất cho thông báo
           message_type: "Request for Approval", // Đặt loại thông báo là "Yêu cầu duyệt"
           status: "Pending Response",
-          sender_id: senderUserId, // Sử dụng `user_id` của tác giả đầu tiên làm người gửi
+          sender_id: senderUserId,
           sender_model: "Student", // Model của người gửi là `Student`
           receiver_id: lecturer.lecturer_id, // ID của người nhận
           receiver_model: "Lecturer", // Vai trò của người nhận
           paper_id: scientificPaper._id, // ID của bài báo
           content: `Có một bài báo mới cần duyệt: ${scientificPaper.title}`, // Nội dung thông báo
-          isread: false, 
+          isread: false,
           time: new Date(),
         };
         // Gọi hàm createMessage từ messagesController
@@ -309,23 +311,112 @@ const scientificPaperController = {
   },
 
   updateScientificPaperById: async (req, res) => {
+    const session = await ScientificPaper.startSession();
+    session.startTransaction();
+
     try {
-      const scientificPaper = await ScientificPaper.findByIdAndUpdate(
-        req.params.id,
-        req.body,
-        { new: true, runValidators: true }
-      )
-        .populate("article_type")
-        .populate("article_group")
-        .populate("author")
-        .populate("views")
-        .populate("downloads");
-      if (!scientificPaper) {
+      const { id } = req.params;
+
+      // Tìm bài báo cần cập nhật
+      const existingPaper = await ScientificPaper.findById(id);
+      if (!existingPaper) {
         return res.status(404).json({ message: "ScientificPaper not found" });
       }
-      res.status(200).json(scientificPaper);
+
+      // Upload file mới lên Cloudinary nếu có
+      let fileUrl = existingPaper.file_url;
+      if (req.file && req.file.path) {
+        const folderName = "scientific_papers";
+        fileUrl = await uploadFileToCloudinary(req.file.path, folderName);
+      }
+
+      // Xử lý danh sách tác giả
+      const authorIds = [];
+      let senderUserId = null;
+      if (Array.isArray(req.body.author) && req.body.author.length > 0) {
+        await PaperAuthor.deleteMany({ paper_id: id }, { session });
+
+        for (const authorData of req.body.author) {
+          const newAuthor = new PaperAuthor({
+            ...authorData,
+            paper_id: id,
+          });
+          const savedAuthor = await newAuthor.save({ session });
+          authorIds.push(savedAuthor._id);
+
+          if (!senderUserId) {
+            senderUserId = savedAuthor.user_id;
+          }
+        }
+      }
+
+      // Cập nhật thông tin bài báo
+      const updatedPaperData = {
+        ...req.body,
+        file_url: fileUrl,
+        author: authorIds,
+      };
+
+      const updatedPaper = await ScientificPaper.findByIdAndUpdate(
+        id,
+        updatedPaperData,
+        { new: true, runValidators: true, session }
+      );
+
+      // Gửi thông báo tới các vai trò trong khoa
+      const departmentId = req.body.department;
+      if (!departmentId) {
+        throw new Error("Department ID is required.");
+      }
+
+      const roleNames = [
+        "head_of_department",
+        "deputy_head_of_department",
+        "department_in_charge",
+      ];
+      const roles = await Role.find({ role_name: { $in: roleNames } });
+      const lecturers = await Lecturer.find({
+        department: departmentId,
+        roles: { $in: roles.map((role) => role._id) },
+      });
+
+      if (lecturers.length === 0) {
+        console.warn("No lecturers found for the specified department.");
+      }
+
+      for (const lecturer of lecturers) {
+        const messageData = {
+          message_id: uuidv4(),
+          message_type: "Request for Approval",
+          status: "Pending Response",
+          sender_id: senderUserId,
+          sender_model: "Student",
+          receiver_id: lecturer.lecturer_id,
+          receiver_model: "Lecturer",
+          paper_id: updatedPaper._id,
+          content: `Bài báo đã được cập nhật và cần duyệt lại: ${updatedPaper.title}`,
+          isread: false,
+          time: new Date(),
+        };
+        await messagesController.createMessage(
+          { body: messageData },
+          { status: () => ({ json: () => {} }) }
+        );
+      }
+
+      // Commit transaction
+      await session.commitTransaction();
+      session.endSession();
+
+      res.status(200).json({
+        message: "Scientific paper updated successfully",
+        scientificPaper: updatedPaper,
+      });
     } catch (error) {
-      res.status(400).json({ message: error.message });
+      await session.abortTransaction();
+      session.endSession();
+      console.error("Error in updateScientificPaperById:", error.message);
+      res.status(500).json({ message: error.message });
     }
   },
 };

@@ -9,12 +9,15 @@ const upload = multer({ storage }).single("file"); // Đặt key là "file" cho 
 const uploadFileToCloudinary = async (buffer, folderName) => {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
-      { folder: folderName },
+      {
+        folder: folderName,
+        access_mode: "public",
+      },
       (error, result) => {
         if (error) {
           reject(error);
         } else {
-          resolve(result.url); // Trả về URL của file đã tải lên
+          resolve(result.url);
         }
       }
     );
@@ -31,6 +34,8 @@ const uploadFile = async (req, res) => {
 
     const folderName = "scientific_papers"; // Tên thư mục trên Cloudinary
     const fileUrl = await uploadFileToCloudinary(req.file.buffer, folderName);
+
+    console.log("Uploaded file URL:", fileUrl); // Log URL để kiểm tra
 
     res.status(200).json({
       message: "File uploaded successfully",
