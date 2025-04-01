@@ -75,7 +75,7 @@ const scientificPaperSchema = new Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "approved", "refused"],
+      enum: ["pending", "approved", "refused", "revision"],
       default: "pending",
       required: true,
     },
@@ -106,7 +106,8 @@ const scientificPaperSchema = new Schema(
       required: true,
     },
     department: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Department",
       required: true,
     },
     cover_image: {

@@ -462,7 +462,7 @@ router.get(
  *             properties:
  *               status:
  *                 type: string
- *                 enum: [pending, approved, refused]
+ *                 enum: [pending, approved, refused, revision]
  *                 description: The new status of the scientific paper
  *     responses:
  *       200:

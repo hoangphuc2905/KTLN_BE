@@ -248,7 +248,7 @@ const scientificPaperController = {
       console.log("Received status:", status);
       console.log("Received id:", id);
 
-      const validStatuses = ["pending", "approved", "refused"];
+      const validStatuses = ["pending", "approved", "refused", "revision"];
       if (!validStatuses.includes(status)) {
         return res.status(400).json({ message: "Invalid status value" });
       }

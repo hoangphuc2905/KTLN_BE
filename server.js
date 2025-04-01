@@ -22,6 +22,7 @@ const attributeRoutes = require("./src/routes/attributes");
 const articleAIRoutes = require("./src/routes/articleAI");
 const swaggerUi = require("swagger-ui-express");
 const fileUploadRoutes = require("./src/routes/fileUpload");
+const paperCollectionRoutes = require("./src/routes/paperCollection");
 const specs = require("./swagger");
 
 dotenv.config();
@@ -65,6 +66,7 @@ app.use("/formulas", formulaRoutes);
 app.use("/attributes", attributeRoutes);
 app.use("/articlesAI", articleAIRoutes);
 app.use("/files", fileUploadRoutes);
+app.use("/papercollections", paperCollectionRoutes);
 
 const PORT = process.env.PORT || 5000;
 
