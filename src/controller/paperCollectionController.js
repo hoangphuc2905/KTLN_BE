@@ -27,6 +27,26 @@ const paperCollectionController = {
     }
   },
 
+  updateCollection: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { name } = req.body;
+      const collection = await PaperCollection.findByIdAndUpdate(
+        id,
+        { name },
+        { new: true, runValidators: true }
+      );
+      if (!collection) {
+        return res.status(404).json({ message: "Collection not found." });
+      }
+      res
+        .status(200)
+        .json({ message: "Collection updated successfully.", collection });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  },
+
   getCollectionsByUserId: async (req, res) => {
     try {
       const { user_id } = req.params;
@@ -43,6 +63,28 @@ const paperCollectionController = {
       });
 
       res.status(200).json(collections);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  },
+
+  isPaperInCollection: async (req, res) => {
+    try {
+      const { user_id, paper_id } = req.params;
+
+      // Tìm bộ sưu tập chứa bài viết
+      const collection = await PaperCollection.findOne({
+        user_id,
+        papers: paper_id, // Kiểm tra xem paper_id có trong mảng papers không
+      });
+
+      if (collection) {
+        return res
+          .status(200)
+          .json({ exists: true, collection_id: collection._id });
+      }
+
+      res.status(200).json({ exists: false });
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
@@ -65,7 +107,6 @@ const paperCollectionController = {
 
       collection.papers.push(paper_id);
       await collection.save();
-
 
       res.status(200).json({
         message: "Paper added to collection successfully.",

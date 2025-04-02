@@ -37,6 +37,39 @@ router.post("/", paperCollectionController.createCollection);
 
 /**
  * @swagger
+ * /papercollections/{id}:
+ *   put:
+ *     summary: Update a paper collection
+ *     tags: [PaperCollections]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID of the collection to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: New name of the collection
+ *     responses:
+ *       200:
+ *         description: Collection updated successfully
+ *       404:
+ *         description: Collection not found
+ *       500:
+ *         description: Internal server error
+ */
+router.put("/:id", paperCollectionController.updateCollection);
+
+/**
+ * @swagger
  * /papercollections/{user_id}:
  *   get:
  *     summary: Get all collections of a user
@@ -55,6 +88,47 @@ router.post("/", paperCollectionController.createCollection);
  *         description: Internal server error
  */
 router.get("/:user_id", paperCollectionController.getCollectionsByUserId);
+
+/**
+ * @swagger
+ * /papercollections/check/{user_id}/{paper_id}:
+ *   get:
+ *     summary: Check if a paper is in any collection of a user
+ *     tags: [PaperCollections]
+ *     parameters:
+ *       - in: path
+ *         name: user_id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID of the user
+ *       - in: path
+ *         name: paper_id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID of the paper to check
+ *     responses:
+ *       200:
+ *         description: Returns whether the paper exists in a collection
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 exists:
+ *                   type: boolean
+ *                   description: Whether the paper exists in a collection
+ *                 collection_id:
+ *                   type: string
+ *                   description: ID of the collection containing the paper (if exists)
+ *       500:
+ *         description: Internal server error
+ */
+router.get(
+  "/check/:user_id/:paper_id",
+  paperCollectionController.isPaperInCollection
+);
 
 /**
  * @swagger
