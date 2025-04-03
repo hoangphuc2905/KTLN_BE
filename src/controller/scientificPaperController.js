@@ -136,7 +136,13 @@ const scientificPaperController = {
       const scientificPapers = await ScientificPaper.find()
         .populate("article_type")
         .populate("article_group")
-        .populate("author") // Populate thông tin tác giả
+        .populate({
+          path: "author",
+          populate: {
+            path: "work_unit_id",
+            model: "WorkUnit",
+          },
+        })
         .populate("views")
         .populate("downloads");
       res.status(200).json(scientificPapers);
@@ -390,6 +396,24 @@ const scientificPaperController = {
       await session.abortTransaction();
       session.endSession();
       console.error("Error in updateScientificPaperById:", error.message);
+      res.status(500).json({ message: error.message });
+    }
+  },
+
+  getTotalPapersByAuthorId: async (req, res) => {
+    try {
+      const { author_id } = req.params; 
+
+      // Tìm tất cả các bài báo có `author` chứa `author_id`
+      const totalPapers = await ScientificPaper.countDocuments({
+        author: author_id,
+      });
+
+      res.status(200).json({
+        author_id,
+        total_papers: totalPapers,
+      });
+    } catch (error) {
       res.status(500).json({ message: error.message });
     }
   },
