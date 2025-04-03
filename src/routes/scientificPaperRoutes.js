@@ -567,39 +567,4 @@ router.put(
  */
 router.put("/:id", scientificPaperController.updateScientificPaperById);
 
-/**
- * @swagger
- * /scientificpapers/total/{author_id}:
- *   get:
- *     summary: Get total number of scientific papers by an author
- *     tags: [ScientificPapers]
- *     parameters:
- *       - in: path
- *         name: author_id
- *         schema:
- *           type: string
- *         required: true
- *         description: ID of the author
- *     responses:
- *       200:
- *         description: Total number of scientific papers retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 author_id:
- *                   type: string
- *                   description: ID of the author
- *                 total_papers:
- *                   type: number
- *                   description: Total number of scientific papers
- *       500:
- *         description: Internal server error
- */
-router.get(
-  "/total/:author_id",
-  scientificPaperController.getTotalPapersByAuthorId
-);
-
 module.exports = router;

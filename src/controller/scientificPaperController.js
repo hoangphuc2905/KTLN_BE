@@ -6,8 +6,8 @@ const { v4: uuidv4 } = require("uuid");
 const { default: mongoose } = require("mongoose");
 const Role = require("../models/Role");
 const Lecturer = require("../models/Lecturer");
-const messagesController = require("./messagesController"); // Import messagesController
-const { uploadFileToCloudinary } = require("./fileCloudinaryController"); // Import hàm uploadFileToCloudinary
+const messagesController = require("./messagesController"); 
+const { uploadFileToCloudinary } = require("./fileCloudinaryController"); 
 
 const scientificPaperController = {
   createScientificPaper: async (req, res) => {
@@ -400,23 +400,7 @@ const scientificPaperController = {
     }
   },
 
-  getTotalPapersByAuthorId: async (req, res) => {
-    try {
-      const { author_id } = req.params; 
-
-      // Tìm tất cả các bài báo có `author` chứa `author_id`
-      const totalPapers = await ScientificPaper.countDocuments({
-        author: author_id,
-      });
-
-      res.status(200).json({
-        author_id,
-        total_papers: totalPapers,
-      });
-    } catch (error) {
-      res.status(500).json({ message: error.message });
-    }
-  },
+  
 };
 
 module.exports = scientificPaperController;
