@@ -6,8 +6,8 @@ const { v4: uuidv4 } = require("uuid");
 const { default: mongoose } = require("mongoose");
 const Role = require("../models/Role");
 const Lecturer = require("../models/Lecturer");
-const messagesController = require("./messagesController"); 
-const { uploadFileToCloudinary } = require("./fileCloudinaryController"); 
+const messagesController = require("./messagesController");
+const { uploadFileToCloudinary } = require("./fileCloudinaryController");
 
 const scientificPaperController = {
   createScientificPaper: async (req, res) => {
@@ -399,8 +399,115 @@ const scientificPaperController = {
       res.status(500).json({ message: error.message });
     }
   },
+  getTop5NewestScientificPapers: async (req, res) => {
+    try {
+      const topPapers = await ScientificPaper.find({ status: "approved" })
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .populate("article_type")
+        .populate("article_group")
+        .populate({
+          path: "author",
+          populate: {
+            path: "work_unit_id",
+            model: "WorkUnit",
+          },
+        })
+        .populate("views")
+        .populate("downloads");
 
-  
+      res.status(200).json({
+        message: "Top 5 newest scientific papers retrieved successfully",
+        papers: topPapers,
+      });
+    } catch (error) {
+      console.error("Error in getTop5NewestScientificPapers:", error.message);
+      res.status(500).json({ message: error.message });
+    }
+  },
+
+  getTop5MostViewedAndDownloadedPapers: async (req, res) => {
+    try {
+      const topPapers = await ScientificPaper.aggregate([
+        {
+          $lookup: {
+            from: "paperviews", // Tên collection chứa lượt xem
+            localField: "_id",
+            foreignField: "paper_id",
+            as: "views",
+          },
+        },
+        {
+          $lookup: {
+            from: "paperdownloads", // Tên collection chứa lượt tải xuống
+            localField: "_id",
+            foreignField: "paper_id",
+            as: "downloads",
+          },
+        },
+        {
+          $lookup: {
+            from: "paperauthors", // Tên collection chứa tác giả
+            localField: "author",
+            foreignField: "_id",
+            as: "author",
+          },
+        },
+        {
+          $addFields: {
+            viewCount: { $size: "$views" }, // Đếm số lượt xem
+            downloadCount: { $size: "$downloads" }, // Đếm số lượt tải xuống
+          },
+        },
+        {
+          $sort: { viewCount: -1, downloadCount: -1 }, // Sắp xếp theo lượt xem và tải xuống giảm dần
+        },
+        {
+          $limit: 5, // Giới hạn 5 bài
+        },
+        {
+          $project: {
+            paper_id: 1,
+            title_vn: 1,
+            title_en: 1,
+            cover_image: 1,
+            department: 1,
+            viewCount: 1,
+            downloadCount: 1,
+            author: {
+              author_name_vi: 1,
+              author_name_en: 1,
+              role: 1,
+            },
+          },
+        },
+      ]);
+
+      // Kiểm tra nếu không có bài nghiên cứu nào
+      if (!topPapers || topPapers.length === 0) {
+        return res.status(404).json({
+          message: "No scientific papers found",
+        });
+      }
+
+      // Trả về kết quả
+      res.status(200).json({
+        message:
+          "Top 5 most viewed and downloaded scientific papers retrieved successfully",
+        papers: topPapers,
+      });
+    } catch (error) {
+      console.error(
+        "Error in getTop5MostViewedAndDownloadedPapers:",
+        error.message
+      );
+      res.status(500).json({
+        message:
+          "An error occurred while retrieving the top 5 most viewed and downloaded scientific papers",
+        error: error.message,
+      });
+    }
+  },
 };
 
 module.exports = scientificPaperController;

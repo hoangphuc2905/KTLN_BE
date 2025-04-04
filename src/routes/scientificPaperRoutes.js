@@ -200,6 +200,85 @@ router.get("/", scientificPaperController.getAllScientificPapers);
 
 /**
  * @swagger
+ * /scientificPapers/top5-newest:
+ *   get:
+ *     summary: Get the top 5 newest scientific papers
+ *     tags: [ScientificPapers]
+ *     responses:
+ *       200:
+ *         description: Top 5 newest scientific papers retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 papers:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       paper_id:
+ *                         type: string
+ *                       title_vn:
+ *                         type: string
+ *                       title_en:
+ *                         type: string
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *       500:
+ *         description: Internal server error
+ */
+router.get(
+  "/top5-newest",
+  scientificPaperController.getTop5NewestScientificPapers
+);
+
+/**
+ * @swagger
+ * /scientificPapers/top5-most-viewed-downloaded:
+ *   get:
+ *     summary: Get the top 5 most viewed and downloaded scientific papers
+ *     tags: [ScientificPapers]
+ *     responses:
+ *       200:
+ *         description: Top 5 most viewed and downloaded scientific papers retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 papers:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                       title_vn:
+ *                         type: string
+ *                       title_en:
+ *                         type: string
+ *                       viewCount:
+ *                         type: number
+ *                       downloadCount:
+ *                         type: number
+ *       404:
+ *         description: No scientific papers found
+ *       500:
+ *         description: Internal server error
+ */
+router.get(
+  "/top5-most-viewed-downloaded",
+  scientificPaperController.getTop5MostViewedAndDownloadedPapers
+);
+
+/**
+ * @swagger
  * /scientificPapers/{id}:
  *   get:
  *     summary: Get a scientific paper by ID

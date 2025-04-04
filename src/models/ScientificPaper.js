@@ -106,7 +106,7 @@ const scientificPaperSchema = new Schema(
       required: true,
     },
     department: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: String,
       ref: "Department",
       required: true,
     },
