@@ -107,4 +107,102 @@ router.get(
   statisticsController.getTotalDownloadsByAuthorId
 );
 
+/**
+ * @swagger
+ * /statistics/top3-papers-by-author/{author_id}:
+ *   get:
+ *     summary: Get top 3 papers by an author with the highest views, downloads, and contribution score
+ *     tags: [Statistics]
+ *     parameters:
+ *       - in: path
+ *         name: author_id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID of the author
+ *     responses:
+ *       200:
+ *         description: Top 3 papers by the author retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 papers:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       paper_id:
+ *                         type: string
+ *                       title_vn:
+ *                         type: string
+ *                       title_en:
+ *                         type: string
+ *                       viewCount:
+ *                         type: number
+ *                       downloadCount:
+ *                         type: number
+ *                       contributionScore:
+ *                         type: number
+ *                       authorDetails:
+ *                         type: array
+ *                         items:
+ *                           type: object
+ *                           properties:
+ *                             author_name_vi:
+ *                               type: string
+ *                             author_name_en:
+ *                               type: string
+ *                             role:
+ *                               type: string
+ *                             point:
+ *                               type: number
+ *       404:
+ *         description: No papers found for this author
+ *       500:
+ *         description: Internal server error
+ */
+router.get(
+  "/top3-papers-by-author/:author_id",
+  statisticsController.getTop3PapersByAuthorId
+);
+
+/**
+ * @swagger
+ * /statistics/total-points-by-author/{author_id}:
+ *   get:
+ *     summary: Get total points contributed by an author
+ *     tags: [Statistics]
+ *     parameters:
+ *       - in: path
+ *         name: author_id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID of the author
+ *     responses:
+ *       200:
+ *         description: Total points contributed by the author retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 author_id:
+ *                   type: string
+ *                   description: ID of the author
+ *                 total_points:
+ *                   type: number
+ *                   description: Total points contributed by the author
+ *       500:
+ *         description: Internal server error
+ */
+router.get(
+  "/total-points-by-author/:author_id",
+  statisticsController.getTotalPointByAuthorId
+);
+
 module.exports = router;
