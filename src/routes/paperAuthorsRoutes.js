@@ -218,6 +218,40 @@ router.get("/paper/:paper_id", paperAuthorController.getAuthorsByPaperId);
 
 /**
  * @swagger
+ * /paperauthor/summary:
+ *   get:
+ *     summary: Get a summary of paper authors with total points and total papers
+ *     tags: [PaperAuthors]
+ *     responses:
+ *       200:
+ *         description: Summary of paper authors
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   STT:
+ *                     type: number
+ *                   TÁC_GIẢ:
+ *                     type: string
+ *                   KHOA:
+ *                     type: string
+ *                   TỔNG_BÀI:
+ *                     type: number
+ *                   TỔNG_ĐIỂM:
+ *                     type: number
+ *     500:
+ *       description: Internal server error
+ */
+router.get(
+  "/summary",
+  paperAuthorController.getAllPaperAuthorsByTolalPointsAndTotalPapers
+);
+
+/**
+ * @swagger
  * /paperauthor/{id}:
  *   delete:
  *     summary: Delete a paper author by ID

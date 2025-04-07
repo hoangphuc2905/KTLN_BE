@@ -145,9 +145,72 @@ const paperAuthorController = {
     }
   },
 
+  getAllPaperAuthorsByTolalPointsAndTotalPapers: async (req, res) => {
+    try {
+      console.log("Route /paperauthor/summary called"); // Log kiểm tra
+
+      const paperAuthors = await PaperAuthor.aggregate([
+        {
+          $project: {
+            user_id: 1,
+            author_name_vi: 1,
+            author_name_en: 1,
+            role: 1,
+            work_unit_id: 1,
+            point: 1,
+          },
+        },
+        {
+          $group: {
+            _id: "$user_id",
+            author_name_vi: { $first: "$author_name_vi" },
+            author_name_en: { $first: "$author_name_en" },
+            role: { $first: "$role" },
+            work_unit_id: { $first: "$work_unit_id" },
+            total_papers: { $sum: 1 },
+            total_points: { $sum: "$point" },
+          },
+        },
+        {
+          $lookup: {
+            from: "workunits",
+            localField: "work_unit_id",
+            foreignField: "_id",
+            as: "work_unit",
+          },
+        },
+        {
+          $unwind: {
+            path: "$work_unit",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+      ]);
+
+      console.log("Aggregation Result:", paperAuthors); // Log kết quả
+      if (paperAuthors.length === 0) {
+        return res.status(404).json({ message: "Paper author not found" });
+      }
+
+      const result = paperAuthors.map((author, index) => ({
+        STT: index + 1,
+        TÁC_GIẢ: author.author_name_vi || author.author_name_en,
+        CHỨC_VỤ: author.role,
+        KHOA: author.work_unit?.name_vi || "N/A",
+        TỔNG_BÀI: author.total_papers,
+        TỔNG_ĐIỂM: author.total_points,
+      }));
+
+      res.status(200).json(result);
+    } catch (error) {
+      console.error("Error:", error); // Log lỗi
+      res.status(500).json({ message: error.message });
+    }
+  },
+
   deletePaperAuthorById: async (req, res) => {
     try {
-      const { id } = req.params; // Updated parameter name
+      const { id } = req.params;
       const result = await PaperAuthor.findByIdAndDelete(id); // Use findByIdAndDelete for consistency
       if (!result) {
         return res.status(404).json({ message: "Paper author not found" });
