@@ -159,7 +159,6 @@ const paperAuthorController = {
             author_name_vi: 1,
             author_name_en: 1,
             role: 1,
-            work_unit_id: 1,
             point: 1,
           },
         },
@@ -169,40 +168,63 @@ const paperAuthorController = {
             author_name_vi: { $first: "$author_name_vi" },
             author_name_en: { $first: "$author_name_en" },
             role: { $first: "$role" },
-            work_unit_id: { $first: "$work_unit_id" },
             total_papers: { $sum: 1 },
             total_points: { $sum: "$point" },
           },
         },
+        // Lookup lecturer để lấy department
         {
           $lookup: {
-            from: "workunits",
-            localField: "work_unit_id",
+            from: "lecturers",
+            localField: "_id",
+            foreignField: "lecturer_id",
+            as: "lecturer_info",
+          },
+        },
+        // Lookup student để lấy department (phòng trường hợp không có trong lecturer)
+        {
+          $lookup: {
+            from: "students",
+            localField: "_id",
+            foreignField: "student_id",
+            as: "student_info",
+          },
+        },
+        // Lấy department_id từ lecturer hoặc student
+        {
+          $addFields: {
+            department_id: {
+              $ifNull: [
+                { $arrayElemAt: ["$lecturer_info.department", 0] },
+                { $arrayElemAt: ["$student_info.department", 0] },
+              ],
+            },
+          },
+        },
+        // Lookup từ department_id sang tên khoa
+        {
+          $lookup: {
+            from: "departments",
+            localField: "department_id",
             foreignField: "_id",
-            as: "work_unit",
+            as: "department_info",
           },
         },
         {
           $unwind: {
-            path: "$work_unit",
+            path: "$department_info",
             preserveNullAndEmptyArrays: true,
           },
         },
         {
-          $sort: { total_points: -1 }, // Sắp xếp giảm dần theo điểm
+          $sort: { total_points: -1 },
         },
       ]);
 
-      console.log("Aggregation Result:", paperAuthors);
-
-      if (!paperAuthors || paperAuthors.length === 0) {
-        console.log("Không có tác giả nào được tìm thấy.");
-        return res.status(404).json({ message: "Paper author not found" });
-      }
-
       const result = paperAuthors.map((author, index) => ({
+        MÃ_TÁC_GIẢ: author._id,
         TÁC_GIẢ: author.author_name_vi || author.author_name_en || "N/A",
-        KHOA: author.work_unit?.name_vi || "N/A",
+        KHOA: author.department_info?.department_name || "N/A",
         TỔNG_BÀI: author.total_papers,
         TỔNG_ĐIỂM: author.total_points,
       }));
@@ -275,6 +297,7 @@ const paperAuthorController = {
       }
 
       const result = paperAuthors.map((author, index) => ({
+        MÃ_TÁC_GIẢ: author._id,
         TÁC_GIẢ: author.author_name_vi || author.author_name_en || "N/A",
         KHOA: department.department_name || "N/A",
         TỔNG_BÀI: author.total_papers,
