@@ -1,4 +1,7 @@
 const PaperAuthor = require("../models/PaperAuthor");
+const Lecturer = require("../models/Lecturer");
+const Student = require("../models/Student");
+const Department = require("../models/Department");
 
 const paperAuthorController = {
   createPaperAuthor: async (req, res) => {
@@ -147,7 +150,7 @@ const paperAuthorController = {
 
   getAllPaperAuthorsByTolalPointsAndTotalPapers: async (req, res) => {
     try {
-      console.log("Route /paperauthor/summary called"); // Log kiểm tra
+      console.log("Route /paperauthor/summary called");
 
       const paperAuthors = await PaperAuthor.aggregate([
         {
@@ -185,17 +188,20 @@ const paperAuthorController = {
             preserveNullAndEmptyArrays: true,
           },
         },
+        {
+          $sort: { total_points: -1 }, // Sắp xếp giảm dần theo điểm
+        },
       ]);
 
-      console.log("Aggregation Result:", paperAuthors); // Log kết quả
-      if (paperAuthors.length === 0) {
+      console.log("Aggregation Result:", paperAuthors);
+
+      if (!paperAuthors || paperAuthors.length === 0) {
+        console.log("Không có tác giả nào được tìm thấy.");
         return res.status(404).json({ message: "Paper author not found" });
       }
 
       const result = paperAuthors.map((author, index) => ({
-        STT: index + 1,
-        TÁC_GIẢ: author.author_name_vi || author.author_name_en,
-        CHỨC_VỤ: author.role,
+        TÁC_GIẢ: author.author_name_vi || author.author_name_en || "N/A",
         KHOA: author.work_unit?.name_vi || "N/A",
         TỔNG_BÀI: author.total_papers,
         TỔNG_ĐIỂM: author.total_points,
@@ -203,7 +209,81 @@ const paperAuthorController = {
 
       res.status(200).json(result);
     } catch (error) {
-      console.error("Error:", error); // Log lỗi
+      console.error("Error:", error);
+      res.status(500).json({ message: error.message });
+    }
+  },
+
+  getPaperAuthorsByDepartment: async (req, res) => {
+    try {
+      const { department_id } = req.params; // Lấy department_id từ URL
+
+      const department = await Department.findById(department_id).select(
+        "department_name"
+      );
+      if (!department) {
+        return res.status(404).json({ message: "Department not found" });
+      }
+      // Tìm tất cả giảng viên và sinh viên thuộc khoa đó
+      const lecturers = await Lecturer.find({
+        department: department_id,
+      }).select("lecturer_id");
+      const students = await Student.find({ department: department_id }).select(
+        "student_id"
+      );
+
+      // Lấy danh sách user_id từ giảng viên và sinh viên
+      const userIds = [
+        ...lecturers.map((lecturer) => lecturer.lecturer_id),
+        ...students.map((student) => student.student_id),
+      ];
+
+      if (userIds.length === 0) {
+        return res
+          .status(404)
+          .json({ message: "No authors found for this department" });
+      }
+
+      // Lấy danh sách tác giả thuộc khoa
+      const paperAuthors = await PaperAuthor.aggregate([
+        {
+          $match: {
+            user_id: { $in: userIds }, // Lọc theo danh sách user_id
+          },
+        },
+        {
+          $group: {
+            _id: "$user_id",
+            author_name_vi: { $first: "$author_name_vi" },
+            author_name_en: { $first: "$author_name_en" },
+            role: { $first: "$role" },
+            total_papers: { $sum: 1 },
+            total_points: { $sum: "$point" },
+          },
+        },
+        {
+          $sort: { total_points: -1 }, // Sắp xếp giảm dần theo tổng điểm
+        },
+      ]);
+
+      console.log("Filtered Paper Authors by Department:", paperAuthors);
+
+      if (!paperAuthors || paperAuthors.length === 0) {
+        return res
+          .status(404)
+          .json({ message: "No authors found for this department" });
+      }
+
+      const result = paperAuthors.map((author, index) => ({
+        TÁC_GIẢ: author.author_name_vi || author.author_name_en || "N/A",
+        KHOA: department.department_name || "N/A",
+        TỔNG_BÀI: author.total_papers,
+        TỔNG_ĐIỂM: author.total_points,
+      }));
+
+      res.status(200).json(result);
+    } catch (error) {
+      console.error("Error:", error);
       res.status(500).json({ message: error.message });
     }
   },

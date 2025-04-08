@@ -85,6 +85,83 @@ router.get("/", paperAuthorController.getAllPaperAuthors);
 
 /**
  * @swagger
+ * /paperauthor/summary:
+ *   get:
+ *     summary: Get a summary of paper authors with total points and total papers
+ *     tags: [PaperAuthors]
+ *     responses:
+ *       200:
+ *         description: Summary of paper authors
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   STT:
+ *                     type: number
+ *                   TÁC_GIẢ:
+ *                     type: string
+ *                   KHOA:
+ *                     type: string
+ *                   TỔNG_BÀI:
+ *                     type: number
+ *                   TỔNG_ĐIỂM:
+ *                     type: number
+ *     500:
+ *       description: Internal server error
+ */
+router.get(
+  "/summary",
+  paperAuthorController.getAllPaperAuthorsByTolalPointsAndTotalPapers
+);
+
+/**
+ * @swagger
+ * /paperauthor/department/{department_id}:
+ *   get:
+ *     summary: Get paper authors by department ID
+ *     tags: [PaperAuthors]
+ *     parameters:
+ *       - in: path
+ *         name: department_id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the department
+ *     responses:
+ *       200:
+ *         description: List of paper authors in the specified department
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   STT:
+ *                     type: number
+ *                   TÁC_GIẢ:
+ *                     type: string
+ *                   CHỨC_VỤ:
+ *                     type: string
+ *                   TỔNG_BÀI:
+ *                     type: number
+ *                   TỔNG_ĐIỂM:
+ *                     type: number
+ *       404:
+ *         description: No authors found for this department
+ *       500:
+ *         description: Internal server error
+ */
+router.get(
+  "/department/:department_id",
+  paperAuthorController.getPaperAuthorsByDepartment
+);
+
+/**
+ * @swagger
  * /paperauthor/{id}:
  *   get:
  *     summary: Get a paper author by user ID
@@ -215,40 +292,6 @@ router.put("/:id", paperAuthorController.updatePaperAuthorById);
  *         description: No authors found for this paper
  */
 router.get("/paper/:paper_id", paperAuthorController.getAuthorsByPaperId);
-
-/**
- * @swagger
- * /paperauthor/summary:
- *   get:
- *     summary: Get a summary of paper authors with total points and total papers
- *     tags: [PaperAuthors]
- *     responses:
- *       200:
- *         description: Summary of paper authors
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   STT:
- *                     type: number
- *                   TÁC_GIẢ:
- *                     type: string
- *                   KHOA:
- *                     type: string
- *                   TỔNG_BÀI:
- *                     type: number
- *                   TỔNG_ĐIỂM:
- *                     type: number
- *     500:
- *       description: Internal server error
- */
-router.get(
-  "/summary",
-  paperAuthorController.getAllPaperAuthorsByTolalPointsAndTotalPapers
-);
 
 /**
  * @swagger
