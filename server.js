@@ -24,6 +24,7 @@ const statisticsRoutes = require("./src/routes/statisticsRoutes");
 const swaggerUi = require("swagger-ui-express");
 const fileUploadRoutes = require("./src/routes/fileUploadRoutes");
 const paperCollectionRoutes = require("./src/routes/paperCollectionRoutes");
+const authorScoreRoutes = require("./src/routes/authorScoreRoutes");
 const specs = require("./swagger");
 
 dotenv.config();
@@ -69,6 +70,7 @@ app.use("/articlesAI", articleAIRoutes);
 app.use("/files", fileUploadRoutes);
 app.use("/papercollections", paperCollectionRoutes);
 app.use("/statistics", statisticsRoutes);
+app.use("/authorScores", authorScoreRoutes);
 
 const PORT = process.env.PORT || 5000;
 

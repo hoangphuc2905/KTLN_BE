@@ -368,6 +368,72 @@ const statisticsController = {
     }
   },
 
+  getStatisticsForAll: async (req, res) => {
+    try {
+      // 1. Lấy tất cả student_id và lecturer_id
+      const students = await Student.find().select("student_id");
+      const lecturers = await Lecturer.find().select("lecturer_id");
+
+      const userIds = [
+        ...students.map((s) => s.student_id.toString()),
+        ...lecturers.map((l) => l.lecturer_id.toString()),
+      ];
+
+      if (userIds.length === 0) {
+        return res.status(200).json({
+          total_papers: 0,
+          total_views: 0,
+          total_downloads: 0,
+        });
+      }
+
+      // 2. Lấy tất cả paper_id của người dùng từ bảng papers_users
+      const paperAuthors = await PaperAuthor.find({
+        user_id: { $in: userIds },
+      }).select("paper_id");
+
+      const paperIds = [
+        ...new Set(paperAuthors.map((p) => p.paper_id.toString())),
+      ]; // loại bỏ trùng
+
+      if (paperIds.length === 0) {
+        return res.status(200).json({
+          total_papers: 0,
+          total_views: 0,
+          total_downloads: 0,
+        });
+      }
+
+      // 3. Đếm số lượng paper đã được duyệt (status = "approved")
+      const approvedPapers = await ScientificPaper.find({
+        _id: { $in: paperIds },
+        status: "approved",
+      }).select("_id");
+
+      const approvedPaperIds = approvedPapers.map((p) => p._id.toString());
+
+      // 4. Đếm lượt xem
+      const totalViews = await PaperView.countDocuments({
+        paper_id: { $in: approvedPaperIds },
+      });
+
+      // 5. Đếm lượt tải
+      const totalDownloads = await PaperDownload.countDocuments({
+        paper_id: { $in: approvedPaperIds },
+      });
+
+      // 6. Trả kết quả
+      res.status(200).json({
+        total_papers: approvedPaperIds.length,
+        total_views: totalViews,
+        total_downloads: totalDownloads,
+      });
+    } catch (error) {
+      console.error("Error in getStatisticsForAll:", error.message);
+      res.status(500).json({ message: error.message });
+    }
+  },
+
   getTotalPointsByDepartmentId: async (req, res) => {
     try {
       const { department_id } = req.params;
@@ -414,6 +480,180 @@ const statisticsController = {
       });
     } catch (error) {
       res.status(500).json({ message: error.message });
+    }
+  },
+
+  getTop3MostViewedAndDownloadedPapers: async (req, res) => {
+    try {
+      const topPapers = await ScientificPaper.aggregate([
+        {
+          $lookup: {
+            from: "paperviews",
+            localField: "_id",
+            foreignField: "paper_id",
+            as: "views",
+          },
+        },
+        {
+          $lookup: {
+            from: "paperdownloads", // Tên collection chứa lượt tải xuống
+            localField: "_id",
+            foreignField: "paper_id",
+            as: "downloads",
+          },
+        },
+        {
+          $lookup: {
+            from: "paperauthors", // Tên collection chứa tác giả
+            localField: "author",
+            foreignField: "_id",
+            as: "author",
+          },
+        },
+        {
+          $addFields: {
+            viewCount: { $size: "$views" }, // Đếm số lượt xem
+            downloadCount: { $size: "$downloads" }, // Đếm số lượt tải xuống
+          },
+        },
+        {
+          $sort: { viewCount: -1, downloadCount: -1 }, // Sắp xếp theo lượt xem và tải xuống giảm dần
+        },
+        {
+          $limit: 3, // Giới hạn 5 bài
+        },
+        {
+          $project: {
+            paper_id: 1,
+            title_vn: 1,
+            title_en: 1,
+            cover_image: 1,
+            department: 1,
+            viewCount: 1,
+            downloadCount: 1,
+            author: {
+              author_name_vi: 1,
+              author_name_en: 1,
+              role: 1,
+            },
+          },
+        },
+      ]);
+
+      // Kiểm tra nếu không có bài nghiên cứu nào
+      if (!topPapers || topPapers.length === 0) {
+        return res.status(404).json({
+          message: "No scientific papers found",
+        });
+      }
+
+      // Trả về kết quả
+      res.status(200).json({
+        message:
+          "Top 3 most viewed and downloaded scientific papers retrieved successfully",
+        papers: topPapers,
+      });
+    } catch (error) {
+      console.error(
+        "Error in getTop3MostViewedAndDownloadedPapers:",
+        error.message
+      );
+      res.status(500).json({
+        message:
+          "An error occurred while retrieving the top 3 most viewed and downloaded scientific papers",
+        error: error.message,
+      });
+    }
+  },
+
+  getTop3MostViewedAndDownloadedPapersByDepartment: async (req, res) => {
+    try {
+      const { department_id } = req.params;
+
+      const topPapers = await ScientificPaper.aggregate([
+        {
+          $lookup: {
+            from: "paperviews",
+            localField: "_id",
+            foreignField: "paper_id",
+            as: "views",
+          },
+        },
+        {
+          $lookup: {
+            from: "paperdownloads", // Tên collection chứa lượt tải xuống
+            localField: "_id",
+            foreignField: "paper_id",
+            as: "downloads",
+          },
+        },
+        {
+          $lookup: {
+            from: "paperauthors", // Tên collection chứa tác giả
+            localField: "author",
+            foreignField: "_id",
+            as: "author",
+          },
+        },
+        {
+          $match: {
+            department: department_id, // Lọc theo khoa
+            status: "approved", // Chỉ lấy bài đã được duyệt
+          },
+        },
+        {
+          $addFields: {
+            viewCount: { $size: "$views" }, // Đếm số lượt xem
+            downloadCount: { $size: "$downloads" }, // Đếm số lượt tải xuống
+          },
+        },
+        {
+          $sort: { viewCount: -1, downloadCount: -1 }, // Sắp xếp theo lượt xem và tải xuống giảm dần
+        },
+        {
+          $limit: 3, // Lấy top 3 bài
+        },
+        {
+          $project: {
+            paper_id: 1,
+            title_vn: 1,
+            title_en: 1,
+            cover_image: 1,
+            department: 1,
+            viewCount: 1,
+            downloadCount: 1,
+            author: {
+              author_name_vi: 1,
+              author_name_en: 1,
+              role: 1,
+            },
+          },
+        },
+      ]);
+
+      // Kiểm tra nếu không có bài nghiên cứu nào
+      if (!topPapers || topPapers.length === 0) {
+        return res.status(404).json({
+          message: "No scientific papers found for this department",
+        });
+      }
+
+      // Trả về kết quả
+      res.status(200).json({
+        message:
+          "Top 3 most viewed and downloaded scientific papers by department retrieved successfully",
+        papers: topPapers,
+      });
+    } catch (error) {
+      console.error(
+        "Error in getTop3MostViewedAndDownloadedPapersByDepartment:",
+        error.message
+      );
+      res.status(500).json({
+        message:
+          "An error occurred while retrieving the top 3 most viewed and downloaded scientific papers by department",
+        error: error.message,
+      });
     }
   },
 };

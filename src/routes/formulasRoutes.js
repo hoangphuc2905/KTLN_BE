@@ -47,6 +47,35 @@ router.post("/", formulaController.createFormula);
 
 /**
  * @swagger
+ * /formulas/update:
+ *   put:
+ *     summary: Update a formula by ID
+ *     tags: [Formulas]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               id:
+ *                 type: string
+ *                 description: The ID of the formula to update
+ *               updateData:
+ *                 type: object
+ *                 description: The fields to update in the formula
+ *     responses:
+ *       200:
+ *         description: Formula updated successfully
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: Formula not found
+ */
+router.put("/update", formulaController.updateFormula);
+
+/**
+ * @swagger
  * /formulas/get-by-date-range:
  *   post:
  *     summary: Get formulas by date range

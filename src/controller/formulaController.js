@@ -12,6 +12,32 @@ const formulaController = {
     }
   },
 
+  updateFormula: async (req, res) => {
+    try {
+      const { id, ...updateData } = req.body;
+
+      // Kiểm tra xem ID có được cung cấp không
+      if (!id) {
+        return res.status(400).json({ message: "ID is required" });
+      }
+
+      // Tìm và cập nhật công thức
+      const formula = await ScoringFormula.findByIdAndUpdate(id, updateData, {
+        new: true, // Trả về tài liệu đã được cập nhật
+        runValidators: true, // Chạy các trình xác thực trong schema
+      });
+
+      // Nếu không tìm thấy công thức
+      if (!formula) {
+        return res.status(404).json({ message: "Formula not found" });
+      }
+
+      res.status(200).json(formula);
+    } catch (error) {
+      res.status(400).json({ message: error.message });
+    }
+  },
+
   // Lấy công thức theo khoảng thời gian
   getFormulaByDateRange: async (req, res) => {
     try {
