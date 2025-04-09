@@ -85,13 +85,13 @@ router.get("/", paperAuthorController.getAllPaperAuthors);
 
 /**
  * @swagger
- * /paperauthor/summary:
+ * /paperauthor/statistics-by-department:
  *   get:
- *     summary: Get a summary of paper authors with total points and total papers
+ *     summary: Get paper statistics grouped by department
  *     tags: [PaperAuthors]
  *     responses:
  *       200:
- *         description: Summary of paper authors
+ *         description: Paper statistics grouped by department retrieved successfully
  *         content:
  *           application/json:
  *             schema:
@@ -99,21 +99,20 @@ router.get("/", paperAuthorController.getAllPaperAuthors);
  *               items:
  *                 type: object
  *                 properties:
- *                   STT:
- *                     type: number
- *                   TÁC_GIẢ:
- *                     type: string
  *                   KHOA:
  *                     type: string
+ *                     description: Department name
  *                   TỔNG_BÀI:
  *                     type: number
+ *                     description: Total number of unique papers
  *                   TỔNG_ĐIỂM:
  *                     type: number
- *     500:
- *       description: Internal server error
+ *                     description: Total points of all papers in the department
+ *       500:
+ *         description: Internal server error
  */
 router.get(
-  "/summary",
+  "/statistics-by-department",
   paperAuthorController.getAllPaperAuthorsByTolalPointsAndTotalPapers
 );
 

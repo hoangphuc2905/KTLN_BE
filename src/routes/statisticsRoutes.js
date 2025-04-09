@@ -207,9 +207,9 @@ router.get(
 
 /**
  * @swagger
- * /statistics/total-papers-by-department/{department_id}:
+ * /statistics/statistics-by-department/{department_id}:
  *   get:
- *     summary: Get total number of scientific papers by department
+ *     summary: Get statistics for a department
  *     tags: [Statistics]
  *     parameters:
  *       - in: path
@@ -220,7 +220,7 @@ router.get(
  *         description: ID of the department
  *     responses:
  *       200:
- *         description: Total number of scientific papers retrieved successfully
+ *         description: Statistics for the department retrieved successfully
  *         content:
  *           application/json:
  *             schema:
@@ -232,73 +232,9 @@ router.get(
  *                 total_papers:
  *                   type: number
  *                   description: Total number of scientific papers
- *       500:
- *         description: Internal server error
- */
-router.get(
-  "/total-papers-by-department/:department_id",
-  statisticsController.getTotalPapersByDepartmentId
-);
-
-/**
- * @swagger
- * /statistics/total-views-by-department/{department_id}:
- *   get:
- *     summary: Get total views of scientific papers by department
- *     tags: [Statistics]
- *     parameters:
- *       - in: path
- *         name: department_id
- *         schema:
- *           type: string
- *         required: true
- *         description: ID of the department
- *     responses:
- *       200:
- *         description: Total views of scientific papers retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 department_id:
- *                   type: string
- *                   description: ID of the department
  *                 total_views:
  *                   type: number
  *                   description: Total views of scientific papers
- *       500:
- *         description: Internal server error
- */
-router.get(
-  "/total-views-by-department/:department_id",
-  statisticsController.getTotalViewsByDepartmentId
-);
-
-/**
- * @swagger
- * /statistics/total-downloads-by-department/{department_id}:
- *   get:
- *     summary: Get total downloads of scientific papers by department
- *     tags: [Statistics]
- *     parameters:
- *       - in: path
- *         name: department_id
- *         schema:
- *           type: string
- *         required: true
- *         description: ID of the department
- *     responses:
- *       200:
- *         description: Total downloads of scientific papers retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 department_id:
- *                   type: string
- *                   description: ID of the department
  *                 total_downloads:
  *                   type: number
  *                   description: Total downloads of scientific papers
@@ -306,8 +242,8 @@ router.get(
  *         description: Internal server error
  */
 router.get(
-  "/total-downloads-by-department/:department_id",
-  statisticsController.getTotalDownloadsByDepartmentId
+  "/statistics-by-department/:department_id",
+  statisticsController.getStatisticsByDepartmentId
 );
 
 /**

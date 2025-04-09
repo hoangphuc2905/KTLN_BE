@@ -150,84 +150,90 @@ const paperAuthorController = {
 
   getAllPaperAuthorsByTolalPointsAndTotalPapers: async (req, res) => {
     try {
-      console.log("Route /paperauthor/summary called");
-
-      const paperAuthors = await PaperAuthor.aggregate([
-        {
-          $project: {
-            user_id: 1,
-            author_name_vi: 1,
-            author_name_en: 1,
-            role: 1,
-            point: 1,
-          },
-        },
-        {
-          $group: {
-            _id: "$user_id",
-            author_name_vi: { $first: "$author_name_vi" },
-            author_name_en: { $first: "$author_name_en" },
-            role: { $first: "$role" },
-            total_papers: { $sum: 1 },
-            total_points: { $sum: "$point" },
-          },
-        },
-        // Lookup lecturer để lấy department
+      const result = await PaperAuthor.aggregate([
+        // 1. Join vào bảng lecturers
         {
           $lookup: {
             from: "lecturers",
-            localField: "_id",
+            localField: "user_id",
             foreignField: "lecturer_id",
-            as: "lecturer_info",
+            as: "lecturerInfo",
           },
         },
-        // Lookup student để lấy department (phòng trường hợp không có trong lecturer)
+        // 2. Join vào bảng students
         {
           $lookup: {
             from: "students",
-            localField: "_id",
+            localField: "user_id",
             foreignField: "student_id",
-            as: "student_info",
+            as: "studentInfo",
           },
         },
-        // Lấy department_id từ lecturer hoặc student
+        // 3. Lấy department từ lecturer hoặc student
         {
           $addFields: {
             department_id: {
               $ifNull: [
-                { $arrayElemAt: ["$lecturer_info.department", 0] },
-                { $arrayElemAt: ["$student_info.department", 0] },
+                { $arrayElemAt: ["$lecturerInfo.department", 0] },
+                { $arrayElemAt: ["$studentInfo.department", 0] },
               ],
             },
           },
         },
-        // Lookup từ department_id sang tên khoa
+        // 4. Join vào bảng scientificpapers để lấy thông tin bài báo
+        {
+          $lookup: {
+            from: "scientificpapers",
+            localField: "paper_id",
+            foreignField: "_id",
+            as: "paperInfo",
+          },
+        },
+        // 5. Lọc chỉ những bài đã được duyệt
+        {
+          $match: {
+            "paperInfo.status": "approved",
+          },
+        },
+        // 6. Nhóm theo department_id, dùng $addToSet để tránh đếm trùng paper
+        {
+          $group: {
+            _id: "$department_id",
+            unique_paper_ids: { $addToSet: "$paper_id" },
+            total_points: { $sum: "$point" },
+          },
+        },
+        // 7. Tính tổng số bài (sau khi loại trùng)
+        {
+          $addFields: {
+            total_papers: { $size: "$unique_paper_ids" },
+          },
+        },
+        // 8. Join vào bảng departments để lấy tên khoa
         {
           $lookup: {
             from: "departments",
-            localField: "department_id",
+            localField: "_id",
             foreignField: "_id",
-            as: "department_info",
+            as: "departmentInfo",
           },
         },
         {
-          $unwind: {
-            path: "$department_info",
-            preserveNullAndEmptyArrays: true,
+          $unwind: "$departmentInfo",
+        },
+        // 9. Format kết quả trả về
+        {
+          $project: {
+            _id: 0,
+            KHOA: "$departmentInfo.department_name",
+            TỔNG_BÀI: "$total_papers",
+            TỔNG_ĐIỂM: "$total_points",
           },
         },
         {
-          $sort: { total_points: -1 },
+          $sort: { TỔNG_BÀI: -1 }, // Sắp xếp theo số bài giảm dần
         },
       ]);
-
-      const result = paperAuthors.map((author, index) => ({
-        MÃ_TÁC_GIẢ: author._id,
-        TÁC_GIẢ: author.author_name_vi || author.author_name_en || "N/A",
-        KHOA: author.department_info?.department_name || "N/A",
-        TỔNG_BÀI: author.total_papers,
-        TỔNG_ĐIỂM: author.total_points,
-      }));
 
       res.status(200).json(result);
     } catch (error) {

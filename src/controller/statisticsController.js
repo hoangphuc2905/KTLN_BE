@@ -1,4 +1,9 @@
 const ScientificPaper = require("../models/ScientificPaper");
+const PaperView = require("../models/PaperViews");
+const PaperDownload = require("../models/PaperDownloads");
+const PaperAuthor = require("../models/PaperAuthor");
+const Lecturer = require("../models/Lecturer");
+const Student = require("../models/Student");
 
 const statisticsController = {
   getTotalPapersByAuthorId: async (req, res) => {
@@ -288,159 +293,77 @@ const statisticsController = {
     }
   },
 
-  getTotalPapersByDepartmentId: async (req, res) => {
+  getStatisticsByDepartmentId: async (req, res) => {
     try {
       const { department_id } = req.params;
 
-      const result = await ScientificPaper.aggregate([
-        {
-          $lookup: {
-            from: "paperauthors",
-            localField: "author",
-            foreignField: "_id",
-            as: "authorDetails",
-          },
-        },
-        {
-          $lookup: {
-            from: "departments",
-            localField: "authorDetails.department_id",
-            foreignField: "_id",
-            as: "departmentDetails",
-          },
-        },
-        {
-          $match: {
-            "departmentDetails._id": department_id,
-            status: "approved",
-          },
-        },
-        {
-          $count: "totalPapers",
-        },
-      ]);
+      // 1. Lấy tất cả student_id và lecturer_id thuộc khoa
+      const students = await Student.find({ department: department_id }).select(
+        "student_id"
+      );
+      const lecturers = await Lecturer.find({
+        department: department_id,
+      }).select("lecturer_id");
 
-      const totalPapers = result.length > 0 ? result[0].totalPapers : 0;
+      const userIds = [
+        ...students.map((s) => s.student_id.toString()),
+        ...lecturers.map((l) => l.lecturer_id.toString()),
+      ];
 
-      res.status(200).json({
-        department_id,
-        total_papers: totalPapers,
+      if (userIds.length === 0) {
+        return res.status(200).json({
+          department_id,
+          total_papers: 0,
+          total_views: 0,
+          total_downloads: 0,
+        });
+      }
+
+      // 2. Lấy tất cả paper_id của người dùng trong khoa từ bảng papers_users
+      const paperAuthors = await PaperAuthor.find({
+        user_id: { $in: userIds },
+      }).select("paper_id");
+
+      const paperIds = [
+        ...new Set(paperAuthors.map((p) => p.paper_id.toString())),
+      ]; // loại bỏ trùng
+
+      if (paperIds.length === 0) {
+        return res.status(200).json({
+          department_id,
+          total_papers: 0,
+          total_views: 0,
+          total_downloads: 0,
+        });
+      }
+
+      // 3. Đếm số lượng paper đã được duyệt (status = "approved")
+      const approvedPapers = await ScientificPaper.find({
+        _id: { $in: paperIds },
+        status: "approved",
+      }).select("_id");
+
+      const approvedPaperIds = approvedPapers.map((p) => p._id.toString());
+
+      // 4. Đếm lượt xem
+      const totalViews = await PaperView.countDocuments({
+        paper_id: { $in: approvedPaperIds },
       });
-    } catch (error) {
-      res.status(500).json({ message: error.message });
-    }
-  },
 
-  getTotalViewsByDepartmentId: async (req, res) => {
-    try {
-      const { department_id } = req.params;
+      // 5. Đếm lượt tải
+      const totalDownloads = await PaperDownload.countDocuments({
+        paper_id: { $in: approvedPaperIds },
+      });
 
-      const result = await ScientificPaper.aggregate([
-        {
-          $lookup: {
-            from: "paperviews",
-            localField: "_id",
-            foreignField: "paper_id",
-            as: "viewDetails",
-          },
-        },
-        {
-          $lookup: {
-            from: "paperauthors",
-            localField: "author",
-            foreignField: "_id",
-            as: "authorDetails",
-          },
-        },
-        {
-          $lookup: {
-            from: "departments",
-            localField: "authorDetails.department_id",
-            foreignField: "_id",
-            as: "departmentDetails",
-          },
-        },
-        {
-          $match: {
-            "departmentDetails._id": department_id,
-            status: "approved",
-          },
-        },
-        {
-          $unwind: "$viewDetails",
-        },
-        {
-          $group: {
-            _id: null,
-            totalViews: { $sum: 1 },
-          },
-        },
-      ]);
-
-      const totalViews = result.length > 0 ? result[0].totalViews : 0;
-
+      // 6. Trả kết quả
       res.status(200).json({
         department_id,
+        total_papers: approvedPaperIds.length,
         total_views: totalViews,
-      });
-    } catch (error) {
-      res.status(500).json({ message: error.message });
-    }
-  },
-
-  getTotalDownloadsByDepartmentId: async (req, res) => {
-    try {
-      const { department_id } = req.params;
-
-      const result = await ScientificPaper.aggregate([
-        {
-          $lookup: {
-            from: "paperdownloads",
-            localField: "_id",
-            foreignField: "paper_id",
-            as: "downloadDetails",
-          },
-        },
-        {
-          $lookup: {
-            from: "paperauthors",
-            localField: "author",
-            foreignField: "_id",
-            as: "authorDetails",
-          },
-        },
-        {
-          $lookup: {
-            from: "departments",
-            localField: "authorDetails.department_id",
-            foreignField: "_id",
-            as: "departmentDetails",
-          },
-        },
-        {
-          $match: {
-            "departmentDetails._id": department_id,
-            status: "approved",
-          },
-        },
-        {
-          $unwind: "$downloadDetails",
-        },
-        {
-          $group: {
-            _id: null,
-            totalDownloads: { $sum: 1 },
-          },
-        },
-      ]);
-
-      const totalDownloads = result.length > 0 ? result[0].totalDownloads : 0;
-
-      res.status(200).json({
-        department_id,
         total_downloads: totalDownloads,
       });
     } catch (error) {
+      console.error("Error in getStatisticsByDepartmentId:", error.message);
       res.status(500).json({ message: error.message });
     }
   },
