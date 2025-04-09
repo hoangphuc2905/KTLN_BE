@@ -225,6 +225,7 @@ const paperAuthorController = {
         {
           $project: {
             _id: 0,
+            DEPARTMENT_ID: "$_id",
             KHOA: "$departmentInfo.department_name",
             TỔNG_BÀI: "$total_papers",
             TỔNG_ĐIỂM: "$total_points",
@@ -252,6 +253,7 @@ const paperAuthorController = {
       if (!department) {
         return res.status(404).json({ message: "Department not found" });
       }
+
       // Tìm tất cả giảng viên và sinh viên thuộc khoa đó
       const lecturers = await Lecturer.find({
         department: department_id,
@@ -272,11 +274,24 @@ const paperAuthorController = {
           .json({ message: "No authors found for this department" });
       }
 
-      // Lấy danh sách tác giả thuộc khoa
+      // Lấy danh sách tác giả thuộc khoa với bài viết đã được duyệt
       const paperAuthors = await PaperAuthor.aggregate([
         {
           $match: {
             user_id: { $in: userIds }, // Lọc theo danh sách user_id
+          },
+        },
+        {
+          $lookup: {
+            from: "scientificpapers", // Join với bảng scientificpapers
+            localField: "paper_id",
+            foreignField: "_id",
+            as: "paperInfo",
+          },
+        },
+        {
+          $match: {
+            "paperInfo.status": "approved", // Chỉ lấy bài viết đã được duyệt
           },
         },
         {
