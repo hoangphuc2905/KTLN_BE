@@ -276,7 +276,7 @@ router.get("/statistics-for-all", statisticsController.getStatisticsForAll);
 
 /**
  * @swagger
- * /statistics/top3-most-viewed-and-downloaded-papers:
+ * /statistics/top5-most-viewed-and-downloaded-papers:
  *   get:
  *     summary: Get top 3 most viewed and downloaded scientific papers
  *     tags: [Statistics]
@@ -324,15 +324,15 @@ router.get("/statistics-for-all", statisticsController.getStatisticsForAll);
  *         description: Internal server error
  */
 router.get(
-  "/top3-most-viewed-and-downloaded-papers",
-  statisticsController.getTop3MostViewedAndDownloadedPapers
+  "/top5-most-viewed-and-downloaded-papers",
+  statisticsController.getTop5MostViewedAndDownloadedPapers
 );
 
 /**
  * @swagger
- * /statistics/top3-papers-by-department/{department_id}:
+ * /statistics/top5-papers-by-department/{department_id}:
  *   get:
- *     summary: Get top 3 papers by a department with the highest views and downloads
+ *     summary: Get top 5 papers by a department with the highest views and downloads
  *     tags: [Statistics]
  *     parameters:
  *       - in: path
@@ -343,7 +343,7 @@ router.get(
  *         description: ID of the department
  *     responses:
  *       200:
- *         description: Top 3 papers by the department retrieved successfully
+ *         description: Top 5 papers by the department retrieved successfully
  *         content:
  *           application/json:
  *             schema:
@@ -381,8 +381,8 @@ router.get(
  *         description: Internal server error
  */
 router.get(
-  "/top3-papers-by-department/:department_id",
-  statisticsController.getTop3MostViewedAndDownloadedPapersByDepartment
+  "/top5-papers-by-department/:department_id",
+  statisticsController.getTop5MostViewedAndDownloadedPapersByDepartment
 );
 
 /**
@@ -418,6 +418,314 @@ router.get(
 router.get(
   "/total-points-by-department/:department_id",
   statisticsController.getTotalPointsByDepartmentId
+);
+
+/**
+ * @swagger
+ * /statistics/by-all-group:
+ *   get:
+ *     summary: Get statistics grouped by article group
+ *     tags: [Statistics]
+ *     responses:
+ *       200:
+ *         description: Statistics by group retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   additionalProperties:
+ *                     type: number
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/by-all-group", statisticsController.getStatisticsByAllGroup);
+
+/**
+ * @swagger
+ * /statistics/top5-by-all-group:
+ *   get:
+ *     summary: Get statistics grouped by department
+ *     tags: [Statistics]
+ *     responses:
+ *       200:
+ *         description: Statistics by department retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   additionalProperties:
+ *                     type: number
+ *       500:
+ *         description: Internal server error
+ */
+router.get(
+  "/top5-by-all-group",
+  statisticsController.getStatisticsTop5ByAllDepartment
+);
+
+/**
+ * @swagger
+ * /statistics/top5-by-type:
+ *   get:
+ *     summary: Get top 5 types of papers by count
+ *     tags: [Statistics]
+ *     responses:
+ *       200:
+ *         description: Top 5 types by approved papers retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   additionalProperties:
+ *                     type: number
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/top5-by-type", statisticsController.getStatisticsTop5ByType);
+
+/**
+ * @swagger
+ * /statistics/group-by-department/{department_id}:
+ *   get:
+ *     summary: Get statistics grouped by article group for a specific department
+ *     tags: [Statistics]
+ *     parameters:
+ *       - in: path
+ *         name: department_id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the department
+ *     responses:
+ *       200:
+ *         description: Statistics by group for the department retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   additionalProperties:
+ *                     type: number
+ *       500:
+ *         description: Internal server error
+ */
+router.get(
+  "/group-by-department/:department_id",
+  statisticsController.getStatisticsByGroupByDepartment
+);
+/**
+ * @swagger
+ * /statistics/top5-authors-by-department/{department_id}:
+ *   get:
+ *     summary: Get top 5 authors by contribution points for a specific department
+ *     tags: [Statistics]
+ *     parameters:
+ *       - in: path
+ *         name: department_id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the department
+ *     responses:
+ *       200:
+ *         description: Top 5 authors by contribution points retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       author_id:
+ *                         type: string
+ *                       authorName:
+ *                         type: string
+ *                       totalPoints:
+ *                         type: number
+ *       500:
+ *         description: Internal server error
+ */
+router.get(
+  "/top5-authors-by-department/:department_id",
+  statisticsController.getTop5AuthorsByDepartment
+);
+
+/**
+ * @swagger
+ * /statistics/top5-by-type-by-department/{department_id}:
+ *   get:
+ *     summary: Get top 5 types of papers by count for a specific department
+ *     tags: [Statistics]
+ *     parameters:
+ *       - in: path
+ *         name: department_id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the department
+ *     responses:
+ *       200:
+ *         description: Top 5 types by approved papers for the department retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   additionalProperties:
+ *                     type: number
+ *       500:
+ *         description: Internal server error
+ */
+router.get(
+  "/top5-by-type-by-department/:department_id",
+  statisticsController.getStatisticsTop5ByTypeByDepartment
+);
+
+/**
+ * @swagger
+ * /statistics/group-by-user/{user_id}:
+ *   get:
+ *     summary: Get statistics grouped by article group for a specific user
+ *     tags: [Statistics]
+ *     parameters:
+ *       - in: path
+ *         name: user_id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the user
+ *     responses:
+ *       200:
+ *         description: Statistics by group for the user retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   additionalProperties:
+ *                     type: number
+ *       500:
+ *         description: Internal server error
+ */
+router.get(
+  "/group-by-user/:user_id",
+  statisticsController.getStatisticsByGroupByUser
+);
+
+/**
+ * @swagger
+ * /statistics/top5-papers-by-author/{author_id}:
+ *   get:
+ *     summary: Get top 5 papers by contribution points for a specific author
+ *     tags: [Statistics]
+ *     parameters:
+ *       - in: path
+ *         name: author_id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the author
+ *     responses:
+ *       200:
+ *         description: Top 5 papers by contribution points for the author retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       paper_id:
+ *                         type: string
+ *                       title:
+ *                         type: string
+ *                       totalPoints:
+ *                         type: number
+ *       500:
+ *         description: Internal server error
+ */
+router.get(
+  "/top5-papers-by-author/:author_id",
+  statisticsController.getTop5PapersByAuthor
+);
+
+/**
+ * @swagger
+ * /statistics/top5-paper-types-by-user/{user_id}:
+ *   get:
+ *     summary: Get top 5 paper types for a specific user
+ *     tags: [Statistics]
+ *     parameters:
+ *       - in: path
+ *         name: user_id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the user
+ *     responses:
+ *       200:
+ *         description: Top 5 paper types for the user retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       type:
+ *                         type: string
+ *                       count:
+ *                         type: number
+ *       404:
+ *         description: No paper types found for this user
+ *       500:
+ *         description: Internal server error
+ */
+router.get(
+  "/top5-paper-types-by-user/:user_id",
+  statisticsController.getTop5PaperTypesByUser
 );
 
 module.exports = router;

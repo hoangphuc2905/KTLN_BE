@@ -4,6 +4,10 @@ const PaperDownload = require("../models/PaperDownloads");
 const PaperAuthor = require("../models/PaperAuthor");
 const Lecturer = require("../models/Lecturer");
 const Student = require("../models/Student");
+const PaperGroup = require("../models/PaperGroup");
+const PaperType = require("../models/PaperType");
+const Department = require("../models/Department");
+const mongoose = require("mongoose");
 
 const statisticsController = {
   getTotalPapersByAuthorId: async (req, res) => {
@@ -203,6 +207,26 @@ const statisticsController = {
       const result = await ScientificPaper.aggregate([
         {
           $lookup: {
+            from: "paperauthors",
+            localField: "_id",
+            foreignField: "paper_id",
+            as: "authorDetails",
+          },
+        },
+        {
+          $unwind: {
+            path: "$authorDetails",
+            preserveNullAndEmptyArrays: false, // Bỏ qua các bài không có tác giả
+          },
+        },
+        {
+          $match: {
+            "authorDetails.user_id": author_id.toString(), // Lọc theo `author_id`
+            status: "approved", // Chỉ lấy các bài báo đã được duyệt
+          },
+        },
+        {
+          $lookup: {
             from: "paperviews",
             localField: "_id",
             foreignField: "paper_id",
@@ -218,33 +242,14 @@ const statisticsController = {
           },
         },
         {
-          $lookup: {
-            from: "paperauthors",
-            localField: "author",
-            foreignField: "_id",
-            as: "authorDetails",
-          },
-        },
-        {
-          $match: {
-            "authorDetails.user_id": author_id.toString(),
-            status: "approved",
-          },
-        },
-        {
-          $addFields: {
-            viewCount: { $size: "$viewDetails" },
-            downloadCount: { $size: "$downloadDetails" },
-            authorDetails: {
-              $filter: {
-                input: "$authorDetails", // Lọc danh sách tác giả
-                as: "author",
-                cond: { $eq: ["$$author.user_id", author_id.toString()] }, // Chỉ giữ tác giả có `user_id` khớp
-              },
-            },
-            contributionScore: {
-              $arrayElemAt: ["$authorDetails.point", 0], // Chỉ lấy điểm đóng góp của tác giả
-            },
+          $group: {
+            _id: "$_id", // Nhóm theo bài báo
+            title_vn: { $first: "$title_vn" },
+            title_en: { $first: "$title_en" },
+            viewCount: { $first: { $size: "$viewDetails" } }, // Đếm số lượt xem
+            downloadCount: { $first: { $size: "$downloadDetails" } }, // Đếm số lượt tải
+            contributionScore: { $sum: "$authorDetails.point" }, // Tính tổng điểm đóng góp của tác giả
+            authorDetails: { $push: "$authorDetails" }, // Lưu danh sách tác giả
           },
         },
         {
@@ -255,13 +260,14 @@ const statisticsController = {
         },
         {
           $project: {
-            paper_id: 1,
+            paper_id: "$_id",
             title_vn: 1,
             title_en: 1,
             viewCount: 1,
             downloadCount: 1,
             contributionScore: 1,
             authorDetails: {
+              user_id: 1,
               author_name_vi: 1,
               author_name_en: 1,
               role: 1,
@@ -483,7 +489,7 @@ const statisticsController = {
     }
   },
 
-  getTop3MostViewedAndDownloadedPapers: async (req, res) => {
+  getTop5MostViewedAndDownloadedPapers: async (req, res) => {
     try {
       const topPapers = await ScientificPaper.aggregate([
         {
@@ -520,7 +526,7 @@ const statisticsController = {
           $sort: { viewCount: -1, downloadCount: -1 }, // Sắp xếp theo lượt xem và tải xuống giảm dần
         },
         {
-          $limit: 3, // Giới hạn 5 bài
+          $limit: 5, // Giới hạn 5 bài
         },
         {
           $project: {
@@ -550,23 +556,23 @@ const statisticsController = {
       // Trả về kết quả
       res.status(200).json({
         message:
-          "Top 3 most viewed and downloaded scientific papers retrieved successfully",
+          "Top 5 most viewed and downloaded scientific papers retrieved successfully",
         papers: topPapers,
       });
     } catch (error) {
       console.error(
-        "Error in getTop3MostViewedAndDownloadedPapers:",
+        "Error in getTop5MostViewedAndDownloadedPapers:",
         error.message
       );
       res.status(500).json({
         message:
-          "An error occurred while retrieving the top 3 most viewed and downloaded scientific papers",
+          "An error occurred while retrieving the top 5 most viewed and downloaded scientific papers",
         error: error.message,
       });
     }
   },
 
-  getTop3MostViewedAndDownloadedPapersByDepartment: async (req, res) => {
+  getTop5MostViewedAndDownloadedPapersByDepartment: async (req, res) => {
     try {
       const { department_id } = req.params;
 
@@ -608,10 +614,10 @@ const statisticsController = {
           },
         },
         {
-          $sort: { viewCount: -1, downloadCount: -1 }, // Sắp xếp theo lượt xem và tải xuống giảm dần
+          $sort: { viewCount: -1, downloadCount: -1 },
         },
         {
-          $limit: 3, // Lấy top 3 bài
+          $limit: 5,
         },
         {
           $project: {
@@ -641,17 +647,709 @@ const statisticsController = {
       // Trả về kết quả
       res.status(200).json({
         message:
-          "Top 3 most viewed and downloaded scientific papers by department retrieved successfully",
+          "Top 5 most viewed and downloaded scientific papers by department retrieved successfully",
         papers: topPapers,
       });
     } catch (error) {
       console.error(
-        "Error in getTop3MostViewedAndDownloadedPapersByDepartment:",
+        "Error in getTop5MostViewedAndDownloadedPapersByDepartment:",
         error.message
       );
       res.status(500).json({
         message:
-          "An error occurred while retrieving the top 3 most viewed and downloaded scientific papers by department",
+          "An error occurred while retrieving the top 5 most viewed and downloaded scientific papers by department",
+        error: error.message,
+      });
+    }
+  },
+
+  getStatisticsByAllGroup: async (req, res) => {
+    try {
+      const groups = await PaperGroup.find({}, { group_name: 1, _id: 0 });
+
+      // Thực hiện thống kê
+      const statistics = await ScientificPaper.aggregate([
+        {
+          $lookup: {
+            from: "papergroups", // Tên collection chứa thông tin nhóm
+            localField: "article_group",
+            foreignField: "_id",
+            as: "groupDetails",
+          },
+        },
+        {
+          $unwind: {
+            path: "$groupDetails", // Tách mảng groupDetails thành các đối tượng riêng lẻ
+            preserveNullAndEmptyArrays: true, // Giữ lại các bài không có nhóm
+          },
+        },
+        {
+          $group: {
+            _id: "$groupDetails.group_name", // Nhóm theo tên nhóm
+            count: { $sum: 1 }, // Đếm số lượng bài trong mỗi nhóm
+          },
+        },
+        {
+          $project: {
+            _id: 0, // Loại bỏ _id khỏi kết quả
+            group: { $ifNull: ["$_id", "Unknown"] }, // Nếu không có nhóm, đặt là "Unknown"
+            count: 1, // Giữ lại trường count
+          },
+        },
+      ]);
+
+      // Chuyển đổi kết quả thành key-value
+      const result = {};
+      groups.forEach((group) => {
+        result[group.group_name] = 0; // Gán mặc định là 0 cho tất cả các nhóm
+      });
+      statistics.forEach((stat) => {
+        result[stat.group] = stat.count; // Cập nhật số lượng bài cho các nhóm có dữ liệu
+      });
+
+      // Trả về kết quả
+      res.status(200).json({
+        message: "Statistics by group retrieved successfully",
+        data: result,
+      });
+    } catch (error) {
+      console.error("Error in getStatisticsByGroup:", error.message);
+      res.status(500).json({
+        message: "An error occurred while retrieving statistics by group",
+        error: error.message,
+      });
+    }
+  },
+
+  getStatisticsTop5ByAllDepartment: async (req, res) => {
+    try {
+      // Lấy danh sách tất cả các khoa
+      const departments = await Department.find(
+        {},
+        { department_name: 1, _id: 1 }
+      );
+
+      // Thực hiện thống kê
+      const statistics = await ScientificPaper.aggregate([
+        {
+          $match: {
+            status: "approved", // Chỉ lấy các bài báo đã được duyệt
+          },
+        },
+        {
+          $addFields: {
+            departmentObjectId: { $toObjectId: "$department" }, // Chuyển `department` thành ObjectId
+          },
+        },
+        {
+          $group: {
+            _id: "$departmentObjectId", // Nhóm theo ObjectId của khoa
+            count: { $sum: 1 },
+          },
+        },
+        {
+          $lookup: {
+            from: "departments",
+            localField: "_id",
+            foreignField: "_id",
+            as: "departmentDetails",
+          },
+        },
+        {
+          $unwind: {
+            path: "$departmentDetails",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            department: {
+              $ifNull: ["$departmentDetails.department_name", "Unknown"],
+            },
+            count: 1,
+          },
+        },
+        {
+          $sort: { count: -1 }, // Sắp xếp theo số lượng bài giảm dần
+        },
+        {
+          $limit: 5, // Lấy top 5 khoa
+        },
+      ]);
+
+      // Chuyển đổi kết quả thành key-value
+      const result = {};
+      statistics.forEach((stat) => {
+        result[stat.department] = stat.count; // Cập nhật số lượng bài cho các khoa
+      });
+
+      // Trả về kết quả
+      res.status(200).json({
+        message: "Top 5 departments by approved papers retrieved successfully",
+        data: result,
+      });
+    } catch (error) {
+      console.error("Error in getStatisticsByAllDepartment:", error.message);
+      res.status(500).json({
+        message: "An error occurred while retrieving statistics by department",
+        error: error.message,
+      });
+    }
+  },
+
+  getStatisticsTop5ByType: async (req, res) => {
+    try {
+      // Lấy danh sách tất cả các loại bài báo
+      const types = await PaperType.find({}, { type_name: 1, _id: 0 });
+
+      // Thực hiện thống kê
+      const statistics = await ScientificPaper.aggregate([
+        {
+          $lookup: {
+            from: "papertypes", // Tên collection chứa thông tin loại bài báo
+            localField: "article_type",
+            foreignField: "_id",
+            as: "typeDetails",
+          },
+        },
+        {
+          $unwind: {
+            path: "$typeDetails", // Tách mảng typeDetails thành các đối tượng riêng lẻ
+            preserveNullAndEmptyArrays: true, // Giữ lại các bài không có loại
+          },
+        },
+        {
+          $group: {
+            _id: "$typeDetails.type_name", // Nhóm theo tên loại
+            count: { $sum: 1 }, // Đếm số lượng bài trong mỗi loại
+          },
+        },
+        {
+          $project: {
+            _id: 0, // Loại bỏ _id khỏi kết quả
+            type: { $ifNull: ["$_id", "Unknown"] }, // Nếu không có loại, đặt là "Unknown"
+            count: 1, // Giữ lại trường count
+          },
+        },
+        {
+          $sort: { count: -1 }, // Sắp xếp theo số lượng bài giảm dần
+        },
+        {
+          $limit: 5, // Lấy top 5 loại bài báo
+        },
+      ]);
+
+      // Chuyển đổi kết quả thành key-value
+      const result = {};
+      types.forEach((type) => {
+        result[type.type_name] = 0; // Gán mặc định là 0 cho tất cả các loại
+      });
+
+      statistics.forEach((stat) => {
+        result[stat.type] = stat.count; // Cập nhật số lượng bài cho các loại có dữ liệu
+      });
+
+      // Trả về kết quả
+      res.status(200).json({
+        message: "Top 5 types by approved papers retrieved successfully",
+        data: result,
+      });
+    } catch (error) {
+      console.error("Error in getStatisticsTop5ByType:", error.message);
+      res.status(500).json({
+        message: "An error occurred while retrieving statistics by type",
+        error: error.message,
+      });
+    }
+  },
+
+  // Thống kê của khoa
+  getStatisticsByGroupByDepartment: async (req, res) => {
+    try {
+      const { department_id } = req.params; // Lấy department_id từ request params
+
+      // Lấy danh sách tất cả các nhóm
+      const groups = await PaperGroup.find({}, { group_name: 1, _id: 0 });
+
+      // Thực hiện thống kê
+      const statistics = await ScientificPaper.aggregate([
+        {
+          $match: {
+            department: department_id, // Lọc theo khoa cụ thể
+            status: "approved", // Chỉ lấy các bài báo đã được duyệt
+          },
+        },
+        {
+          $lookup: {
+            from: "papergroups", // Tên collection chứa thông tin nhóm
+            localField: "article_group",
+            foreignField: "_id",
+            as: "groupDetails",
+          },
+        },
+        {
+          $unwind: {
+            path: "$groupDetails", // Tách mảng groupDetails thành các đối tượng riêng lẻ
+            preserveNullAndEmptyArrays: true, // Giữ lại các bài không có nhóm
+          },
+        },
+        {
+          $group: {
+            _id: "$groupDetails.group_name", // Nhóm theo tên nhóm
+            count: { $sum: 1 }, // Đếm số lượng bài trong mỗi nhóm
+          },
+        },
+        {
+          $project: {
+            _id: 0, // Loại bỏ _id khỏi kết quả
+            group: { $ifNull: ["$_id", "Unknown"] }, // Nếu không có nhóm, đặt là "Unknown"
+            count: 1, // Giữ lại trường count
+          },
+        },
+      ]);
+
+      // Chuyển đổi kết quả thành key-value
+      const result = {};
+      groups.forEach((group) => {
+        result[group.group_name] = 0; // Gán mặc định là 0 cho tất cả các nhóm
+      });
+      statistics.forEach((stat) => {
+        result[stat.group] = stat.count; // Cập nhật số lượng bài cho các nhóm có dữ liệu
+      });
+
+      // Trả về kết quả
+      res.status(200).json({
+        message: `Statistics by group for department ${department_id} retrieved successfully`,
+        data: result,
+      });
+    } catch (error) {
+      console.error(
+        "Error in getStatisticsByGroupByDepartment:",
+        error.message
+      );
+      res.status(500).json({
+        message:
+          "An error occurred while retrieving statistics by group for the department",
+        error: error.message,
+      });
+    }
+  },
+
+  getTop5AuthorsByDepartment: async (req, res) => {
+    try {
+      const { department_id } = req.params;
+
+      const topAuthors = await ScientificPaper.aggregate([
+        {
+          $match: { status: "approved" }, // Chỉ lấy bài đã duyệt
+        },
+        {
+          $lookup: {
+            from: "paperauthors",
+            localField: "_id",
+            foreignField: "paper_id",
+            as: "authors",
+          },
+        },
+        { $unwind: "$authors" },
+        {
+          $lookup: {
+            from: "lecturers",
+            localField: "authors.user_id",
+            foreignField: "lecturer_id",
+            as: "lecturerInfo",
+          },
+        },
+        {
+          $lookup: {
+            from: "students",
+            localField: "authors.user_id",
+            foreignField: "student_id",
+            as: "studentInfo",
+          },
+        },
+        {
+          $addFields: {
+            department: {
+              $cond: [
+                { $gt: [{ $size: "$lecturerInfo" }, 0] },
+                { $arrayElemAt: ["$lecturerInfo.department", 0] },
+                { $arrayElemAt: ["$studentInfo.department", 0] },
+              ],
+            },
+            authorName: {
+              $cond: [
+                { $gt: [{ $size: "$lecturerInfo" }, 0] },
+                { $arrayElemAt: ["$lecturerInfo.full_name", 0] },
+                { $arrayElemAt: ["$studentInfo.full_name", 0] },
+              ],
+            },
+            degree: {
+              $cond: [
+                { $gt: [{ $size: "$lecturerInfo" }, 0] },
+                { $arrayElemAt: ["$lecturerInfo.degree", 0] },
+                { $arrayElemAt: ["$studentInfo.degree", 0] },
+              ],
+            },
+            userId: "$authors.user_id",
+            point: "$authors.point",
+          },
+        },
+        {
+          $match: {
+            department: new mongoose.Types.ObjectId(department_id),
+          },
+        },
+        {
+          $group: {
+            _id: "$userId",
+            authorName: { $first: "$authorName" },
+            degree: { $first: "$degree" },
+            totalPoints: { $sum: "$point" },
+          },
+        },
+        { $sort: { totalPoints: -1 } },
+        { $limit: 5 },
+        {
+          $project: {
+            _id: 0,
+            author_id: "$_id",
+            authorName: 1,
+            degree: 1,
+            totalPoints: 1,
+          },
+        },
+      ]);
+
+      return res.status(200).json({
+        message: "Top 5 authors by point",
+        data: topAuthors,
+      });
+    } catch (error) {
+      console.error("Error getTop5AuthorsByDepartment:", error);
+      return res.status(500).json({ message: "Server error" });
+    }
+  },
+
+  getStatisticsTop5ByTypeByDepartment: async (req, res) => {
+    try {
+      const { department_id } = req.params; // Lấy department_id từ request params
+
+      // Lấy danh sách tất cả các loại bài báo
+      const types = await PaperType.find({}, { type_name: 1, _id: 0 });
+
+      // Thực hiện thống kê
+      const statistics = await ScientificPaper.aggregate([
+        {
+          $match: {
+            department: department_id, // Lọc theo khoa cụ thể
+            status: "approved", // Chỉ lấy các bài báo đã được duyệt
+          },
+        },
+        {
+          $lookup: {
+            from: "papertypes", // Tên collection chứa thông tin loại bài báo
+            localField: "article_type",
+            foreignField: "_id",
+            as: "typeDetails",
+          },
+        },
+        {
+          $unwind: {
+            path: "$typeDetails", // Tách mảng typeDetails thành các đối tượng riêng lẻ
+            preserveNullAndEmptyArrays: true, // Giữ lại các bài không có loại
+          },
+        },
+        {
+          $group: {
+            _id: "$typeDetails.type_name", // Nhóm theo tên loại
+            count: { $sum: 1 }, // Đếm số lượng bài trong mỗi loại
+          },
+        },
+        {
+          $project: {
+            _id: 0, // Loại bỏ _id khỏi kết quả
+            type: { $ifNull: ["$_id", "Unknown"] }, // Nếu không có loại, đặt là "Unknown"
+            count: 1, // Giữ lại trường count
+          },
+        },
+        {
+          $sort: { count: -1 }, // Sắp xếp theo số lượng bài giảm dần
+        },
+        {
+          $limit: 5, // Lấy top 5 loại bài báo
+        },
+      ]);
+
+      // Chuyển đổi kết quả thành key-value
+      const result = {};
+      types.forEach((type) => {
+        result[type.type_name] = 0; // Gán mặc định là 0 cho tất cả các loại
+      });
+
+      statistics.forEach((stat) => {
+        result[stat.type] = stat.count; // Cập nhật số lượng bài cho các loại có dữ liệu
+      });
+
+      // Trả về kết quả
+      res.status(200).json({
+        message: `Top 5 types by approved papers for department ${department_id} retrieved successfully`,
+        data: result,
+      });
+    } catch (error) {
+      console.error(
+        "Error in getStatisticsTop5ByTypeByDepartment:",
+        error.message
+      );
+      res.status(500).json({
+        message:
+          "An error occurred while retrieving statistics by type for the department",
+        error: error.message,
+      });
+    }
+  },
+
+  // Thống kê của giảng viên và sinh viên
+  getStatisticsByGroupByUser: async (req, res) => {
+    try {
+      const { user_id } = req.params; // Lấy user_id từ request params
+
+      // Lấy danh sách tất cả các nhóm bài báo
+      const groups = await PaperGroup.find({}, { group_name: 1, _id: 0 });
+
+      // Thực hiện thống kê
+      const statistics = await ScientificPaper.aggregate([
+        {
+          $lookup: {
+            from: "paperauthors", // Kết nối với bảng tác giả
+            localField: "_id",
+            foreignField: "paper_id",
+            as: "authorDetails",
+          },
+        },
+        {
+          $unwind: {
+            path: "$authorDetails", // Tách mảng authorDetails thành các đối tượng riêng lẻ
+            preserveNullAndEmptyArrays: false, // Bỏ qua các bài không có tác giả
+          },
+        },
+        {
+          $match: {
+            "authorDetails.user_id": user_id, // Lọc theo user_id
+            status: "approved", // Chỉ lấy các bài báo đã được duyệt
+          },
+        },
+        {
+          $lookup: {
+            from: "papergroups", // Kết nối với bảng nhóm bài báo
+            localField: "article_group",
+            foreignField: "_id",
+            as: "groupDetails",
+          },
+        },
+        {
+          $unwind: {
+            path: "$groupDetails", // Tách mảng groupDetails thành các đối tượng riêng lẻ
+            preserveNullAndEmptyArrays: true, // Giữ lại các bài không có nhóm
+          },
+        },
+        {
+          $group: {
+            _id: "$groupDetails.group_name", // Nhóm theo tên nhóm
+            count: { $sum: 1 }, // Đếm số lượng bài trong mỗi nhóm
+          },
+        },
+        {
+          $project: {
+            _id: 0, // Loại bỏ _id khỏi kết quả
+            group: { $ifNull: ["$_id", "Unknown"] }, // Nếu không có nhóm, đặt là "Unknown"
+            count: 1, // Giữ lại trường count
+          },
+        },
+      ]);
+
+      // Chuyển đổi kết quả thành key-value
+      const result = {};
+      groups.forEach((group) => {
+        result[group.group_name] = 0; // Gán mặc định là 0 cho tất cả các nhóm
+      });
+      statistics.forEach((stat) => {
+        result[stat.group] = stat.count; // Cập nhật số lượng bài cho các nhóm có dữ liệu
+      });
+
+      // Trả về kết quả
+      res.status(200).json({
+        message: `Statistics by group for user ${user_id} retrieved successfully`,
+        data: result,
+      });
+    } catch (error) {
+      console.error("Error in getStatisticsByGroupByUser:", error.message);
+      res.status(500).json({
+        message:
+          "An error occurred while retrieving statistics by group for the user",
+        error: error.message,
+      });
+    }
+  },
+
+  getTop5PapersByAuthor: async (req, res) => {
+    try {
+      const { author_id } = req.params;
+
+      const result = await ScientificPaper.aggregate([
+        {
+          $lookup: {
+            from: "paperauthors",
+            localField: "_id",
+            foreignField: "paper_id",
+            as: "authorDetails",
+          },
+        },
+        {
+          $unwind: {
+            path: "$authorDetails",
+            preserveNullAndEmptyArrays: false,
+          },
+        },
+        {
+          $match: {
+            "authorDetails.user_id": author_id.toString(),
+            status: "approved",
+          },
+        },
+        {
+          $group: {
+            _id: "$_id",
+            title_vn: { $first: "$title_vn" },
+            title_en: { $first: "$title_en" },
+            contributionScore: { $sum: "$authorDetails.point" }, // Tính tổng điểm đóng góp
+            authorDetails: { $push: "$authorDetails" }, // Lưu danh sách tác giả
+          },
+        },
+        {
+          $sort: { contributionScore: -1 }, // Sắp xếp theo điểm đóng góp giảm dần
+        },
+        {
+          $limit: 3, // Lấy top 3 bài
+        },
+        {
+          $project: {
+            paper_id: "$_id",
+            title_vn: 1,
+            title_en: 1,
+            contributionScore: 1,
+            authorDetails: {
+              user_id: 1,
+              author_name_vi: 1,
+              author_name_en: 1,
+              role: 1,
+              point: 1,
+            },
+          },
+        },
+      ]);
+
+      // Kiểm tra nếu không có bài nghiên cứu nào
+      if (!result || result.length === 0) {
+        return res.status(404).json({
+          message: "No papers found for this author",
+        });
+      }
+
+      // Trả về kết quả
+      res.status(200).json({
+        message: "Top 3 papers by author retrieved successfully",
+        papers: result,
+      });
+    } catch (error) {
+      console.error("Error in getTop3PapersByAuthor:", error.message);
+      res.status(500).json({
+        message:
+          "An error occurred while retrieving the top 3 papers by author",
+        error: error.message,
+      });
+    }
+  },
+
+  getTop5PaperTypesByUser: async (req, res) => {
+    try {
+      const { user_id } = req.params; // Lấy user_id từ request params
+
+      // Thực hiện thống kê
+      const statistics = await ScientificPaper.aggregate([
+        {
+          $lookup: {
+            from: "paperauthors", // Kết nối với bảng tác giả
+            localField: "_id",
+            foreignField: "paper_id",
+            as: "authorDetails",
+          },
+        },
+        {
+          $unwind: {
+            path: "$authorDetails", // Tách mảng authorDetails thành các đối tượng riêng lẻ
+            preserveNullAndEmptyArrays: false, // Bỏ qua các bài không có tác giả
+          },
+        },
+        {
+          $match: {
+            "authorDetails.user_id": user_id, // Lọc theo user_id
+            status: "approved", // Chỉ lấy các bài báo đã được duyệt
+          },
+        },
+        {
+          $lookup: {
+            from: "papertypes", // Kết nối với bảng loại bài báo
+            localField: "article_type",
+            foreignField: "_id",
+            as: "typeDetails",
+          },
+        },
+        {
+          $unwind: {
+            path: "$typeDetails", // Tách mảng typeDetails thành các đối tượng riêng lẻ
+            preserveNullAndEmptyArrays: true, // Giữ lại các bài không có loại
+          },
+        },
+        {
+          $group: {
+            _id: "$typeDetails.type_name", // Nhóm theo tên loại bài báo
+            count: { $sum: 1 }, // Đếm số lượng bài trong mỗi loại
+          },
+        },
+        {
+          $project: {
+            _id: 0, // Loại bỏ _id khỏi kết quả
+            type: { $ifNull: ["$_id", "Unknown"] }, // Nếu không có loại, đặt là "Unknown"
+            count: 1, // Giữ lại trường count
+          },
+        },
+        {
+          $sort: { count: -1 }, // Sắp xếp theo số lượng bài giảm dần
+        },
+        {
+          $limit: 5, // Lấy top 5 loại bài báo
+        },
+      ]);
+
+      // Kiểm tra nếu không có dữ liệu
+      if (!statistics || statistics.length === 0) {
+        return res.status(404).json({
+          message: "No paper types found for this user",
+        });
+      }
+
+      // Trả về kết quả
+      res.status(200).json({
+        message: `Top 5 paper types for user ${user_id} retrieved successfully`,
+        data: statistics,
+      });
+    } catch (error) {
+      console.error("Error in getTop5PaperTypesByUser:", error.message);
+      res.status(500).json({
+        message:
+          "An error occurred while retrieving top 5 paper types for the user",
         error: error.message,
       });
     }
