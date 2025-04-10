@@ -19,12 +19,13 @@ const paperDownloadRoutes = require("./src/routes/paperDownloadsRoutes");
 const messagesRoutes = require("./src/routes/messagesRoutes");
 const formulaRoutes = require("./src/routes/formulasRoutes");
 const attributeRoutes = require("./src/routes/attributesRoutes");
-const articleAIRoutes = require("./src/routes/articleAIRoutes");
 const statisticsRoutes = require("./src/routes/statisticsRoutes");
 const swaggerUi = require("swagger-ui-express");
 const fileUploadRoutes = require("./src/routes/fileUploadRoutes");
 const paperCollectionRoutes = require("./src/routes/paperCollectionRoutes");
 const authorScoreRoutes = require("./src/routes/authorScoreRoutes");
+const searchAIRoutes = require("./src/routes/searchAIRoutes");
+const articleAIRoutes = require("./src/routes/articleAIRoutes");
 const specs = require("./swagger");
 
 dotenv.config();
@@ -66,11 +67,12 @@ app.use("/scientificPapers", scientificPaperRoutes);
 app.use("/messages", messagesRoutes);
 app.use("/formulas", formulaRoutes);
 app.use("/attributes", attributeRoutes);
-app.use("/articlesAI", articleAIRoutes);
 app.use("/files", fileUploadRoutes);
 app.use("/papercollections", paperCollectionRoutes);
 app.use("/statistics", statisticsRoutes);
 app.use("/authorScores", authorScoreRoutes);
+app.use("/search", searchAIRoutes);
+app.use("/articlesAI", articleAIRoutes);    
 
 const PORT = process.env.PORT || 5000;
 

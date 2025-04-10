@@ -8,6 +8,7 @@ const Role = require("../models/Role");
 const Lecturer = require("../models/Lecturer");
 const messagesController = require("./messagesController");
 const { uploadFileToCloudinary } = require("./fileCloudinaryController");
+const { generateEmbedding } = require("../utils/embeddingUtils");
 
 const scientificPaperController = {
   createScientificPaper: async (req, res) => {
@@ -109,6 +110,17 @@ const scientificPaperController = {
           { status: () => ({ json: () => {} }) } // Giả lập res (không cần trả về gì)
         );
       }
+
+      // Tạo nội dung để sinh embedding
+      const contentToEmbed = `${scientificPaper.title_vn} ${scientificPaper.title_en} ${scientificPaper.summary} ${scientificPaper.keywords}`;
+      const embedding = await generateEmbedding(contentToEmbed);
+
+      // Cập nhật embedding vào bài báo
+      await ScientificPaper.updateOne(
+        { _id: scientificPaper._id },
+        { $set: { embedding } },
+        { session }
+      );
 
       // Commit transaction
       await session.commitTransaction();

@@ -114,6 +114,11 @@ const scientificPaperSchema = new Schema(
       type: String,
       required: true,
     },
+    embedding: {
+      type: [Number],
+      default: [],
+      required: false,
+    },
   },
   { timestamps: true }
 );
