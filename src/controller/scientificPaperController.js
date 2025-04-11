@@ -9,6 +9,10 @@ const Lecturer = require("../models/Lecturer");
 const messagesController = require("./messagesController");
 const { uploadFileToCloudinary } = require("./fileCloudinaryController");
 const { generateEmbedding } = require("../utils/embeddingUtils");
+const {
+  getAcademicYearRange,
+  getDefaultAcademicYear,
+} = require("../utils/dateUtils");
 
 const scientificPaperController = {
   createScientificPaper: async (req, res) => {
@@ -143,9 +147,20 @@ const scientificPaperController = {
     }
   },
 
+  // Backend logic for getAllScientificPapers
   getAllScientificPapers: async (req, res) => {
     try {
-      const scientificPapers = await ScientificPaper.find()
+      const { academicYear } = req.query; // Get academicYear from query string
+
+      let filter = {}; // Default filter is empty (fetch all papers)
+
+      // If academicYear is provided, calculate the date range and add to the filter
+      if (academicYear) {
+        const { startDate, endDate } = getAcademicYearRange(academicYear);
+        filter.createdAt = { $gte: startDate, $lte: endDate };
+      }
+
+      const scientificPapers = await ScientificPaper.find(filter)
         .populate("article_type")
         .populate("article_group")
         .populate({
@@ -157,8 +172,16 @@ const scientificPaperController = {
         })
         .populate("views")
         .populate("downloads");
-      res.status(200).json(scientificPapers);
+
+      res.status(200).json({
+        message: academicYear
+          ? `Scientific papers for academic year ${academicYear}`
+          : "All scientific papers retrieved successfully",
+        academicYear: academicYear || "All",
+        scientificPapers,
+      });
     } catch (error) {
+      console.error("Error fetching scientific papers:", error);
       res.status(500).json({ message: error.message });
     }
   },
@@ -189,6 +212,7 @@ const scientificPaperController = {
   getScientificPapersByAuthorId: async (req, res) => {
     try {
       const { userId } = req.params; // Lấy `userId` từ URL params
+      const { academicYear } = req.query; // Lấy `academicYear` từ query string
 
       // Tìm tất cả các tác giả có `user_id` khớp
       const authors = await PaperAuthor.find({ user_id: userId });
@@ -201,9 +225,17 @@ const scientificPaperController = {
 
       const authorIds = authors.map((author) => author._id);
 
-      const scientificPapers = await ScientificPaper.find({
-        author: { $in: authorIds },
-      })
+      // Bộ lọc mặc định theo `author`
+      let filter = { author: { $in: authorIds } };
+
+      // Nếu có năm học, thêm điều kiện lọc theo khoảng thời gian
+      if (academicYear) {
+        const { startDate, endDate } = getAcademicYearRange(academicYear);
+        filter.createdAt = { $gte: startDate, $lte: endDate };
+      }
+
+      // Tìm tất cả bài viết theo bộ lọc
+      const scientificPapers = await ScientificPaper.find(filter)
         .populate("article_type")
         .populate("article_group")
         .populate({
@@ -222,7 +254,13 @@ const scientificPaperController = {
           .json({ message: "No scientific papers found for this user_id." });
       }
 
-      res.status(200).json(scientificPapers);
+      res.status(200).json({
+        message: academicYear
+          ? `Scientific papers for user ${userId} in academic year ${academicYear}`
+          : `All scientific papers for user ${userId}`,
+        academicYear: academicYear || "All",
+        scientificPapers,
+      });
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
@@ -230,10 +268,19 @@ const scientificPaperController = {
 
   getScientificPapersByDepartment: async (req, res) => {
     try {
-      const { department } = req.params; // Lấy `department` từ URL params
+      const { department } = req.params;
+      const { academicYear } = req.query;
 
-      // Tìm tất cả bài viết có `department` khớp
-      const scientificPapers = await ScientificPaper.find({ department })
+      let filter = { department };
+
+      // Nếu có năm học, tính khoảng thời gian và thêm vào bộ lọc
+      if (academicYear) {
+        const { startDate, endDate } = getAcademicYearRange(academicYear);
+        filter.createdAt = { $gte: startDate, $lte: endDate };
+      }
+
+      // Tìm tất cả bài viết theo bộ lọc
+      const scientificPapers = await ScientificPaper.find(filter)
         .populate("article_type")
         .populate("article_group")
         .populate({
@@ -252,7 +299,13 @@ const scientificPaperController = {
           .json({ message: "No scientific papers found for this department." });
       }
 
-      res.status(200).json(scientificPapers);
+      res.status(200).json({
+        message: academicYear
+          ? `Scientific papers for department ${department} in academic year ${academicYear}`
+          : `All scientific papers for department ${department}`,
+        academicYear: academicYear || "All",
+        scientificPapers,
+      });
     } catch (error) {
       res.status(500).json({ message: error.message });
     }

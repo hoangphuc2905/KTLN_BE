@@ -135,69 +135,86 @@ router.post("/", scientificPaperController.createScientificPaper);
  *   get:
  *     summary: Get all scientific papers
  *     tags: [ScientificPapers]
+ *     parameters:
+ *       - in: query
+ *         name: academicYear
+ *         schema:
+ *           type: string
+ *           example: "2024-2025"
+ *         required: false
+ *         description: The academic year to filter scientific papers (e.g., "2024-2025")
  *     responses:
  *       200:
  *         description: List of scientific papers
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   paper_id:
- *                     type: string
- *                   article_type:
- *                     type: string
- *                   article_group:
- *                     type: string
- *                   title_vn:
- *                     type: string
- *                   title_en:
- *                     type: string
- *                   author_count:
- *                     type: number
- *                   author:
- *                     type: array
- *                     items:
- *                       type: string
- *                       description: IDs of authors
- *                   publish_date:
- *                     type: string
- *                     format: date
- *                   magazine_vi:
- *                     type: string
- *                   magazine_en:
- *                     type: string
- *                   magazine_type:
- *                     type: string
- *                   page:
- *                     type: number
- *                   issn_isbn:
- *                     type: string
- *                   file:
- *                     type: string
- *                   link:
- *                     type: string
- *                   doi:
- *                     type: string
- *                   status:
- *                     type: boolean
- *                   order_no:
- *                     type: boolean
- *                   featured:
- *                     type: boolean
- *                   keywords:
- *                     type: string
- *                   summary:
- *                     type: string
- *                   department:
- *                     type: string
- *                   cover_image:
- *                     type: string
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 academicYear:
+ *                   type: string
+ *                   example: "2024-2025"
+ *                 scientificPapers:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       paper_id:
+ *                         type: string
+ *                       article_type:
+ *                         type: string
+ *                       article_group:
+ *                         type: string
+ *                       title_vn:
+ *                         type: string
+ *                       title_en:
+ *                         type: string
+ *                       author_count:
+ *                         type: number
+ *                       author:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                           description: IDs of authors
+ *                       publish_date:
+ *                         type: string
+ *                         format: date
+ *                       magazine_vi:
+ *                         type: string
+ *                       magazine_en:
+ *                         type: string
+ *                       magazine_type:
+ *                         type: string
+ *                       page:
+ *                         type: number
+ *                       issn_isbn:
+ *                         type: string
+ *                       file:
+ *                         type: string
+ *                       link:
+ *                         type: string
+ *                       doi:
+ *                         type: string
+ *                       status:
+ *                         type: boolean
+ *                       order_no:
+ *                         type: boolean
+ *                       featured:
+ *                         type: boolean
+ *                       keywords:
+ *                         type: string
+ *                       summary:
+ *                         type: string
+ *                       department:
+ *                         type: string
+ *                       cover_image:
+ *                         type: string
+ *       500:
+ *         description: Server error
  */
 router.get("/", scientificPaperController.getAllScientificPapers);
-
 /**
  * @swagger
  * /scientificPapers/top5-newest:
@@ -357,79 +374,53 @@ router.get("/:id", scientificPaperController.getScientificPaperById);
  * @swagger
  * /scientificPapers/author/{userId}:
  *   get:
- *     summary: Get all scientific papers by user ID
+ *     summary: Get scientific papers by author ID
  *     tags: [ScientificPapers]
  *     parameters:
  *       - in: path
  *         name: userId
+ *         required: true
  *         schema:
  *           type: string
- *         required: true
- *         description: The user ID of the author
+ *         description: The ID of the author
+ *       - in: query
+ *         name: academicYear
+ *         schema:
+ *           type: string
+ *           example: "2024-2025"
+ *         required: false
+ *         description: The academic year to filter scientific papers (e.g., "2024-2025")
  *     responses:
  *       200:
- *         description: List of scientific papers for the user
+ *         description: List of scientific papers by the author
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   paper_id:
- *                     type: string
- *                   article_type:
- *                     type: string
- *                   article_group:
- *                     type: string
- *                   title_vn:
- *                     type: string
- *                   title_en:
- *                     type: string
- *                   author_count:
- *                     type: number
- *                   author:
- *                     type: array
- *                     items:
- *                       type: string
- *                       description: IDs of authors
- *                   publish_date:
- *                     type: string
- *                     format: date
- *                   magazine_vi:
- *                     type: string
- *                   magazine_en:
- *                     type: string
- *                   magazine_type:
- *                     type: string
- *                   page:
- *                     type: number
- *                   issn_isbn:
- *                     type: string
- *                   file:
- *                     type: string
- *                   link:
- *                     type: string
- *                   doi:
- *                     type: string
- *                   status:
- *                     type: boolean
- *                   order_no:
- *                     type: boolean
- *                   featured:
- *                     type: boolean
- *                   keywords:
- *                     type: string
- *                   summary:
- *                     type: string
- *                   department:
- *                     type: string
- *                   cover_image:
- *                     type: string
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 academicYear:
+ *                   type: string
+ *                   example: "2024-2025"
+ *                 scientificPapers:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       paper_id:
+ *                         type: string
+ *                       title_vn:
+ *                         type: string
+ *                       title_en:
+ *                         type: string
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
  *       404:
- *         description: No scientific papers found for this user
+ *         description: No scientific papers found for the given author ID
  *       500:
- *         description: Internal server error
+ *         description: Server error
  */
 router.get(
   "/author/:userId",
@@ -440,79 +431,51 @@ router.get(
  * @swagger
  * /scientificPapers/department/{department}:
  *   get:
- *     summary: Get all scientific papers by department
+ *     summary: Get scientific papers by department
  *     tags: [ScientificPapers]
  *     parameters:
  *       - in: path
  *         name: department
+ *         required: true
  *         schema:
  *           type: string
- *         required: true
- *         description: The department name
+ *         description: Department ID
+ *       - in: query
+ *         name: academicYear
+ *         schema:
+ *           type: string
+ *           example: "2024-2025"
+ *         required: false
+ *         description: The academic year to filter scientific papers (e.g., "2024-2025")
  *     responses:
  *       200:
- *         description: List of scientific papers for the department
+ *         description: List of scientific papers
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   paper_id:
- *                     type: string
- *                   article_type:
- *                     type: string
- *                   article_group:
- *                     type: string
- *                   title_vn:
- *                     type: string
- *                   title_en:
- *                     type: string
- *                   author_count:
- *                     type: number
- *                   author:
- *                     type: array
- *                     items:
- *                       type: string
- *                       description: IDs of authors
- *                   publish_date:
- *                     type: string
- *                     format: date
- *                   magazine_vi:
- *                     type: string
- *                   magazine_en:
- *                     type: string
- *                   magazine_type:
- *                     type: string
- *                   page:
- *                     type: number
- *                   issn_isbn:
- *                     type: string
- *                   file:
- *                     type: string
- *                   link:
- *                     type: string
- *                   doi:
- *                     type: string
- *                   status:
- *                     type: boolean
- *                   order_no:
- *                     type: boolean
- *                   featured:
- *                     type: boolean
- *                   keywords:
- *                     type: string
- *                   summary:
- *                     type: string
- *                   department:
- *                     type: string
- *                   cover_image:
- *                     type: string
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 academicYear:
+ *                   type: string
+ *                   example: "2024-2025"
+ *                 scientificPapers:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       paper_id:
+ *                         type: string
+ *                       title_en:
+ *                         type: string
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
  *       404:
- *         description: No scientific papers found for this department
+ *         description: No scientific papers found
  *       500:
- *         description: Internal server error
+ *         description: Server error
  */
 router.get(
   "/department/:department",

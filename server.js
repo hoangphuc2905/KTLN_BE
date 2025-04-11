@@ -25,6 +25,7 @@ const fileUploadRoutes = require("./src/routes/fileUploadRoutes");
 const paperCollectionRoutes = require("./src/routes/paperCollectionRoutes");
 const authorScoreRoutes = require("./src/routes/authorScoreRoutes");
 const searchAIRoutes = require("./src/routes/searchAIRoutes");
+const academicYearRoutes = require("./src/routes/academicYearRoutes");
 const articleAIRoutes = require("./src/routes/articleAIRoutes");
 const specs = require("./swagger");
 
@@ -72,7 +73,8 @@ app.use("/papercollections", paperCollectionRoutes);
 app.use("/statistics", statisticsRoutes);
 app.use("/authorScores", authorScoreRoutes);
 app.use("/search", searchAIRoutes);
-app.use("/articlesAI", articleAIRoutes);    
+app.use("/academic-years", academicYearRoutes);
+app.use("/articlesAI", articleAIRoutes);
 
 const PORT = process.env.PORT || 5000;
 
