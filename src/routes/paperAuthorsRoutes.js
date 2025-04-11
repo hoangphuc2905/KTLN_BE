@@ -87,27 +87,46 @@ router.get("/", paperAuthorController.getAllPaperAuthors);
  * @swagger
  * /paperauthor/statistics-by-department:
  *   get:
- *     summary: Get paper statistics grouped by department
+ *     summary: Get paper statistics grouped by department and filtered by academic year
  *     tags: [PaperAuthors]
+ *     parameters:
+ *       - in: query
+ *         name: academicYear
+ *         schema:
+ *           type: string
+ *           example: "2024-2025"
+ *         required: false
+ *         description: The academic year to filter paper statistics (e.g., "2024-2025")
  *     responses:
  *       200:
  *         description: Paper statistics grouped by department retrieved successfully
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   KHOA:
- *                     type: string
- *                     description: Department name
- *                   TỔNG_BÀI:
- *                     type: number
- *                     description: Total number of unique papers
- *                   TỔNG_ĐIỂM:
- *                     type: number
- *                     description: Total points of all papers in the department
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 academicYear:
+ *                   type: string
+ *                   example: "2024-2025"
+ *                 result:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       DEPARTMENT_ID:
+ *                         type: string
+ *                         description: Department ID
+ *                       KHOA:
+ *                         type: string
+ *                         description: Department name
+ *                       TỔNG_BÀI:
+ *                         type: number
+ *                         description: Total number of unique papers
+ *                       TỔNG_ĐIỂM:
+ *                         type: number
+ *                         description: Total points of all papers in the department
  *       500:
  *         description: Internal server error
  */
@@ -120,7 +139,7 @@ router.get(
  * @swagger
  * /paperauthor/department/{department_id}:
  *   get:
- *     summary: Get paper authors by department ID
+ *     summary: Get paper authors by department ID and optionally filter by academic year
  *     tags: [PaperAuthors]
  *     parameters:
  *       - in: path
@@ -129,26 +148,46 @@ router.get(
  *           type: string
  *         required: true
  *         description: The ID of the department
+ *       - in: query
+ *         name: academicYear
+ *         schema:
+ *           type: string
+ *           example: "2024-2025"
+ *         required: false
+ *         description: The academic year to filter paper authors (e.g., "2024-2025")
  *     responses:
  *       200:
  *         description: List of paper authors in the specified department
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   STT:
- *                     type: number
- *                   TÁC_GIẢ:
- *                     type: string
- *                   CHỨC_VỤ:
- *                     type: string
- *                   TỔNG_BÀI:
- *                     type: number
- *                   TỔNG_ĐIỂM:
- *                     type: number
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 academicYear:
+ *                   type: string
+ *                   example: "2024-2025"
+ *                 result:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       MÃ_TÁC_GIẢ:
+ *                         type: string
+ *                         description: Author ID
+ *                       TÁC_GIẢ:
+ *                         type: string
+ *                         description: Author name
+ *                       KHOA:
+ *                         type: string
+ *                         description: Department name
+ *                       TỔNG_BÀI:
+ *                         type: number
+ *                         description: Total number of papers
+ *                       TỔNG_ĐIỂM:
+ *                         type: number
+ *                         description: Total points of all papers
  *       404:
  *         description: No authors found for this department
  *       500:
@@ -158,6 +197,7 @@ router.get(
   "/department/:department_id",
   paperAuthorController.getPaperAuthorsByDepartment
 );
+
 
 /**
  * @swagger

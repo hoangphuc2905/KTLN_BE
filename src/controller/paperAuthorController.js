@@ -2,6 +2,10 @@ const PaperAuthor = require("../models/PaperAuthor");
 const Lecturer = require("../models/Lecturer");
 const Student = require("../models/Student");
 const Department = require("../models/Department");
+const {
+  getAcademicYearRange,
+  getDefaultAcademicYear,
+} = require("../utils/dateUtils");
 
 const paperAuthorController = {
   createPaperAuthor: async (req, res) => {
@@ -150,6 +154,17 @@ const paperAuthorController = {
 
   getAllPaperAuthorsByTolalPointsAndTotalPapers: async (req, res) => {
     try {
+      const { academicYear } = req.query; // Lấy `academicYear` từ query string
+
+      // Nếu có năm học, tính khoảng thời gian
+      let dateFilter = {};
+      if (academicYear) {
+        const { startDate, endDate } = getAcademicYearRange(academicYear);
+        dateFilter = {
+          "paperInfo.createdAt": { $gte: startDate, $lte: endDate },
+        };
+      }
+
       const result = await PaperAuthor.aggregate([
         // 1. Join vào bảng lecturers
         {
@@ -189,10 +204,11 @@ const paperAuthorController = {
             as: "paperInfo",
           },
         },
-        // 5. Lọc chỉ những bài đã được duyệt
+        // 5. Lọc chỉ những bài đã được duyệt và theo năm học (nếu có)
         {
           $match: {
             "paperInfo.status": "approved",
+            ...dateFilter, // Áp dụng bộ lọc theo năm học (nếu có)
           },
         },
         // 6. Nhóm theo department_id, dùng $addToSet để tránh đếm trùng paper
@@ -236,7 +252,13 @@ const paperAuthorController = {
         },
       ]);
 
-      res.status(200).json(result);
+      res.status(200).json({
+        message: academicYear
+          ? `Statistics for academic year ${academicYear}`
+          : "Statistics for all academic years",
+        academicYear: academicYear || "All",
+        result,
+      });
     } catch (error) {
       console.error("Error:", error);
       res.status(500).json({ message: error.message });
@@ -246,7 +268,9 @@ const paperAuthorController = {
   getPaperAuthorsByDepartment: async (req, res) => {
     try {
       const { department_id } = req.params; // Lấy department_id từ URL
+      const { academicYear } = req.query; // Lấy `academicYear` từ query string
 
+      // Tìm thông tin khoa
       const department = await Department.findById(department_id).select(
         "department_name"
       );
@@ -274,6 +298,15 @@ const paperAuthorController = {
           .json({ message: "No authors found for this department" });
       }
 
+      // Nếu có năm học, tính khoảng thời gian
+      let dateFilter = {};
+      if (academicYear) {
+        const { startDate, endDate } = getAcademicYearRange(academicYear);
+        dateFilter = {
+          "paperInfo.createdAt": { $gte: startDate, $lte: endDate },
+        };
+      }
+
       // Lấy danh sách tác giả thuộc khoa với bài viết đã được duyệt
       const paperAuthors = await PaperAuthor.aggregate([
         {
@@ -292,6 +325,7 @@ const paperAuthorController = {
         {
           $match: {
             "paperInfo.status": "approved", // Chỉ lấy bài viết đã được duyệt
+            ...dateFilter, // Áp dụng bộ lọc theo năm học (nếu có)
           },
         },
         {
@@ -309,15 +343,13 @@ const paperAuthorController = {
         },
       ]);
 
-      console.log("Filtered Paper Authors by Department:", paperAuthors);
-
       if (!paperAuthors || paperAuthors.length === 0) {
         return res
           .status(404)
           .json({ message: "No authors found for this department" });
       }
 
-      const result = paperAuthors.map((author, index) => ({
+      const result = paperAuthors.map((author) => ({
         MÃ_TÁC_GIẢ: author._id,
         TÁC_GIẢ: author.author_name_vi || author.author_name_en || "N/A",
         KHOA: department.department_name || "N/A",
@@ -325,7 +357,13 @@ const paperAuthorController = {
         TỔNG_ĐIỂM: author.total_points,
       }));
 
-      res.status(200).json(result);
+      res.status(200).json({
+        message: academicYear
+          ? `Authors in department ${department.department_name} for academic year ${academicYear}`
+          : `Authors in department ${department.department_name}`,
+        academicYear: academicYear || "All",
+        result,
+      });
     } catch (error) {
       console.error("Error:", error);
       res.status(500).json({ message: error.message });
