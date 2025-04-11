@@ -8,11 +8,23 @@ const PaperGroup = require("../models/PaperGroup");
 const PaperType = require("../models/PaperType");
 const Department = require("../models/Department");
 const mongoose = require("mongoose");
+const {
+  getAcademicYearRange,
+  getDefaultAcademicYear,
+} = require("../utils/dateUtils");
 
 const statisticsController = {
   getTotalPapersByAuthorId: async (req, res) => {
     try {
-      const { author_id } = req.params;
+      const { author_id } = req.params; // Lấy `author_id` từ URL params
+      const { academicYear } = req.query; // Lấy `academicYear` từ query string
+
+      // Nếu có năm học, tính khoảng thời gian
+      let dateFilter = {};
+      if (academicYear) {
+        const { startDate, endDate } = getAcademicYearRange(academicYear);
+        dateFilter = { createdAt: { $gte: startDate, $lte: endDate } };
+      }
 
       const result = await ScientificPaper.aggregate([
         {
@@ -27,6 +39,7 @@ const statisticsController = {
           $match: {
             "authorDetails.user_id": author_id.toString(),
             status: "approved",
+            ...dateFilter, // Áp dụng bộ lọc theo năm học (nếu có)
           },
         },
         {
@@ -38,6 +51,7 @@ const statisticsController = {
 
       res.status(200).json({
         author_id,
+        academicYear: academicYear || "All",
         total_papers: totalPapers,
       });
     } catch (error) {
@@ -48,6 +62,16 @@ const statisticsController = {
   getTotalViewsByAuthorId: async (req, res) => {
     try {
       const { author_id } = req.params;
+      const { academicYear } = req.query; // Lấy `academicYear` từ query string
+
+      // Nếu có năm học, tính khoảng thời gian
+      let dateFilter = {};
+      if (academicYear) {
+        const { startDate, endDate } = getAcademicYearRange(academicYear);
+        dateFilter = {
+          "viewDetails.createdAt": { $gte: startDate, $lte: endDate },
+        };
+      }
 
       const result = await ScientificPaper.aggregate([
         {
@@ -70,6 +94,7 @@ const statisticsController = {
           $match: {
             "authorDetails.user_id": author_id.toString(),
             status: "approved",
+            ...dateFilter, // Áp dụng bộ lọc theo năm học (nếu có)
           },
         },
         {
@@ -87,6 +112,7 @@ const statisticsController = {
 
       res.status(200).json({
         author_id,
+        academicYear: academicYear || "All",
         total_views: totalViews,
       });
     } catch (error) {
@@ -97,6 +123,16 @@ const statisticsController = {
   getTotalDownloadsByAuthorId: async (req, res) => {
     try {
       const { author_id } = req.params;
+      const { academicYear } = req.query; // Lấy `academicYear` từ query string
+
+      // Nếu có năm học, tính khoảng thời gian
+      let dateFilter = {};
+      if (academicYear) {
+        const { startDate, endDate } = getAcademicYearRange(academicYear);
+        dateFilter = {
+          "downloadDetails.createdAt": { $gte: startDate, $lte: endDate },
+        };
+      }
 
       const result = await ScientificPaper.aggregate([
         {
@@ -119,6 +155,7 @@ const statisticsController = {
           $match: {
             "authorDetails.user_id": author_id.toString(),
             status: "approved",
+            ...dateFilter, // Áp dụng bộ lọc theo năm học (nếu có)
           },
         },
         {
@@ -136,6 +173,7 @@ const statisticsController = {
 
       res.status(200).json({
         author_id,
+        academicYear: academicYear || "All",
         total_downloads: totalDownloads,
       });
     } catch (error) {
@@ -145,7 +183,17 @@ const statisticsController = {
 
   getTotalPointByAuthorId: async (req, res) => {
     try {
-      const { author_id } = req.params;
+      const { author_id } = req.params; // Lấy `author_id` từ URL params
+      const { academicYear } = req.query; // Lấy `academicYear` từ query string
+
+      // Nếu có năm học, tính khoảng thời gian
+      let dateFilter = {};
+      if (academicYear) {
+        const { startDate, endDate } = getAcademicYearRange(academicYear);
+        dateFilter = {
+          "authorDetails.createdAt": { $gte: startDate, $lte: endDate },
+        };
+      }
 
       const result = await ScientificPaper.aggregate([
         {
@@ -160,6 +208,7 @@ const statisticsController = {
           $match: {
             "authorDetails.user_id": author_id.toString(),
             status: "approved",
+            ...dateFilter, // Áp dụng bộ lọc theo năm học (nếu có)
           },
         },
         {
@@ -189,10 +238,11 @@ const statisticsController = {
       // Trả về kết quả
       res.status(200).json({
         author_id,
+        academicYear: academicYear || "All",
         total_points: totalPoints,
       });
     } catch (error) {
-      console.error("Error in getTotalContributionByAuthorId:", error.message);
+      console.error("Error in getTotalPointByAuthorId:", error.message);
       res.status(500).json({
         message: "An error occurred while retrieving the total points",
         error: error.message,
@@ -200,9 +250,17 @@ const statisticsController = {
     }
   },
 
-  getTop3PapersByAuthorId: async (req, res) => {
+  getTop5PapersByAuthorId: async (req, res) => {
     try {
       const { author_id } = req.params;
+      const { academicYear } = req.query; // Lấy `academicYear` từ query string
+
+      // Nếu có năm học, tính khoảng thời gian
+      let dateFilter = {};
+      if (academicYear) {
+        const { startDate, endDate } = getAcademicYearRange(academicYear);
+        dateFilter = { createdAt: { $gte: startDate, $lte: endDate } };
+      }
 
       const result = await ScientificPaper.aggregate([
         {
@@ -223,6 +281,7 @@ const statisticsController = {
           $match: {
             "authorDetails.user_id": author_id.toString(), // Lọc theo `author_id`
             status: "approved", // Chỉ lấy các bài báo đã được duyệt
+            ...dateFilter, // Áp dụng bộ lọc theo năm học (nếu có)
           },
         },
         {
@@ -242,21 +301,36 @@ const statisticsController = {
           },
         },
         {
+          $addFields: {
+            viewCount: { $size: "$viewDetails" }, // Tính số lượt xem
+            downloadCount: { $size: "$downloadDetails" }, // Tính số lượt tải
+          },
+        },
+        {
           $group: {
             _id: "$_id", // Nhóm theo bài báo
             title_vn: { $first: "$title_vn" },
             title_en: { $first: "$title_en" },
-            viewCount: { $first: { $size: "$viewDetails" } }, // Đếm số lượt xem
-            downloadCount: { $first: { $size: "$downloadDetails" } }, // Đếm số lượt tải
+            viewCount: { $first: "$viewCount" }, // Lấy số lượt xem
+            downloadCount: { $first: "$downloadCount" }, // Lấy số lượt tải
             contributionScore: { $sum: "$authorDetails.point" }, // Tính tổng điểm đóng góp của tác giả
             authorDetails: { $push: "$authorDetails" }, // Lưu danh sách tác giả
           },
         },
         {
-          $sort: { contributionScore: -1 }, // Sắp xếp theo điểm đóng góp giảm dần
+          $addFields: {
+            totalScore: {
+              $add: ["$contributionScore", "$viewCount", "$downloadCount"], // Tổng điểm của 3 tiêu chí
+            },
+          },
         },
         {
-          $limit: 3, // Lấy top 3 bài
+          $sort: {
+            totalScore: -1, // Sắp xếp theo tổng điểm giảm dần
+          },
+        },
+        {
+          $limit: 5, // Lấy top 5 bài
         },
         {
           $project: {
@@ -266,6 +340,7 @@ const statisticsController = {
             viewCount: 1,
             downloadCount: 1,
             contributionScore: 1,
+            totalScore: 1, // Bao gồm tổng điểm trong kết quả
             authorDetails: {
               user_id: 1,
               author_name_vi: 1,
@@ -286,14 +361,15 @@ const statisticsController = {
 
       // Trả về kết quả
       res.status(200).json({
-        message: "Top 3 papers by author retrieved successfully",
+        message: "Top 5 papers by author retrieved successfully",
+        academicYear: academicYear || "All",
         papers: result,
       });
     } catch (error) {
-      console.error("Error in getTop3PapersByAuthor:", error.message);
+      console.error("Error in getTop5PapersByAuthorId:", error.message);
       res.status(500).json({
         message:
-          "An error occurred while retrieving the top 3 papers by author",
+          "An error occurred while retrieving the top 5 papers by author",
         error: error.message,
       });
     }
@@ -1193,9 +1269,17 @@ const statisticsController = {
     }
   },
 
-  getTop5PapersByAuthor: async (req, res) => {
+  getTop5PapersByPointByUser: async (req, res) => {
     try {
       const { author_id } = req.params;
+      const { academicYear } = req.query; // Lấy `academicYear` từ query string
+
+      // Nếu có năm học, tính khoảng thời gian
+      let dateFilter = {};
+      if (academicYear) {
+        const { startDate, endDate } = getAcademicYearRange(academicYear);
+        dateFilter = { createdAt: { $gte: startDate, $lte: endDate } };
+      }
 
       const result = await ScientificPaper.aggregate([
         {
@@ -1216,6 +1300,7 @@ const statisticsController = {
           $match: {
             "authorDetails.user_id": author_id.toString(),
             status: "approved",
+            ...dateFilter, // Áp dụng bộ lọc theo năm học (nếu có)
           },
         },
         {
@@ -1231,7 +1316,7 @@ const statisticsController = {
           $sort: { contributionScore: -1 }, // Sắp xếp theo điểm đóng góp giảm dần
         },
         {
-          $limit: 3, // Lấy top 3 bài
+          $limit: 5, // Lấy top 5 bài
         },
         {
           $project: {
@@ -1259,14 +1344,15 @@ const statisticsController = {
 
       // Trả về kết quả
       res.status(200).json({
-        message: "Top 3 papers by author retrieved successfully",
+        message: "Top 5 papers by author retrieved successfully",
+        academicYear: academicYear || "All",
         papers: result,
       });
     } catch (error) {
-      console.error("Error in getTop3PapersByAuthor:", error.message);
+      console.error("Error in getTop5PapersByPointByUser:", error.message);
       res.status(500).json({
         message:
-          "An error occurred while retrieving the top 3 papers by author",
+          "An error occurred while retrieving the top 5 papers by author",
         error: error.message,
       });
     }

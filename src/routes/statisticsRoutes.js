@@ -6,18 +6,25 @@ const statisticsController = require("../controller/statisticsController");
  * @swagger
  * /statistics/total-by-author/{author_id}:
  *   get:
- *     summary: Get total number of scientific papers by an author
+ *     summary: Get total number of approved papers by author ID, optionally filtered by academic year
  *     tags: [Statistics]
  *     parameters:
  *       - in: path
  *         name: author_id
+ *         required: true
  *         schema:
  *           type: string
- *         required: true
- *         description: ID of the author
+ *         description: The ID of the author
+ *       - in: query
+ *         name: academicYear
+ *         schema:
+ *           type: string
+ *           example: "2024-2025"
+ *         required: false
+ *         description: The academic year to filter papers (e.g., "2024-2025")
  *     responses:
  *       200:
- *         description: Total number of scientific papers retrieved successfully
+ *         description: Total number of approved papers retrieved successfully
  *         content:
  *           application/json:
  *             schema:
@@ -25,10 +32,14 @@ const statisticsController = require("../controller/statisticsController");
  *               properties:
  *                 author_id:
  *                   type: string
- *                   description: ID of the author
+ *                   description: The ID of the author
+ *                 academicYear:
+ *                   type: string
+ *                   description: The academic year filter applied
+ *                   example: "2024-2025"
  *                 total_papers:
  *                   type: number
- *                   description: Total number of scientific papers
+ *                   description: Total number of approved papers
  *       500:
  *         description: Internal server error
  */
@@ -41,18 +52,25 @@ router.get(
  * @swagger
  * /statistics/total-views-by-author/{author_id}:
  *   get:
- *     summary: Get total views of scientific papers by an author
+ *     summary: Get total number of views by author ID, optionally filtered by academic year
  *     tags: [Statistics]
  *     parameters:
  *       - in: path
  *         name: author_id
+ *         required: true
  *         schema:
  *           type: string
- *         required: true
- *         description: ID of the author
+ *         description: The ID of the author
+ *       - in: query
+ *         name: academicYear
+ *         schema:
+ *           type: string
+ *           example: "2024-2025"
+ *         required: false
+ *         description: The academic year to filter views (e.g., "2024-2025")
  *     responses:
  *       200:
- *         description: Total views of scientific papers retrieved successfully
+ *         description: Total number of views retrieved successfully
  *         content:
  *           application/json:
  *             schema:
@@ -60,10 +78,14 @@ router.get(
  *               properties:
  *                 author_id:
  *                   type: string
- *                   description: ID of the author
+ *                   description: The ID of the author
+ *                 academicYear:
+ *                   type: string
+ *                   description: The academic year filter applied
+ *                   example: "2024-2025"
  *                 total_views:
  *                   type: number
- *                   description: Total views of the author's scientific papers
+ *                   description: Total number of views
  *       500:
  *         description: Internal server error
  */
@@ -76,15 +98,22 @@ router.get(
  * @swagger
  * /statistics/total-downloads-by-author/{author_id}:
  *   get:
- *     summary: Get total downloads of scientific papers by an author
+ *     summary: Get total downloads of scientific papers by an author, optionally filtered by academic year
  *     tags: [Statistics]
  *     parameters:
  *       - in: path
  *         name: author_id
+ *         required: true
  *         schema:
  *           type: string
- *         required: true
- *         description: ID of the author
+ *         description: The ID of the author
+ *       - in: query
+ *         name: academicYear
+ *         schema:
+ *           type: string
+ *           example: "2024-2025"
+ *         required: false
+ *         description: The academic year to filter downloads (e.g., "2024-2025")
  *     responses:
  *       200:
  *         description: Total downloads of scientific papers retrieved successfully
@@ -95,7 +124,11 @@ router.get(
  *               properties:
  *                 author_id:
  *                   type: string
- *                   description: ID of the author
+ *                   description: The ID of the author
+ *                 academicYear:
+ *                   type: string
+ *                   description: The academic year filter applied
+ *                   example: "2024-2025"
  *                 total_downloads:
  *                   type: number
  *                   description: Total downloads of the author's scientific papers
@@ -109,9 +142,9 @@ router.get(
 
 /**
  * @swagger
- * /statistics/top3-papers-by-author/{author_id}:
+ * /statistics/top5-papers-by-author/{author_id}:
  *   get:
- *     summary: Get top 3 papers by an author with the highest views, downloads, and contribution score
+ *     summary: Get top 5 papers by an author with the highest views, downloads, and contribution score, optionally filtered by academic year
  *     tags: [Statistics]
  *     parameters:
  *       - in: path
@@ -120,9 +153,16 @@ router.get(
  *           type: string
  *         required: true
  *         description: ID of the author
+ *       - in: query
+ *         name: academicYear
+ *         schema:
+ *           type: string
+ *           example: "2024-2025"
+ *         required: false
+ *         description: The academic year to filter papers (e.g., "2024-2025")
  *     responses:
  *       200:
- *         description: Top 3 papers by the author retrieved successfully
+ *         description: Top 5 papers by the author retrieved successfully
  *         content:
  *           application/json:
  *             schema:
@@ -130,6 +170,10 @@ router.get(
  *               properties:
  *                 message:
  *                   type: string
+ *                 academicYear:
+ *                   type: string
+ *                   description: The academic year filter applied
+ *                   example: "2024-2025"
  *                 papers:
  *                   type: array
  *                   items:
@@ -152,6 +196,8 @@ router.get(
  *                         items:
  *                           type: object
  *                           properties:
+ *                             user_id:
+ *                               type: string
  *                             author_name_vi:
  *                               type: string
  *                             author_name_en:
@@ -166,8 +212,8 @@ router.get(
  *         description: Internal server error
  */
 router.get(
-  "/top3-papers-by-author/:author_id",
-  statisticsController.getTop3PapersByAuthorId
+  "/top5-papers-by-author/:author_id",
+  statisticsController.getTop5PapersByAuthorId
 );
 
 /**
@@ -646,9 +692,9 @@ router.get(
 
 /**
  * @swagger
- * /statistics/top5-papers-by-author/{author_id}:
+ * /statistics/top5-papers-points-by-author/{author_id}:
  *   get:
- *     summary: Get top 5 papers by contribution points for a specific author
+ *     summary: Get top 5 papers by contribution points for a specific author, optionally filtered by academic year
  *     tags: [Statistics]
  *     parameters:
  *       - in: path
@@ -657,6 +703,13 @@ router.get(
  *         schema:
  *           type: string
  *         description: The ID of the author
+ *       - in: query
+ *         name: academicYear
+ *         schema:
+ *           type: string
+ *           example: "2024-2025"
+ *         required: false
+ *         description: The academic year to filter papers (e.g., "2024-2025")
  *     responses:
  *       200:
  *         description: Top 5 papers by contribution points for the author retrieved successfully
@@ -667,23 +720,46 @@ router.get(
  *               properties:
  *                 message:
  *                   type: string
- *                 data:
+ *                 academicYear:
+ *                   type: string
+ *                   description: The academic year filter applied
+ *                   example: "2024-2025"
+ *                 papers:
  *                   type: array
  *                   items:
  *                     type: object
  *                     properties:
  *                       paper_id:
  *                         type: string
- *                       title:
+ *                       title_vn:
  *                         type: string
- *                       totalPoints:
+ *                       title_en:
+ *                         type: string
+ *                       contributionScore:
  *                         type: number
+ *                       authorDetails:
+ *                         type: array
+ *                         items:
+ *                           type: object
+ *                           properties:
+ *                             user_id:
+ *                               type: string
+ *                             author_name_vi:
+ *                               type: string
+ *                             author_name_en:
+ *                               type: string
+ *                             role:
+ *                               type: string
+ *                             point:
+ *                               type: number
+ *       404:
+ *         description: No papers found for this author
  *       500:
  *         description: Internal server error
  */
 router.get(
-  "/top5-papers-by-author/:author_id",
-  statisticsController.getTop5PapersByAuthor
+  "/top5-papers-points-by-author/:author_id",
+  statisticsController.getTop5PapersByPointByUser
 );
 
 /**
