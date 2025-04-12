@@ -1187,9 +1187,17 @@ const statisticsController = {
   },
 
   // Thống kê của giảng viên và sinh viên
-  getStatisticsByGroupByUser: async (req, res) => {
+  getPaperGroupsByUser: async (req, res) => {
     try {
       const { user_id } = req.params; // Lấy user_id từ request params
+      const { academicYear } = req.query; // Lấy `academicYear` từ query string
+
+      // Nếu có năm học, tính khoảng thời gian
+      let dateFilter = {};
+      if (academicYear) {
+        const { startDate, endDate } = getAcademicYearRange(academicYear);
+        dateFilter = { createdAt: { $gte: startDate, $lte: endDate } };
+      }
 
       // Lấy danh sách tất cả các nhóm bài báo
       const groups = await PaperGroup.find({}, { group_name: 1, _id: 0 });
@@ -1214,6 +1222,7 @@ const statisticsController = {
           $match: {
             "authorDetails.user_id": user_id, // Lọc theo user_id
             status: "approved", // Chỉ lấy các bài báo đã được duyệt
+            ...dateFilter, // Áp dụng bộ lọc theo năm học (nếu có)
           },
         },
         {
@@ -1243,9 +1252,12 @@ const statisticsController = {
             count: 1, // Giữ lại trường count
           },
         },
+        {
+          $sort: { count: -1 }, // Sắp xếp theo số lượng bài giảm dần
+        },
       ]);
 
-      // Chuyển đổi kết quả thành key-value
+      // Chuyển đổi kết quả thành key-value với mặc định là 0
       const result = {};
       groups.forEach((group) => {
         result[group.group_name] = 0; // Gán mặc định là 0 cho tất cả các nhóm
@@ -1256,11 +1268,12 @@ const statisticsController = {
 
       // Trả về kết quả
       res.status(200).json({
-        message: `Statistics by group for user ${user_id} retrieved successfully`,
+        message: `Groups for user ${user_id} retrieved successfully`,
+        academicYear: academicYear || "All",
         data: result,
       });
     } catch (error) {
-      console.error("Error in getStatisticsByGroupByUser:", error.message);
+      console.error("Error in getTop5PaperGroupsByUser:", error.message);
       res.status(500).json({
         message:
           "An error occurred while retrieving statistics by group for the user",
@@ -1361,6 +1374,14 @@ const statisticsController = {
   getTop5PaperTypesByUser: async (req, res) => {
     try {
       const { user_id } = req.params; // Lấy user_id từ request params
+      const { academicYear } = req.query; // Lấy `academicYear` từ query string
+
+      // Nếu có năm học, tính khoảng thời gian
+      let dateFilter = {};
+      if (academicYear) {
+        const { startDate, endDate } = getAcademicYearRange(academicYear);
+        dateFilter = { createdAt: { $gte: startDate, $lte: endDate } };
+      }
 
       // Thực hiện thống kê
       const statistics = await ScientificPaper.aggregate([
@@ -1382,6 +1403,7 @@ const statisticsController = {
           $match: {
             "authorDetails.user_id": user_id, // Lọc theo user_id
             status: "approved", // Chỉ lấy các bài báo đã được duyệt
+            ...dateFilter, // Áp dụng bộ lọc theo năm học (nếu có)
           },
         },
         {
@@ -1429,6 +1451,7 @@ const statisticsController = {
       // Trả về kết quả
       res.status(200).json({
         message: `Top 5 paper types for user ${user_id} retrieved successfully`,
+        academicYear: academicYear || "All",
         data: statistics,
       });
     } catch (error) {

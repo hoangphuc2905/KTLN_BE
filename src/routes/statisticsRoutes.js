@@ -657,9 +657,9 @@ router.get(
 
 /**
  * @swagger
- * /statistics/group-by-user/{user_id}:
+ * /statistics/paper-group-by-user/{user_id}:
  *   get:
- *     summary: Get statistics grouped by article group for a specific user
+ *     summary: Get top 5 paper groups for a specific user, optionally filtered by academic year
  *     tags: [Statistics]
  *     parameters:
  *       - in: path
@@ -668,9 +668,16 @@ router.get(
  *         schema:
  *           type: string
  *         description: The ID of the user
+ *       - in: query
+ *         name: academicYear
+ *         schema:
+ *           type: string
+ *           example: "2024-2025"
+ *         required: false
+ *         description: The academic year to filter papers (e.g., "2024-2025")
  *     responses:
  *       200:
- *         description: Statistics by group for the user retrieved successfully
+ *         description: Top 5 paper groups for the user retrieved successfully
  *         content:
  *           application/json:
  *             schema:
@@ -678,16 +685,27 @@ router.get(
  *               properties:
  *                 message:
  *                   type: string
+ *                 academicYear:
+ *                   type: string
+ *                   description: The academic year filter applied
+ *                   example: "2024-2025"
  *                 data:
- *                   type: object
- *                   additionalProperties:
- *                     type: number
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       group:
+ *                         type: string
+ *                       count:
+ *                         type: number
+ *       404:
+ *         description: No groups found for this user
  *       500:
  *         description: Internal server error
  */
 router.get(
-  "/group-by-user/:user_id",
-  statisticsController.getStatisticsByGroupByUser
+  "/paper-group-by-user/:user_id",
+  statisticsController.getPaperGroupsByUser
 );
 
 /**
@@ -766,7 +784,7 @@ router.get(
  * @swagger
  * /statistics/top5-paper-types-by-user/{user_id}:
  *   get:
- *     summary: Get top 5 paper types for a specific user
+ *     summary: Get top 5 paper types for a specific user, optionally filtered by academic year
  *     tags: [Statistics]
  *     parameters:
  *       - in: path
@@ -775,6 +793,13 @@ router.get(
  *         schema:
  *           type: string
  *         description: The ID of the user
+ *       - in: query
+ *         name: academicYear
+ *         schema:
+ *           type: string
+ *           example: "2024-2025"
+ *         required: false
+ *         description: The academic year to filter papers (e.g., "2024-2025")
  *     responses:
  *       200:
  *         description: Top 5 paper types for the user retrieved successfully
@@ -785,6 +810,10 @@ router.get(
  *               properties:
  *                 message:
  *                   type: string
+ *                 academicYear:
+ *                   type: string
+ *                   description: The academic year filter applied
+ *                   example: "2024-2025"
  *                 data:
  *                   type: array
  *                   items:
