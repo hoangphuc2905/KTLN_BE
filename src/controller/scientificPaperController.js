@@ -494,14 +494,14 @@ const scientificPaperController = {
   getTop5MostViewedAndDownloadedPapers: async (req, res) => {
     try {
       const { academicYear } = req.query; // Lấy `academicYear` từ query string
-  
+
       // Nếu có năm học, tính khoảng thời gian
       let dateFilter = {};
       if (academicYear) {
         const { startDate, endDate } = getAcademicYearRange(academicYear);
-        dateFilter = { createdAt: { $gte: startDate, $lte: endDate } };
+        dateFilter = { $gte: startDate, $lte: endDate };
       }
-  
+
       const topPapers = await ScientificPaper.aggregate([
         {
           $lookup: {
@@ -534,11 +534,14 @@ const scientificPaperController = {
                 $filter: {
                   input: "$views",
                   as: "view",
-                  cond: {
-                    $and: [
-                      dateFilter.createdAt || {}, // Áp dụng bộ lọc theo năm học (nếu có)
-                    ],
-                  },
+                  cond: academicYear
+                    ? {
+                        $and: [
+                          { $gte: ["$$view.createdAt", dateFilter.$gte] },
+                          { $lte: ["$$view.createdAt", dateFilter.$lte] },
+                        ],
+                      }
+                    : true, // Không áp dụng bộ lọc nếu không có `academicYear`
                 },
               },
             },
@@ -547,14 +550,25 @@ const scientificPaperController = {
                 $filter: {
                   input: "$downloads",
                   as: "download",
-                  cond: {
-                    $and: [
-                      dateFilter.createdAt || {}, // Áp dụng bộ lọc theo năm học (nếu có)
-                    ],
-                  },
+                  cond: academicYear
+                    ? {
+                        $and: [
+                          { $gte: ["$$download.createdAt", dateFilter.$gte] },
+                          { $lte: ["$$download.createdAt", dateFilter.$lte] },
+                        ],
+                      }
+                    : true, // Không áp dụng bộ lọc nếu không có `academicYear`
                 },
               },
             },
+          },
+        },
+        {
+          $match: {
+            $or: [
+              { viewCount: { $gt: 0 } }, // Chỉ lấy bài có lượt xem > 0
+              { downloadCount: { $gt: 0 } }, // Hoặc lượt tải xuống > 0
+            ],
           },
         },
         {
@@ -580,14 +594,16 @@ const scientificPaperController = {
           },
         },
       ]);
-  
+
       // Kiểm tra nếu không có bài nghiên cứu nào
       if (!topPapers || topPapers.length === 0) {
-        return res.status(404).json({
+        return res.status(200).json({
           message: "No scientific papers found",
+          academicYear: academicYear || "All",
+          papers: [],
         });
       }
-  
+
       // Trả về kết quả
       res.status(200).json({
         message:
@@ -608,5 +624,4 @@ const scientificPaperController = {
     }
   },
 };
-
 module.exports = scientificPaperController;

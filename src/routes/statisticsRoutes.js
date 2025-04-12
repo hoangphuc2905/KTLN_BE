@@ -255,7 +255,7 @@ router.get(
  * @swagger
  * /statistics/statistics-by-department/{department_id}:
  *   get:
- *     summary: Get statistics for a department
+ *     summary: Get statistics for a specific department, optionally filtered by academic year
  *     tags: [Statistics]
  *     parameters:
  *       - in: path
@@ -263,7 +263,14 @@ router.get(
  *         schema:
  *           type: string
  *         required: true
- *         description: ID of the department
+ *         description: The ID of the department
+ *       - in: query
+ *         name: academicYear
+ *         schema:
+ *           type: string
+ *           example: "2023-2024"
+ *         required: false
+ *         description: The academic year to filter statistics (e.g., "2023-2024")
  *     responses:
  *       200:
  *         description: Statistics for the department retrieved successfully
@@ -274,16 +281,16 @@ router.get(
  *               properties:
  *                 department_id:
  *                   type: string
- *                   description: ID of the department
+ *                 academicYear:
+ *                   type: string
+ *                   description: The academic year filter applied
+ *                   example: "2023-2024"
  *                 total_papers:
  *                   type: number
- *                   description: Total number of scientific papers
  *                 total_views:
  *                   type: number
- *                   description: Total views of scientific papers
  *                 total_downloads:
  *                   type: number
- *                   description: Total downloads of scientific papers
  *       500:
  *         description: Internal server error
  */
@@ -390,7 +397,7 @@ router.get(
  * @swagger
  * /statistics/top5-papers-by-department/{department_id}:
  *   get:
- *     summary: Get top 5 papers by a department with the highest views and downloads
+ *     summary: Get top 5 most viewed and downloaded scientific papers by department, optionally filtered by academic year
  *     tags: [Statistics]
  *     parameters:
  *       - in: path
@@ -398,10 +405,17 @@ router.get(
  *         schema:
  *           type: string
  *         required: true
- *         description: ID of the department
+ *         description: The ID of the department
+ *       - in: query
+ *         name: academicYear
+ *         schema:
+ *           type: string
+ *           example: "2023-2024"
+ *         required: false
+ *         description: The academic year to filter statistics (e.g., "2023-2024")
  *     responses:
  *       200:
- *         description: Top 5 papers by the department retrieved successfully
+ *         description: Top 5 most viewed and downloaded scientific papers by department retrieved successfully
  *         content:
  *           application/json:
  *             schema:
@@ -409,6 +423,10 @@ router.get(
  *               properties:
  *                 message:
  *                   type: string
+ *                 academicYear:
+ *                   type: string
+ *                   description: The academic year filter applied
+ *                   example: "2023-2024"
  *                 papers:
  *                   type: array
  *                   items:
@@ -420,11 +438,15 @@ router.get(
  *                         type: string
  *                       title_en:
  *                         type: string
+ *                       cover_image:
+ *                         type: string
+ *                       department:
+ *                         type: string
  *                       viewCount:
  *                         type: number
  *                       downloadCount:
  *                         type: number
- *                       authorDetails:
+ *                       author:
  *                         type: object
  *                         properties:
  *                           author_name_vi:
@@ -434,7 +456,7 @@ router.get(
  *                           role:
  *                             type: string
  *       404:
- *         description: No papers found for this department
+ *         description: No scientific papers found for this department
  *       500:
  *         description: Internal server error
  */
@@ -596,15 +618,22 @@ router.get("/top5-by-type", statisticsController.getStatisticsTop5ByType);
  * @swagger
  * /statistics/group-by-department/{department_id}:
  *   get:
- *     summary: Get statistics grouped by article group for a specific department
+ *     summary: Get statistics by group for a specific department, optionally filtered by academic year
  *     tags: [Statistics]
  *     parameters:
  *       - in: path
  *         name: department_id
- *         required: true
  *         schema:
  *           type: string
+ *         required: true
  *         description: The ID of the department
+ *       - in: query
+ *         name: academicYear
+ *         schema:
+ *           type: string
+ *           example: "2023-2024"
+ *         required: false
+ *         description: The academic year to filter statistics (e.g., "2023-2024")
  *     responses:
  *       200:
  *         description: Statistics by group for the department retrieved successfully
@@ -615,6 +644,10 @@ router.get("/top5-by-type", statisticsController.getStatisticsTop5ByType);
  *               properties:
  *                 message:
  *                   type: string
+ *                 academicYear:
+ *                   type: string
+ *                   description: The academic year filter applied
+ *                   example: "2023-2024"
  *                 data:
  *                   type: object
  *                   additionalProperties:
@@ -630,18 +663,25 @@ router.get(
  * @swagger
  * /statistics/top5-authors-by-department/{department_id}:
  *   get:
- *     summary: Get top 5 authors by contribution points for a specific department
+ *     summary: Get top 5 authors by total points in a specific department, optionally filtered by academic year
  *     tags: [Statistics]
  *     parameters:
  *       - in: path
  *         name: department_id
- *         required: true
  *         schema:
  *           type: string
+ *         required: true
  *         description: The ID of the department
+ *       - in: query
+ *         name: academicYear
+ *         schema:
+ *           type: string
+ *           example: "2023-2024"
+ *         required: false
+ *         description: The academic year to filter statistics (e.g., "2023-2024")
  *     responses:
  *       200:
- *         description: Top 5 authors by contribution points retrieved successfully
+ *         description: Top 5 authors by total points retrieved successfully
  *         content:
  *           application/json:
  *             schema:
@@ -649,6 +689,10 @@ router.get(
  *               properties:
  *                 message:
  *                   type: string
+ *                 academicYear:
+ *                   type: string
+ *                   description: The academic year filter applied
+ *                   example: "2023-2024"
  *                 data:
  *                   type: array
  *                   items:
@@ -657,6 +701,8 @@ router.get(
  *                       author_id:
  *                         type: string
  *                       authorName:
+ *                         type: string
+ *                       degree:
  *                         type: string
  *                       totalPoints:
  *                         type: number
@@ -672,18 +718,25 @@ router.get(
  * @swagger
  * /statistics/top5-by-type-by-department/{department_id}:
  *   get:
- *     summary: Get top 5 types of papers by count for a specific department
+ *     summary: Get top 5 paper types by approved papers for a specific department, optionally filtered by academic year
  *     tags: [Statistics]
  *     parameters:
  *       - in: path
  *         name: department_id
- *         required: true
  *         schema:
  *           type: string
+ *         required: true
  *         description: The ID of the department
+ *       - in: query
+ *         name: academicYear
+ *         schema:
+ *           type: string
+ *           example: "2023-2024"
+ *         required: false
+ *         description: The academic year to filter statistics (e.g., "2023-2024")
  *     responses:
  *       200:
- *         description: Top 5 types by approved papers for the department retrieved successfully
+ *         description: Top 5 paper types by approved papers retrieved successfully
  *         content:
  *           application/json:
  *             schema:
@@ -691,6 +744,10 @@ router.get(
  *               properties:
  *                 message:
  *                   type: string
+ *                 academicYear:
+ *                   type: string
+ *                   description: The academic year filter applied
+ *                   example: "2023-2024"
  *                 data:
  *                   type: object
  *                   additionalProperties:

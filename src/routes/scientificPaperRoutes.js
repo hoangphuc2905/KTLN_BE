@@ -258,7 +258,7 @@ router.get(
  * /scientificPapers/top5-most-viewed-downloaded:
  *   get:
  *     summary: Get top 5 most viewed and downloaded scientific papers, optionally filtered by academic year
- *     tags: [Scientific Papers]
+ *     tags: [ScientificPapers]
  *     parameters:
  *       - in: query
  *         name: academicYear

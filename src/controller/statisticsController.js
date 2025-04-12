@@ -378,6 +378,14 @@ const statisticsController = {
   getStatisticsByDepartmentId: async (req, res) => {
     try {
       const { department_id } = req.params;
+      const { academicYear } = req.query; // Lấy `academicYear` từ query string
+
+      // Nếu có năm học, tính khoảng thời gian
+      let dateFilter = {};
+      if (academicYear) {
+        const { startDate, endDate } = getAcademicYearRange(academicYear);
+        dateFilter = { createdAt: { $gte: startDate, $lte: endDate } };
+      }
 
       // 1. Lấy tất cả student_id và lecturer_id thuộc khoa
       const students = await Student.find({ department: department_id }).select(
@@ -395,6 +403,7 @@ const statisticsController = {
       if (userIds.length === 0) {
         return res.status(200).json({
           department_id,
+          academicYear: academicYear || "All",
           total_papers: 0,
           total_views: 0,
           total_downloads: 0,
@@ -413,6 +422,7 @@ const statisticsController = {
       if (paperIds.length === 0) {
         return res.status(200).json({
           department_id,
+          academicYear: academicYear || "All",
           total_papers: 0,
           total_views: 0,
           total_downloads: 0,
@@ -423,6 +433,7 @@ const statisticsController = {
       const approvedPapers = await ScientificPaper.find({
         _id: { $in: paperIds },
         status: "approved",
+        ...dateFilter, // Áp dụng bộ lọc theo năm học (nếu có)
       }).select("_id");
 
       const approvedPaperIds = approvedPapers.map((p) => p._id.toString());
@@ -430,16 +441,19 @@ const statisticsController = {
       // 4. Đếm lượt xem
       const totalViews = await PaperView.countDocuments({
         paper_id: { $in: approvedPaperIds },
+        ...dateFilter, // Áp dụng bộ lọc theo năm học (nếu có)
       });
 
       // 5. Đếm lượt tải
       const totalDownloads = await PaperDownload.countDocuments({
         paper_id: { $in: approvedPaperIds },
+        ...dateFilter, // Áp dụng bộ lọc theo năm học (nếu có)
       });
 
       // 6. Trả kết quả
       res.status(200).json({
         department_id,
+        academicYear: academicYear || "All",
         total_papers: approvedPaperIds.length,
         total_views: totalViews,
         total_downloads: totalDownloads,
@@ -664,6 +678,14 @@ const statisticsController = {
   getTop5MostViewedAndDownloadedPapersByDepartment: async (req, res) => {
     try {
       const { department_id } = req.params;
+      const { academicYear } = req.query; // Lấy `academicYear` từ query string
+
+      // Nếu có năm học, tính khoảng thời gian
+      let dateFilter = {};
+      if (academicYear) {
+        const { startDate, endDate } = getAcademicYearRange(academicYear);
+        dateFilter = { createdAt: { $gte: startDate, $lte: endDate } };
+      }
 
       const topPapers = await ScientificPaper.aggregate([
         {
@@ -694,12 +716,63 @@ const statisticsController = {
           $match: {
             department: department_id, // Lọc theo khoa
             status: "approved", // Chỉ lấy bài đã được duyệt
+            ...dateFilter, // Áp dụng bộ lọc theo năm học (nếu có)
           },
         },
         {
           $addFields: {
-            viewCount: { $size: "$views" }, // Đếm số lượt xem
-            downloadCount: { $size: "$downloads" }, // Đếm số lượt tải xuống
+            viewCount: {
+              $size: {
+                $filter: {
+                  input: "$views",
+                  as: "view",
+                  cond: academicYear
+                    ? {
+                        $and: [
+                          {
+                            $gte: [
+                              "$$view.createdAt",
+                              dateFilter.createdAt.$gte,
+                            ],
+                          },
+                          {
+                            $lte: [
+                              "$$view.createdAt",
+                              dateFilter.createdAt.$lte,
+                            ],
+                          },
+                        ],
+                      }
+                    : true, // Không áp dụng bộ lọc nếu không có `academicYear`
+                },
+              },
+            },
+            downloadCount: {
+              $size: {
+                $filter: {
+                  input: "$downloads",
+                  as: "download",
+                  cond: academicYear
+                    ? {
+                        $and: [
+                          {
+                            $gte: [
+                              "$$download.createdAt",
+                              dateFilter.createdAt.$gte,
+                            ],
+                          },
+                          {
+                            $lte: [
+                              "$$download.createdAt",
+                              dateFilter.createdAt.$lte,
+                            ],
+                          },
+                        ],
+                      }
+                    : true, // Không áp dụng bộ lọc nếu không có `academicYear`
+                },
+              },
+            },
           },
         },
         {
@@ -728,8 +801,9 @@ const statisticsController = {
 
       // Kiểm tra nếu không có bài nghiên cứu nào
       if (!topPapers || topPapers.length === 0) {
-        return res.status(404).json({
+        return res.status(200).json({
           message: "No scientific papers found for this department",
+          academicYear: academicYear || "All",
         });
       }
 
@@ -737,6 +811,7 @@ const statisticsController = {
       res.status(200).json({
         message:
           "Top 5 most viewed and downloaded scientific papers by department retrieved successfully",
+        academicYear: academicYear || "All",
         papers: topPapers,
       });
     } catch (error) {
@@ -999,6 +1074,14 @@ const statisticsController = {
   getStatisticsByGroupByDepartment: async (req, res) => {
     try {
       const { department_id } = req.params; // Lấy department_id từ request params
+      const { academicYear } = req.query; // Lấy `academicYear` từ query string
+
+      // Nếu có năm học, tính khoảng thời gian
+      let dateFilter = {};
+      if (academicYear) {
+        const { startDate, endDate } = getAcademicYearRange(academicYear);
+        dateFilter = { createdAt: { $gte: startDate, $lte: endDate } };
+      }
 
       // Lấy danh sách tất cả các nhóm
       const groups = await PaperGroup.find({}, { group_name: 1, _id: 0 });
@@ -1009,6 +1092,7 @@ const statisticsController = {
           $match: {
             department: department_id, // Lọc theo khoa cụ thể
             status: "approved", // Chỉ lấy các bài báo đã được duyệt
+            ...dateFilter, // Áp dụng bộ lọc theo năm học (nếu có)
           },
         },
         {
@@ -1052,6 +1136,7 @@ const statisticsController = {
       // Trả về kết quả
       res.status(200).json({
         message: `Statistics by group for department ${department_id} retrieved successfully`,
+        academicYear: academicYear || "All",
         data: result,
       });
     } catch (error) {
@@ -1070,10 +1155,21 @@ const statisticsController = {
   getTop5AuthorsByDepartment: async (req, res) => {
     try {
       const { department_id } = req.params;
+      const { academicYear } = req.query; // Lấy `academicYear` từ query string
+
+      // Nếu có năm học, tính khoảng thời gian
+      let dateFilter = {};
+      if (academicYear) {
+        const { startDate, endDate } = getAcademicYearRange(academicYear);
+        dateFilter = { createdAt: { $gte: startDate, $lte: endDate } };
+      }
 
       const topAuthors = await ScientificPaper.aggregate([
         {
-          $match: { status: "approved" }, // Chỉ lấy bài đã duyệt
+          $match: {
+            status: "approved", // Chỉ lấy bài đã duyệt
+            ...dateFilter, // Áp dụng bộ lọc theo năm học (nếu có)
+          },
         },
         {
           $lookup: {
@@ -1155,6 +1251,7 @@ const statisticsController = {
 
       return res.status(200).json({
         message: "Top 5 authors by point",
+        academicYear: academicYear || "All",
         data: topAuthors,
       });
     } catch (error) {
@@ -1166,16 +1263,25 @@ const statisticsController = {
   getStatisticsTop5ByTypeByDepartment: async (req, res) => {
     try {
       const { department_id } = req.params; // Lấy department_id từ request params
-
+      const { academicYear } = req.query; // Lấy `academicYear` từ query string
+  
+      // Nếu có năm học, tính khoảng thời gian
+      let dateFilter = {};
+      if (academicYear) {
+        const { startDate, endDate } = getAcademicYearRange(academicYear);
+        dateFilter = { createdAt: { $gte: startDate, $lte: endDate } };
+      }
+  
       // Lấy danh sách tất cả các loại bài báo
       const types = await PaperType.find({}, { type_name: 1, _id: 0 });
-
+  
       // Thực hiện thống kê
       const statistics = await ScientificPaper.aggregate([
         {
           $match: {
             department: department_id, // Lọc theo khoa cụ thể
             status: "approved", // Chỉ lấy các bài báo đã được duyệt
+            ...dateFilter, // Áp dụng bộ lọc theo năm học (nếu có)
           },
         },
         {
@@ -1212,20 +1318,21 @@ const statisticsController = {
           $limit: 5, // Lấy top 5 loại bài báo
         },
       ]);
-
+  
       // Chuyển đổi kết quả thành key-value
       const result = {};
       types.forEach((type) => {
         result[type.type_name] = 0; // Gán mặc định là 0 cho tất cả các loại
       });
-
+  
       statistics.forEach((stat) => {
         result[stat.type] = stat.count; // Cập nhật số lượng bài cho các loại có dữ liệu
       });
-
+  
       // Trả về kết quả
       res.status(200).json({
         message: `Top 5 types by approved papers for department ${department_id} retrieved successfully`,
+        academicYear: academicYear || "All",
         data: result,
       });
     } catch (error) {
