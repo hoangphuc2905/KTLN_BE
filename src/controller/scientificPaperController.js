@@ -493,6 +493,15 @@ const scientificPaperController = {
 
   getTop5MostViewedAndDownloadedPapers: async (req, res) => {
     try {
+      const { academicYear } = req.query; // Lấy `academicYear` từ query string
+  
+      // Nếu có năm học, tính khoảng thời gian
+      let dateFilter = {};
+      if (academicYear) {
+        const { startDate, endDate } = getAcademicYearRange(academicYear);
+        dateFilter = { createdAt: { $gte: startDate, $lte: endDate } };
+      }
+  
       const topPapers = await ScientificPaper.aggregate([
         {
           $lookup: {
@@ -520,8 +529,32 @@ const scientificPaperController = {
         },
         {
           $addFields: {
-            viewCount: { $size: "$views" }, // Đếm số lượt xem
-            downloadCount: { $size: "$downloads" }, // Đếm số lượt tải xuống
+            viewCount: {
+              $size: {
+                $filter: {
+                  input: "$views",
+                  as: "view",
+                  cond: {
+                    $and: [
+                      dateFilter.createdAt || {}, // Áp dụng bộ lọc theo năm học (nếu có)
+                    ],
+                  },
+                },
+              },
+            },
+            downloadCount: {
+              $size: {
+                $filter: {
+                  input: "$downloads",
+                  as: "download",
+                  cond: {
+                    $and: [
+                      dateFilter.createdAt || {}, // Áp dụng bộ lọc theo năm học (nếu có)
+                    ],
+                  },
+                },
+              },
+            },
           },
         },
         {
@@ -547,18 +580,19 @@ const scientificPaperController = {
           },
         },
       ]);
-
+  
       // Kiểm tra nếu không có bài nghiên cứu nào
       if (!topPapers || topPapers.length === 0) {
         return res.status(404).json({
           message: "No scientific papers found",
         });
       }
-
+  
       // Trả về kết quả
       res.status(200).json({
         message:
           "Top 5 most viewed and downloaded scientific papers retrieved successfully",
+        academicYear: academicYear || "All",
         papers: topPapers,
       });
     } catch (error) {

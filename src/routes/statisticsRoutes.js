@@ -296,8 +296,16 @@ router.get(
  * @swagger
  * /statistics/statistics-for-all:
  *   get:
- *     summary: Get statistics for all users (students and lecturers)
+ *     summary: Get statistics for all users (students and lecturers), optionally filtered by academic year
  *     tags: [Statistics]
+ *     parameters:
+ *       - in: query
+ *         name: academicYear
+ *         schema:
+ *           type: string
+ *           example: "2024-2025"
+ *         required: false
+ *         description: The academic year to filter statistics (e.g., "2024-2025")
  *     responses:
  *       200:
  *         description: Statistics for all users retrieved successfully
@@ -306,15 +314,19 @@ router.get(
  *             schema:
  *               type: object
  *               properties:
+ *                 academicYear:
+ *                   type: string
+ *                   description: The academic year filter applied
+ *                   example: "2024-2025"
  *                 total_papers:
  *                   type: number
- *                   description: Total number of scientific papers
+ *                   description: Total number of approved papers
  *                 total_views:
  *                   type: number
- *                   description: Total views of scientific papers
+ *                   description: Total number of views
  *                 total_downloads:
  *                   type: number
- *                   description: Total downloads of scientific papers
+ *                   description: Total number of downloads
  *       500:
  *         description: Internal server error
  */
@@ -470,8 +482,16 @@ router.get(
  * @swagger
  * /statistics/by-all-group:
  *   get:
- *     summary: Get statistics grouped by article group
+ *     summary: Get statistics grouped by article group, optionally filtered by academic year
  *     tags: [Statistics]
+ *     parameters:
+ *       - in: query
+ *         name: academicYear
+ *         schema:
+ *           type: string
+ *           example: "2024-2025"
+ *         required: false
+ *         description: The academic year to filter statistics (e.g., "2024-2025")
  *     responses:
  *       200:
  *         description: Statistics by group retrieved successfully
@@ -482,6 +502,10 @@ router.get(
  *               properties:
  *                 message:
  *                   type: string
+ *                 academicYear:
+ *                   type: string
+ *                   description: The academic year filter applied
+ *                   example: "2024-2025"
  *                 data:
  *                   type: object
  *                   additionalProperties:
@@ -495,11 +519,19 @@ router.get("/by-all-group", statisticsController.getStatisticsByAllGroup);
  * @swagger
  * /statistics/top5-by-all-group:
  *   get:
- *     summary: Get statistics grouped by department
+ *     summary: Get top 5 departments by approved papers, optionally filtered by academic year
  *     tags: [Statistics]
+ *     parameters:
+ *       - in: query
+ *         name: academicYear
+ *         schema:
+ *           type: string
+ *           example: "2024-2025"
+ *         required: false
+ *         description: The academic year to filter statistics (e.g., "2024-2025")
  *     responses:
  *       200:
- *         description: Statistics by department retrieved successfully
+ *         description: Top 5 departments by approved papers retrieved successfully
  *         content:
  *           application/json:
  *             schema:
@@ -507,6 +539,10 @@ router.get("/by-all-group", statisticsController.getStatisticsByAllGroup);
  *               properties:
  *                 message:
  *                   type: string
+ *                 academicYear:
+ *                   type: string
+ *                   description: The academic year filter applied
+ *                   example: "2024-2025"
  *                 data:
  *                   type: object
  *                   additionalProperties:
@@ -523,8 +559,16 @@ router.get(
  * @swagger
  * /statistics/top5-by-type:
  *   get:
- *     summary: Get top 5 types of papers by count
+ *     summary: Get top 5 types of papers by count, optionally filtered by academic year
  *     tags: [Statistics]
+ *     parameters:
+ *       - in: query
+ *         name: academicYear
+ *         schema:
+ *           type: string
+ *           example: "2024-2025"
+ *         required: false
+ *         description: The academic year to filter statistics (e.g., "2024-2025")
  *     responses:
  *       200:
  *         description: Top 5 types by approved papers retrieved successfully
@@ -535,6 +579,10 @@ router.get(
  *               properties:
  *                 message:
  *                   type: string
+ *                 academicYear:
+ *                   type: string
+ *                   description: The academic year filter applied
+ *                   example: "2024-2025"
  *                 data:
  *                   type: object
  *                   additionalProperties:

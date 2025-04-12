@@ -257,8 +257,16 @@ router.get(
  * @swagger
  * /scientificPapers/top5-most-viewed-downloaded:
  *   get:
- *     summary: Get the top 5 most viewed and downloaded scientific papers
- *     tags: [ScientificPapers]
+ *     summary: Get top 5 most viewed and downloaded scientific papers, optionally filtered by academic year
+ *     tags: [Scientific Papers]
+ *     parameters:
+ *       - in: query
+ *         name: academicYear
+ *         schema:
+ *           type: string
+ *           example: "2024-2025"
+ *         required: false
+ *         description: The academic year to filter statistics (e.g., "2024-2025")
  *     responses:
  *       200:
  *         description: Top 5 most viewed and downloaded scientific papers retrieved successfully
@@ -269,23 +277,38 @@ router.get(
  *               properties:
  *                 message:
  *                   type: string
+ *                 academicYear:
+ *                   type: string
+ *                   description: The academic year filter applied
+ *                   example: "2024-2025"
  *                 papers:
  *                   type: array
  *                   items:
  *                     type: object
  *                     properties:
- *                       _id:
+ *                       paper_id:
  *                         type: string
  *                       title_vn:
  *                         type: string
  *                       title_en:
  *                         type: string
+ *                       cover_image:
+ *                         type: string
+ *                       department:
+ *                         type: string
  *                       viewCount:
  *                         type: number
  *                       downloadCount:
  *                         type: number
- *       404:
- *         description: No scientific papers found
+ *                       author:
+ *                         type: object
+ *                         properties:
+ *                           author_name_vi:
+ *                             type: string
+ *                           author_name_en:
+ *                             type: string
+ *                           role:
+ *                             type: string
  *       500:
  *         description: Internal server error
  */
