@@ -27,6 +27,7 @@ const authorScoreRoutes = require("./src/routes/authorScoreRoutes");
 const searchAIRoutes = require("./src/routes/searchAIRoutes");
 const academicYearRoutes = require("./src/routes/academicYearRoutes");
 const articleAIRoutes = require("./src/routes/articleAIRoutes");
+const recommendationRoutes = require("./src/routes/recommendationRoutes");
 const specs = require("./swagger");
 
 dotenv.config();
@@ -75,6 +76,7 @@ app.use("/authorScores", authorScoreRoutes);
 app.use("/search", searchAIRoutes);
 app.use("/academic-years", academicYearRoutes);
 app.use("/articlesAI", articleAIRoutes);
+app.use("/recommendations", recommendationRoutes);
 
 const PORT = process.env.PORT || 5000;
 
