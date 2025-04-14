@@ -99,7 +99,18 @@ exports.getRecommendationsByUserHistory = async (req, res) => {
     const otherPapers = await ScientificPaper.find({
       _id: { $nin: interactedPaperIds },
       embedding: { $exists: true },
-    });
+    })
+      .populate("article_type")
+      .populate("article_group")
+      .populate({
+        path: "author",
+        populate: {
+          path: "work_unit_id",
+          model: "WorkUnit",
+        },
+      })
+      .populate("views")
+      .populate("downloads");
 
     // 5. Hàm tính cosine similarity
     const cosineSimilarity = (a, b) => {
@@ -111,10 +122,7 @@ exports.getRecommendationsByUserHistory = async (req, res) => {
 
     // 6. Tính điểm tương đồng
     const scored = otherPapers.map((paper) => ({
-      _id: paper._id,
-      title_vn: paper.title_vn,
-      title_en: paper.title_en,
-      cover_image: paper.cover_image,
+      ...paper._doc,
       similarity: cosineSimilarity(avgEmbedding, paper.embedding),
     }));
 
