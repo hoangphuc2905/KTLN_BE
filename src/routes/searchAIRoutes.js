@@ -17,7 +17,13 @@ const { semanticSearch } = require("../controller/searchAIControllers");
  *             properties:
  *               query:
  *                 type: string
- *                 description: The search query
+ *                 description: The search query (required)
+ *               department:
+ *                 type: string
+ *                 description: The department to filter by (optional)
+ *               criteria:
+ *                 type: string
+ *                 description: The search criteria (title, author, year, keywords) (optional)
  *     responses:
  *       200:
  *         description: Search results retrieved successfully
@@ -28,6 +34,16 @@ const { semanticSearch } = require("../controller/searchAIControllers");
  *               properties:
  *                 query:
  *                   type: string
+ *                   description: The search query
+ *                 filters:
+ *                   type: object
+ *                   properties:
+ *                     department:
+ *                       type: string
+ *                       description: The department filter applied
+ *                     criteria:
+ *                       type: string
+ *                       description: The search criteria applied
  *                 results:
  *                   type: array
  *                   items:
@@ -40,7 +56,7 @@ const { semanticSearch } = require("../controller/searchAIControllers");
  *                         type: number
  *                         description: Semantic similarity score
  *       400:
- *         description: Missing query
+ *         description: Missing query or invalid criteria
  *       500:
  *         description: Server error
  */
