@@ -238,18 +238,8 @@ const lecturerController = {
         }
       }
 
-      // Lấy `_id` của vai trò "lecturer" từ collection `roles`
-      const lecturerRole = await Role.findOne({ role_name: "lecturer" });
-      if (!lecturerRole) {
-        return res
-          .status(500)
-          .json({ message: "Default lecturer role not found" });
-      }
-
-      console.log("Lecturer role ID:", lecturerRole._id);
-
-      // Cập nhật quyền mới cho giảng viên, giữ lại vai trò "lecturer"
-      lecturer.roles = [role._id, lecturerRole._id]; // Lưu `_id` của vai trò mới và vai trò "lecturer"
+      // Cập nhật quyền mới cho giảng viên (KHÔNG giữ lại vai trò "lecturer")
+      lecturer.roles = [role._id]; // Chỉ lưu vai trò mới
       await lecturer.save();
 
       // Cập nhật vai trò cho khoa
