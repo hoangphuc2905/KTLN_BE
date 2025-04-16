@@ -238,8 +238,28 @@ const lecturerController = {
         }
       }
 
-      // Cập nhật quyền mới cho giảng viên (KHÔNG giữ lại vai trò "lecturer")
-      lecturer.roles = [role._id]; // Chỉ lưu vai trò mới
+      // Lấy `_id` của vai trò "lecturer" từ collection `roles`
+      const lecturerRole = await Role.findOne({ role_name: "lecturer" });
+      if (!lecturerRole) {
+        return res
+          .status(500)
+          .json({ message: "Default lecturer role not found" });
+      }
+
+      // Đảm bảo quyền "lecturer" luôn tồn tại và không bị trùng lặp
+      const roleIds = lecturer.roles.map((r) => r._id.toString());
+      if (!roleIds.includes(lecturerRole._id.toString())) {
+        lecturer.roles.push(lecturerRole._id);
+      }
+
+      // Thêm vai trò mới nếu chưa tồn tại
+      if (!roleIds.includes(role._id.toString())) {
+        lecturer.roles.push(role._id);
+      }
+
+      // Loại bỏ các vai trò trùng lặp
+      lecturer.roles = [...new Set(lecturer.roles.map((r) => r.toString()))];
+
       await lecturer.save();
 
       // Cập nhật vai trò cho khoa
@@ -262,10 +282,12 @@ const lecturerController = {
 
   deleteRole: async (req, res) => {
     try {
-      const { adminId, lecturerId, roleId } = req.body;
+      const { adminId, lecturerId, role } = req.body;
+
+      console.log("Request body:", req.body);
 
       // Kiểm tra các tham số đầu vào
-      if (!adminId || !lecturerId || !roleId) {
+      if (!adminId || !lecturerId || !role) {
         return res.status(400).json({ message: "Missing required fields" });
       }
 
@@ -280,55 +302,6 @@ const lecturerController = {
 
       console.log("Admin roles:", admin.roles);
 
-      // Kiểm tra quyền admin
-      if (admin.roles.some((role) => role.role_name === "admin")) {
-        console.log("Admin has full permission to remove roles");
-      } else if (
-        admin.roles.some((role) => role.role_name === "head_of_department")
-      ) {
-        if (admin.department.toString() !== lecturer.department.toString()) {
-          return res.status(403).json({
-            message: "You can only remove roles within your department",
-          });
-        }
-      } else if (
-        admin.roles.some(
-          (role) => role.role_name === "deputy_head_of_department"
-        )
-      ) {
-        if (admin.department.toString() !== lecturer.department.toString()) {
-          return res.status(403).json({
-            message: "You can only remove roles within your department",
-          });
-        }
-        if (roleId === "head_of_department") {
-          return res.status(403).json({
-            message: "You cannot remove the role of the head of department",
-          });
-        }
-      } else if (
-        admin.roles.some((role) => role.role_name === "department_in_charge")
-      ) {
-        if (admin.department.toString() !== lecturer.department.toString()) {
-          return res.status(403).json({
-            message: "You can only remove roles within your department",
-          });
-        }
-        if (
-          roleId === "head_of_department" ||
-          roleId === "deputy_head_of_department"
-        ) {
-          return res.status(403).json({
-            message:
-              "You cannot remove the role of the head of department or deputy head of department",
-          });
-        }
-      } else {
-        return res
-          .status(403)
-          .json({ message: "You do not have permission to remove roles" });
-      }
-
       // Lấy thông tin giảng viên cần xóa vai trò (lecturerId)
       const lecturer = await Lecturer.findOne({
         lecturer_id: lecturerId,
@@ -341,9 +314,15 @@ const lecturerController = {
       }
 
       console.log("Lecturer roles before removal:", lecturer.roles);
+      console.log("Role ID to remove:", role);
+
+      // Chuyển roleId thành ObjectId
+      const roleObjectId = new mongoose.Types.ObjectId(role);
 
       // Kiểm tra xem vai trò có tồn tại trong danh sách vai trò của giảng viên không
-      const roleIndex = lecturer.roles.indexOf(roleId);
+      const roleIndex = lecturer.roles.findIndex(
+        (role) => role._id.toString() === roleObjectId.toString()
+      );
       if (roleIndex === -1) {
         return res
           .status(400)

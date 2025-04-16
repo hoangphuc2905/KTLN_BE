@@ -423,13 +423,13 @@ router.post("/assign-role", lecturerController.assignRole);
  *               lecturerId:
  *                 type: string
  *                 description: ID of the lecturer
- *               roleId:
+ *               role:
  *                 type: string
  *                 description: ID of the role to remove
  *             example:
  *               adminId: "21000000"
  *               lecturerId: "21111111"
- *               roleId: "67e0034aad59fbe6e1602a4e"
+ *               role: "67e0034aad59fbe6e1602a4e"
  *     responses:
  *       200:
  *         description: Role removed successfully
