@@ -122,7 +122,7 @@ const scientificPaperController = {
           receiver_id: lecturer.lecturer_id,
           receiver_model: "Lecturer",
           paper_id: scientificPaper._id,
-          content: `Có một bài báo mới cần duyệt: ${scientificPaper.title_vn} || ${scientificPaper.title_en}`,
+          content: `Có một bài báo mới cần duyệt: ${scientificPaper.title_vn}`,
           isread: false,
           time: new Date(),
         };
