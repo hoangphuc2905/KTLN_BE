@@ -50,6 +50,7 @@ const scientificPaperController = {
       await scientificPaper.save({
         session,
       });
+      console.log("Scientific paper saved:", scientificPaper);
 
       // Xử lý danh sách tác giả
       const authorIds = [];
@@ -121,7 +122,7 @@ const scientificPaperController = {
           receiver_id: lecturer.lecturer_id,
           receiver_model: "Lecturer",
           paper_id: scientificPaper._id,
-          content: `Có một bài báo mới cần duyệt: ${req.body.title_vn} || ${req.body.title_en}`,
+          content: `Có một bài báo mới cần duyệt: ${scientificPaper.title_vn} || ${scientificPaper.title_en}`,
           isread: false,
           time: new Date(),
         };

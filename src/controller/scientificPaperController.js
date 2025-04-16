@@ -48,6 +48,7 @@ const scientificPaperController = {
       });
 
       await scientificPaper.save({ session });
+      console.log("Scientific paper saved:", scientificPaper);
 
       // Xử lý danh sách tác giả
       const authorIds = [];
@@ -104,7 +105,7 @@ const scientificPaperController = {
           receiver_id: lecturer.lecturer_id, // ID của người nhận
           receiver_model: "Lecturer", // Vai trò của người nhận
           paper_id: scientificPaper._id, // ID của bài báo
-          content: `Có một bài báo mới cần duyệt: ${req.body.title_vn} || ${req.body.title_en}`,
+          content: `Có một bài báo mới cần duyệt: ${scientificPaper.title_vn} || ${scientificPaper.title_en}`,
           isread: false,
           time: new Date(),
         };
