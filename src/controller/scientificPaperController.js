@@ -104,7 +104,7 @@ const scientificPaperController = {
           receiver_id: lecturer.lecturer_id, // ID của người nhận
           receiver_model: "Lecturer", // Vai trò của người nhận
           paper_id: scientificPaper._id, // ID của bài báo
-          content: `Có một bài báo mới cần duyệt: ${scientificPaper.title_vn} || ${scientificPaper.title_en}`, // Nội dung thông báo
+          content: `Có một bài báo mới cần duyệt: ${req.body.title_vn} || ${req.body.title_en}`,
           isread: false,
           time: new Date(),
         };

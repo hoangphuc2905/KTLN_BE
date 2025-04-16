@@ -109,26 +109,19 @@ const scientificPaperController = {
           $in: roles.map((role) => role._id),
         },
       });
-      senderUserId = senderUserId || authorIds[0]; // Nếu không có `user_id` của tác giả, sử dụng tác giả đầu tiên
+      senderUserId = senderUserId || authorIds[0];
 
       for (const lecturer of lecturers) {
         const messageData = {
           message_id: uuidv4(),
-          // Tạo ID duy nhất cho thông báo
           message_type: "Request for Approval",
-          // Đặt loại thông báo là "Yêu cầu duyệt"
           status: "Pending Response",
           sender_id: senderUserId,
           sender_model: "Student",
-          // Model của người gửi là `Student`
           receiver_id: lecturer.lecturer_id,
-          // ID của người nhận
           receiver_model: "Lecturer",
-          // Vai trò của người nhận
           paper_id: scientificPaper._id,
-          // ID của bài báo
-          content: `Có một bài báo mới cần duyệt: ${scientificPaper.title_vn} || ${scientificPaper.title_en}`,
-          // Nội dung thông báo
+          content: `Có một bài báo mới cần duyệt: ${req.body.title_vn} || ${req.body.title_en}`,
           isread: false,
           time: new Date(),
         };
