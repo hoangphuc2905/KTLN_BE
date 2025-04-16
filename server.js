@@ -78,11 +78,20 @@ app.use("/academic-years", academicYearRoutes);
 app.use("/articlesAI", articleAIRoutes);
 app.use("/recommendations", recommendationRoutes);
 
-const PORT = process.env.PORT || 5000;
+const APP_PORT = process.env.APP_PORT;
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-  console.log(
-    `API documentation available at http://localhost:${PORT}/api-docs`
-  );
-});
+if (process.env.BUILD_MODE === "production") {
+  app.listen(process.env.PORT, () => {
+    console.log(`Production server is running on port ${process.env.PORT}`);
+    console.log(
+      `Production API documentation available at http://localhost:${process.env.PORT}/api-docs`
+    );
+  });
+} else {
+  app.listen(APP_PORT, () => {
+    console.log(`Server is running on port ${APP_PORT}`);
+    console.log(
+      `API documentation available at http://localhost:${APP_PORT}/api-docs`
+    );
+  });
+}
