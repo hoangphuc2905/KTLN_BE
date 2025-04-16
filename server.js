@@ -78,7 +78,7 @@ app.use("/academic-years", academicYearRoutes);
 app.use("/articlesAI", articleAIRoutes);
 app.use("/recommendations", recommendationRoutes);
 
-const APP_PORT = process.env.APP_PORT;
+const APP_PORT = process.env.APP_PORT || 5000;
 
 if (process.env.BUILD_MODE === "production") {
   app.listen(process.env.PORT, () => {

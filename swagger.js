@@ -10,7 +10,8 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: "http://localhost:5000", 
+        url: "https://ktln-be.onrender.com",
+        description: "Render Production Server",
       },
     ],
     components: {
@@ -18,17 +19,17 @@ const swaggerOptions = {
         bearerAuth: {
           type: "http",
           scheme: "bearer",
-          bearerFormat: "JWT", 
+          bearerFormat: "JWT",
         },
       },
     },
     security: [
       {
-        bearerAuth: [], 
+        bearerAuth: [],
       },
     ],
   },
-  apis: ["./src/routes/*.js"], 
+  apis: ["./src/routes/*.js"],
 };
 
 const specs = swaggerJsDoc(swaggerOptions);
