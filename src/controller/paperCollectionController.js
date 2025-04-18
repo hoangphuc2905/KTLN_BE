@@ -96,13 +96,13 @@ const paperCollectionController = {
 
       const collection = await PaperCollection.findById(collection_id);
       if (!collection) {
-        return res.status(404).json({ message: "Collection not found." });
+        return res.status(404).json({ message: "Bộ sưu tập không tồn tại." });
       }
 
       if (collection.papers.includes(paper_id)) {
         return res
           .status(400)
-          .json({ message: "Paper already exists in the collection." });
+          .json({ message: "Bài báo đã có trong bộ sưu tập." });
       }
 
       collection.papers.push(paper_id);

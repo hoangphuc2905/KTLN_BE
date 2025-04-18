@@ -80,8 +80,8 @@ const lecturerController = {
           cccd: row.cccd,
           start_date: new Date(row.start_date),
           address: row.address,
-          department: departmentId, // Lấy department từ người đăng nhập
-          roles: "67e0033fad59fbe6e1602a4c", // ID của vai trò giảng viên
+          department: departmentId, 
+          roles: "67e0033fad59fbe6e1602a4c", 
           avatar:
             row.avatar ||
             "https://i.pinimg.com/1200x/bc/43/98/bc439871417621836a0eeea768d60944.jpg",
