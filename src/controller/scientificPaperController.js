@@ -172,7 +172,13 @@ const scientificPaperController = {
           },
         })
         .populate("views")
-        .populate("downloads");
+        .populate("downloads")
+        .populate({
+          path: "department",
+          select: "department_name",
+        });
+
+      console.log("Scientific papers retrieved:", scientificPapers);
 
       res.status(200).json({
         message: academicYear

@@ -1,5 +1,8 @@
 const express = require("express");
 const router = express.Router();
+const multer = require("multer");
+const upload = multer({ dest: "uploads/" });
+const authMiddleware = require("../middleware/authMiddleware");
 const lecturerController = require("../controller/lecturerController");
 
 /**
@@ -65,6 +68,89 @@ const lecturerController = require("../controller/lecturerController");
  *         description: Bad request
  */
 router.post("/", lecturerController.createLecturer);
+
+/**
+ * @swagger
+ * /lecturers/import:
+ *   post:
+ *     summary: Import lecturers from an Excel file
+ *     tags: [Lecturers]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *                 description: The Excel file to upload
+ *     responses:
+ *       201:
+ *         description: Lecturers and accounts created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 lecturers:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       lecturer:
+ *                         type: object
+ *                         properties:
+ *                           lecturer_id:
+ *                             type: string
+ *                           full_name:
+ *                             type: string
+ *                           email:
+ *                             type: string
+ *                           phone:
+ *                             type: string
+ *                           gender:
+ *                             type: string
+ *                             enum: [male, female, other]
+ *                           date_of_birth:
+ *                             type: string
+ *                             format: date
+ *                           department:
+ *                             type: string
+ *                           roles:
+ *                             type: array
+ *                             items:
+ *                               type: string
+ *                           avatar:
+ *                             type: string
+ *                           degree:
+ *                             type: string
+ *                             enum: [Bachelor, Master, Doctor, Engineer, Professor, Associate_Professor]
+ *                           isActive:
+ *                             type: boolean
+ *                       account:
+ *                         type: object
+ *                         properties:
+ *                           user_id:
+ *                             type: string
+ *                           user_type:
+ *                             type: string
+ *       400:
+ *         description: Bad request (e.g., no file uploaded or invalid file format)
+ *       403:
+ *         description: Unauthorized (e.g., no department found for the user)
+ *       500:
+ *         description: Internal server error
+ */
+router.post(
+  "/import",
+  authMiddleware.authenticate,
+  upload.single("file"),
+  lecturerController.importLecturersFromExcel
+);
 
 /**
  * @swagger
