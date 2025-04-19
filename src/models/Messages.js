@@ -16,7 +16,7 @@ const messagesSchema = new Schema(
         "Approved",
         "Request for Approval",
         "Rejection",
-      ], // Đảm bảo giá trị hợp lệ
+      ],
       required: true,
     },
     status: {
@@ -34,7 +34,7 @@ const messagesSchema = new Schema(
       enum: ["Student", "Lecturer"],
     },
     receiver_id: {
-      type: String, // Thay đổi từ ObjectId thành String
+      type: String, 
       required: true,
     },
     receiver_model: {

@@ -295,6 +295,173 @@ router.put("/:id", messagesController.updateMessageById);
  *         description: Server error
  */
 router.put("/read/:id", messagesController.markMessageAsRead);
+
+/**
+ * @swagger
+ * /messages/paperbyrejection/{paperId}:
+ *   get:
+ *     summary: Lấy thông báo theo paper_id
+ *     tags: [Messages]
+ *     parameters:
+ *       - in: path
+ *         name: paperId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID của bài báo (paper_id) cần lấy thông báo
+ *     responses:
+ *       200:
+ *         description: Thành công, trả về danh sách thông báo
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   _id:
+ *                     type: string
+ *                   message_id:
+ *                     type: string
+ *                   message_type:
+ *                     type: string
+ *                   status:
+ *                     type: string
+ *                   sender_id:
+ *                     type: string
+ *                   sender_model:
+ *                     type: string
+ *                     enum: [Student, Lecturer]
+ *                   receiver_id:
+ *                     type: string
+ *                   receiver_model:
+ *                     type: string
+ *                     enum: [Student, Lecturer]
+ *                   paper_id:
+ *                     type: string
+ *                   content:
+ *                     type: string
+ *                   isread:
+ *                     type: boolean
+ *                     default: false
+ *                   time:
+ *                     type: string
+ *                     format: date-time
+ *                   createdAt:
+ *                     type: string
+ *                     format: date-time
+ *                   updatedAt:
+ *                     type: string
+ *                     format: date-time
+ *       404:
+ *         description: Không tìm thấy thông báo nào cho paper_id này
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: No messages found for this paper
+ *       500:
+ *         description: Lỗi xử lý trên server
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Error in getMessagesByPaperId
+ */
+router.get(
+  "/paperbyrejection/:paperId",
+  messagesController.getMessagesByStatusRejectionByPaperId
+);
+
+/**
+ * @swagger
+ * /messages/paperbyrequestforedit/{paperId}:
+ *   get:
+ *     summary: Lấy thông báo theo paper_id
+ *     tags: [Messages]
+ *     parameters:
+ *       - in: path
+ *         name: paperId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID của bài báo (paper_id) cần lấy thông báo
+ *     responses:
+ *       200:
+ *         description: Thành công, trả về danh sách thông báo
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   _id:
+ *                     type: string
+ *                   message_id:
+ *                     type: string
+ *                   message_type:
+ *                     type: string
+ *                   status:
+ *                     type: string
+ *                   sender_id:
+ *                     type: string
+ *                   sender_model:
+ *                     type: string
+ *                     enum: [Student, Lecturer]
+ *                   receiver_id:
+ *                     type: string
+ *                   receiver_model:
+ *                     type: string
+ *                     enum: [Student, Lecturer]
+ *                   paper_id:
+ *                     type: string
+ *                   content:
+ *                     type: string
+ *                   isread:
+ *                     type: boolean
+ *                     default: false
+ *                   time:
+ *                     type: string
+ *                     format: date-time
+ *                   createdAt:
+ *                     type: string
+ *                     format: date-time
+ *                   updatedAt:
+ *                     type: string
+ *                     format: date-time
+ *       404:
+ *         description: Không tìm thấy thông báo nào cho paper_id này
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: No messages found for this paper
+ *       500:
+ *         description: Lỗi xử lý trên server
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Error in getMessagesByPaperId
+ */
+router.get(
+  "/paperbyrequestforedit/:paperId",
+  messagesController.getMessagesByStatusRequestforEditByPaperId
+);
+
 /**
  * @swagger
  * /messages/{id}:

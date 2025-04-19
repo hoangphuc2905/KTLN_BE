@@ -298,7 +298,11 @@ const scientificPaperController = {
           },
         })
         .populate("views")
-        .populate("downloads");
+        .populate("downloads")
+        .populate({
+          path: "department",
+          select: "department_name",
+        });
 
       if (!scientificPapers || scientificPapers.length === 0) {
         return res
