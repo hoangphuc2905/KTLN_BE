@@ -446,7 +446,7 @@ const scientificPaperController = {
           receiver_id: lecturer.lecturer_id,
           receiver_model: "Lecturer",
           paper_id: updatedPaper._id,
-          content: `Bài báo đã được cập nhật và cần duyệt lại: ${updatedPaper.title}`,
+          content: `Bài báo đã được cập nhật và cần duyệt lại: ${updatedPaper.title_vn}`,
           isread: false,
           time: new Date(),
         };
