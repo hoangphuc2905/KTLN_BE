@@ -80,7 +80,7 @@ app.use("/recommendations", recommendationRoutes);
 
 const APP_PORT = process.env.APP_PORT || 5000;
 
-if (process.env.BUILD_MODE === "prodguction") {
+if (process.env.BUILD_MODE === "production") {
   app.listen(process.env.PORT, () => {
     console.log(`Production server is running on port ${process.env.PORT}`);
     console.log(
