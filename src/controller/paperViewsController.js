@@ -61,12 +61,37 @@ const paperViewsController = {
     }
   },
 
-  getViewCountByPaperId : async (req, res) => {
+  getViewCountByPaperId: async (req, res) => {
     try {
       const { paper_id } = req.params;
       const viewCount = await PaperViews.countDocuments({ paper_id });
       res.status(200).json({ viewCount });
     } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  },
+
+  getAllPaperViewsByUser: async (req, res) => {
+    try {
+      const { user_id } = req.params;
+      console.log("Fetching paper views for user_id:", user_id);
+      const paperViews = await PaperViews.find({ user_id })
+        .sort({ view_time: -1 })
+        .populate({
+          path: "paper_id",
+          populate: [
+            { path: "author", select: "author_name_vi" },
+            { path: "department", select: "department_name" },
+          ],
+        });
+      if (!paperViews || paperViews.length === 0) {
+        return res
+          .status(404)
+          .json({ message: "No paper views found for this user" });
+      }
+      res.status(200).json(paperViews);
+    } catch (error) {
+      console.error("Error fetching paper views:", error);
       res.status(500).json({ message: error.message });
     }
   },

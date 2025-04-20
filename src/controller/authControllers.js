@@ -33,19 +33,19 @@ const authController = {
 
       if (!user) {
         return res.status(400).json({
-          message: "Invalid user_id, password, or account is inactive",
+          message: "Tài khoản không tồn tại hoặc đã bị khóa",
         });
       }
 
       const account = await Account.findOne({ user_id: user._id });
       if (!account) {
-        return res.status(400).json({ message: "Account not found" });
+        return res.status(400).json({ message: "Tài khoản không tồn tại" });
       }
 
       // Kiểm tra mật khẩu
       const isPasswordValid = await bcrypt.compare(password, account.password);
       if (!isPasswordValid) {
-        return res.status(400).json({ message: "Invalid user_id or password" });
+        return res.status(400).json({ message: "Mât khẩu không đúng" });
       }
 
       // Tạo token JWT

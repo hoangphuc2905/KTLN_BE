@@ -339,7 +339,7 @@ const paperAuthorController = {
           },
         },
         {
-          $sort: { total_points: -1 }, // Sắp xếp giảm dần theo tổng điểm
+          $sort: { total_points: -1 }, 
         },
       ]);
 
@@ -363,6 +363,66 @@ const paperAuthorController = {
           : `Authors in department ${department.department_name}`,
         academicYear: academicYear || "All",
         result,
+      });
+    } catch (error) {
+      console.error("Error:", error);
+      res.status(500).json({ message: error.message });
+    }
+  },
+
+  getTotalPointsByAuthorAndYear: async (req, res) => {
+    try {
+      const { user_id } = req.params;
+      const { academicYear } = req.query;
+
+      let dateFilter = {};
+      if (academicYear) {
+        const { startDate, endDate } = getAcademicYearRange(academicYear);
+        dateFilter = {
+          "paperInfo.createdAt": { $gte: startDate, $lte: endDate },
+        };
+      }
+
+      const result = await PaperAuthor.aggregate([
+        {
+          $match: {
+            user_id,
+          },
+        },
+        {
+          $lookup: {
+            from: "scientificpapers",
+            localField: "paper_id",
+            foreignField: "_id",
+            as: "paperInfo",
+          },
+        },
+        {
+          $match: {
+            "paperInfo.status": "approved",
+            ...dateFilter,
+          },
+        },
+        {
+          $group: {
+            _id: "$user_id",
+            total_points: { $sum: "$point" },
+          },
+        },
+      ]);
+
+      if (!result || result.length === 0) {
+        return res
+          .status(200)
+          .json({ message: "Không có điểm nào cho tác giả này" });
+      }
+
+      res.status(200).json({
+        message: academicYear
+          ? `Total points for author ${user_id} in academic year ${academicYear}`
+          : `Total points for author ${user_id} across all years`,
+        academicYear: academicYear || "All",
+        total_points: result[0].total_points,
       });
     } catch (error) {
       console.error("Error:", error);

@@ -227,5 +227,46 @@ router.get(
   paperDownloadsController.getDownloadCountByPaperId
 );
 
+/**
+ * @swagger
+ * /paperdownload/user/{user_id}:
+ *   get:
+ *     summary: Get all paper downloads by a specific user
+ *     tags: [PaperDownloads]
+ *     parameters:
+ *       - in: path
+ *         name: user_id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the user to get paper downloads for
+ *     responses:
+ *       200:
+ *         description: List of paper downloads for the user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   download_id:
+ *                     type: string
+ *                   paper_id:
+ *                     type: string
+ *                   user_id:
+ *                     type: string
+ *                   download_time:
+ *                     type: string
+ *                     format: date
+ *       404:
+ *         description: No paper downloads found for this user
+ *       500:
+ *         description: Internal server error
+ */
+router.get(
+  "/user/:user_id",
+  paperDownloadsController.getAllPaperDownloadsByUser
+);
 
 module.exports = router;

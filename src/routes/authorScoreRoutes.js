@@ -62,4 +62,6 @@ const {
  */
 router.post("/input", calculateScoreFromInput);
 
+
+
 module.exports = router;
