@@ -629,7 +629,7 @@ const statisticsController = {
           $sort: { viewCount: -1, downloadCount: -1 }, // Sắp xếp theo lượt xem và tải xuống giảm dần
         },
         {
-          $limit: 5, // Giới hạn 5 bài
+          $limit: 5,
         },
         {
           $project: {
@@ -845,6 +845,7 @@ const statisticsController = {
       const statistics = await ScientificPaper.aggregate([
         {
           $match: {
+            status: "approved", // Chỉ lấy các bài báo đã được duyệt
             ...dateFilter, // Áp dụng bộ lọc theo năm học (nếu có)
           },
         },
@@ -1007,6 +1008,7 @@ const statisticsController = {
       const statistics = await ScientificPaper.aggregate([
         {
           $match: {
+            status: "approved", // Chỉ lấy các bài báo đã được duyệt
             ...dateFilter, // Áp dụng bộ lọc theo năm học (nếu có)
           },
         },
