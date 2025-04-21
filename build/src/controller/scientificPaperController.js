@@ -568,7 +568,12 @@ const scientificPaperController = {
           },
         })
         .populate("views")
-        .populate("downloads");
+        .populate("downloads")
+        .populate("downloads")
+        .populate({
+          path: "department",
+          select: "department_name",
+        });
       res.status(200).json({
         message: "Top 5 newest scientific papers retrieved successfully",
         papers: topPapers,

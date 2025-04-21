@@ -1264,17 +1264,17 @@ const statisticsController = {
     try {
       const { department_id } = req.params; // Lấy department_id từ request params
       const { academicYear } = req.query; // Lấy `academicYear` từ query string
-  
+
       // Nếu có năm học, tính khoảng thời gian
       let dateFilter = {};
       if (academicYear) {
         const { startDate, endDate } = getAcademicYearRange(academicYear);
         dateFilter = { createdAt: { $gte: startDate, $lte: endDate } };
       }
-  
+
       // Lấy danh sách tất cả các loại bài báo
       const types = await PaperType.find({}, { type_name: 1, _id: 0 });
-  
+
       // Thực hiện thống kê
       const statistics = await ScientificPaper.aggregate([
         {
@@ -1318,17 +1318,17 @@ const statisticsController = {
           $limit: 5, // Lấy top 5 loại bài báo
         },
       ]);
-  
+
       // Chuyển đổi kết quả thành key-value
       const result = {};
       types.forEach((type) => {
         result[type.type_name] = 0; // Gán mặc định là 0 cho tất cả các loại
       });
-  
+
       statistics.forEach((stat) => {
         result[stat.type] = stat.count; // Cập nhật số lượng bài cho các loại có dữ liệu
       });
-  
+
       // Trả về kết quả
       res.status(200).json({
         message: `Top 5 types by approved papers for department ${department_id} retrieved successfully`,

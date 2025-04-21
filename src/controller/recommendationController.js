@@ -80,6 +80,7 @@ exports.getRecommendationsByUserHistory = async (req, res) => {
     // 2. Lấy embedding của các bài đã tương tác
     const viewedPapers = await ScientificPaper.find({
       _id: { $in: interactedPaperIds },
+      status: "approved",
       embedding: { $exists: true },
     });
 
@@ -98,6 +99,7 @@ exports.getRecommendationsByUserHistory = async (req, res) => {
     // 4. Lấy các bài báo khác (chưa xem hoặc tải)
     const otherPapers = await ScientificPaper.find({
       _id: { $nin: interactedPaperIds },
+      status: "approved",
       embedding: { $exists: true },
     })
       .populate("article_type")
@@ -110,7 +112,11 @@ exports.getRecommendationsByUserHistory = async (req, res) => {
         },
       })
       .populate("views")
-      .populate("downloads");
+      .populate("downloads")
+      .populate({
+        path: "department",
+        select: "department_name",
+      });
 
     // 5. Hàm tính cosine similarity
     const cosineSimilarity = (a, b) => {
@@ -129,7 +135,7 @@ exports.getRecommendationsByUserHistory = async (req, res) => {
     // 7. Trả về top 10 gợi ý
     const topPapers = scored
       .sort((a, b) => b.similarity - a.similarity)
-      .slice(0, 10);
+      .slice(0, 50);
 
     return res.status(200).json({
       message: "Recommended papers based on views and downloads",
