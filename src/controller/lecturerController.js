@@ -80,8 +80,8 @@ const lecturerController = {
           cccd: row.cccd,
           start_date: new Date(row.start_date),
           address: row.address,
-          department: departmentId, 
-          roles: "67e0033fad59fbe6e1602a4c", 
+          department: departmentId,
+          roles: "67e0033fad59fbe6e1602a4c",
           avatar:
             row.avatar ||
             "https://i.pinimg.com/1200x/bc/43/98/bc439871417621836a0eeea768d60944.jpg",
@@ -456,14 +456,14 @@ const lecturerController = {
 
       const lecturers = await Lecturer.find({ department: departmentId })
         .select(
-          "lecturer_id full_name email phone gender date_of_birth department roles score_year avatar degree isActive"
+          "lecturer_id full_name email phone gender date_of_birth department roles score_year avatar degree isActive cccd start_date address"
         )
         .populate("department", "department_name")
         .populate("roles", "role_name");
 
       const students = await Student.find({ department: departmentId })
         .select(
-          "student_id full_name email phone gender date_of_birth department score_year avatar role degree isActive"
+          "student_id full_name email phone gender date_of_birth department score_year avatar role degree isActive cccd start_date address"
         )
         .populate("department", "department_name");
 

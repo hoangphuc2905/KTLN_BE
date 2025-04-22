@@ -24,7 +24,7 @@ const scientificPaperSchema = new Schema(
     },
     title_en: {
       type: String,
-      required: true,
+      required: false,
     },
     author_count: {
       type: String,
@@ -47,11 +47,11 @@ const scientificPaperSchema = new Schema(
     },
     magazine_en: {
       type: String,
-      required: true,
+      required: false,
     },
     magazine_type: {
       type: String,
-      required: true,
+      required: false,
     },
     page: {
       type: Number,
@@ -71,7 +71,7 @@ const scientificPaperSchema = new Schema(
     },
     doi: {
       type: String,
-      required: true,
+      required: false,
     },
     status: {
       type: String,
