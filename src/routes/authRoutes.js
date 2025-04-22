@@ -149,4 +149,135 @@ router.put(
   authController.updateUserInfo
 );
 
+/**
+ * @swagger
+ * /auth/register:
+ *   post:
+ *     summary: Register a new student
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               student_id:
+ *                 type: string
+ *                 description: Unique ID for the student
+ *               full_name:
+ *                 type: string
+ *                 description: Full name of the student
+ *               email:
+ *                 type: string
+ *                 description: Email address of the student
+ *               phone:
+ *                 type: string
+ *                 description: Phone number of the student
+ *               gender:
+ *                 type: string
+ *                 enum: [male, female, other]
+ *                 description: Gender of the student
+ *               date_of_birth:
+ *                 type: string
+ *                 format: date
+ *                 description: Date of birth of the student
+ *               cccd:
+ *                 type: string
+ *                 description: Citizen ID of the student
+ *               address:
+ *                 type: string
+ *                 description: Address of the student
+ *               start_date:
+ *                 type: string
+ *                 format: date
+ *                 description: Start date of the student
+ *               department:
+ *                 type: string
+ *                 description: Department ID the student belongs to
+ *     responses:
+ *       201:
+ *         description: Student registered successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Student registered successfully. Awaiting approval.
+ *                 student:
+ *                   type: object
+ *                   properties:
+ *                     student_id:
+ *                       type: string
+ *                     full_name:
+ *                       type: string
+ *                     email:
+ *                       type: string
+ *                     phone:
+ *                       type: string
+ *                     gender:
+ *                       type: string
+ *                     date_of_birth:
+ *                       type: string
+ *                       format: date
+ *                     cccd:
+ *                       type: string
+ *                     address:
+ *                       type: string
+ *                     start_date:
+ *                       type: string
+ *                       format: date
+ *                     department:
+ *                       type: string
+ *                     isActive:
+ *                       type: boolean
+ *                     score_year:
+ *                       type: number
+ *                     degree:
+ *                       type: string
+ *                     role:
+ *                       type: string
+ *                     avatar:
+ *                       type: string
+ *                 account:
+ *                   type: object
+ *                   properties:
+ *                     user_id:
+ *                       type: string
+ *                     user_type:
+ *                       type: string
+ *       400:
+ *         description: Bad request (e.g., student ID or email already exists)
+ *       500:
+ *         description: Internal server error
+ */
+router.post("/register", authController.registerStudent);
+
+/**
+ * @swagger
+ * /auth/approve/{studentId}:
+ *   patch:
+ *     summary: Approve a student and send login credentials via email
+ *     tags: [Auth]
+ *     parameters:
+ *       - in: path
+ *         name: studentId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the student to approve
+ *     responses:
+ *       200:
+ *         description: Student approved and email sent successfully
+ *       400:
+ *         description: Student is already approved
+ *       404:
+ *         description: Student not found
+ *       500:
+ *         description: Internal server error
+ */
+router.patch("/approve/:studentId", authController.approveStudent);
+
 module.exports = router;

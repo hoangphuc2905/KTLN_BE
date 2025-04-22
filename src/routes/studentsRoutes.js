@@ -68,6 +68,73 @@ const authMiddleware = require("../middleware/authMiddleware");
  */
 router.post("/", studentController.createStudent);
 
+
+
+/**
+ * @swagger
+ * /students/inactive/{departmentId}:
+ *   get:
+ *     summary: Get all inactive students by department
+ *     tags: [Students]
+ *     parameters:
+ *       - in: path
+ *         name: departmentId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the department
+ *     responses:
+ *       200:
+ *         description: List of inactive students retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 students:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       student_id:
+ *                         type: string
+ *                       full_name:
+ *                         type: string
+ *                       email:
+ *                         type: string
+ *                       phone:
+ *                         type: string
+ *                       gender:
+ *                         type: string
+ *                       date_of_birth:
+ *                         type: string
+ *                         format: date
+ *                       cccd:
+ *                         type: string
+ *                       address:
+ *                         type: string
+ *                       start_date:
+ *                         type: string
+ *                         format: date
+ *                       department:
+ *                         type: object
+ *                         properties:
+ *                           department_name:
+ *                             type: string
+ *                       isActive:
+ *                         type: boolean
+ *       404:
+ *         description: No inactive students found for this department
+ *       500:
+ *         description: Internal server error
+ */
+router.get(
+  "/inactive/:departmentId",
+  studentController.getInactiveStudentsByDepartment
+);
+
 /**
  * @swagger
  * /students/import:

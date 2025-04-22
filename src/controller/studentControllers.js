@@ -36,6 +36,41 @@ const studentController = {
     }
   },
 
+ 
+  getInactiveStudentsByDepartment: async (req, res) => {
+    try {
+      const { departmentId } = req.params; // Lấy departmentId từ URL params
+
+      // Tìm tất cả sinh viên có trạng thái isActive: false và thuộc khoa được chỉ định
+      const inactiveStudents = await Student.find({
+        department: departmentId,
+        isActive: false,
+      }).populate({
+        path: "department",
+        select: "department_name",
+      });
+
+      // Kiểm tra nếu không có sinh viên nào
+      if (!inactiveStudents || inactiveStudents.length === 0) {
+        return res.status(404).json({
+          message: "No inactive students found for this department",
+        });
+      }
+
+      // Trả về danh sách sinh viên
+      res.status(200).json({
+        message: "Inactive students retrieved successfully",
+        students: inactiveStudents,
+      });
+    } catch (error) {
+      console.error("Error retrieving inactive students:", error);
+      res.status(500).json({
+        message: "An error occurred while retrieving inactive students",
+        error: error.message,
+      });
+    }
+  },
+
   importStudentsFromExcel: async (req, res) => {
     try {
       // Kiểm tra xem file có được tải lên không

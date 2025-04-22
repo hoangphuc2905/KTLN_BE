@@ -61,6 +61,7 @@ const studentSchema = new Schema(
     degree: {
       type: String,
       enum: [
+        "None",
         "Bachelor",
         "Master",
         "Doctor",
