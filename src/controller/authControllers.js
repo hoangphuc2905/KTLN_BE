@@ -266,7 +266,7 @@ const authController = {
         to: student.email, // Email người nhận
         subject:
           "Hệ thống quản lý các bài báo nghiên cứu khoa học của sinh viên và giảng viên trường Đại học Công Nghiệp TPHCM",
-        text: `Chào ${student.full_name},\n\nTài khỏan của bạn đã được phê duyệt thành công trên hệ thống quản lý bài báo nghiên cứu khoa học của sinh viên và giảng viên trường Đại học Công Nghiệp TPHCM.\n\nBạn có thể đăng nhập vào hệ thống bằng mã số sinh viên của bạn: ${student.student_id}\n\nMật khẩu mặc định là: 1111\n\nSau khi đăng nhập, bạn nên thay đổi mật khẩu của mình để bảo mật tài khoản.\n\nNếu bạn có bất kỳ câu hỏi nào, vui lòng liên hệ với chúng tôi.\n\nTrân trọng,\nHệ thống quản lý bài báo nghiên cứu khoa học`,
+        text: `Chào ${student.full_name},\n\nTài khỏan của bạn đã được phê duyệt thành công trên hệ thống quản lý bài báo nghiên cứu khoa học của sinh viên và giảng viên trường Đại học Công Nghiệp TPHCM.\n\nBạn có thể đăng nhập vào hệ thống bằng mã số sinh viên của bạn: ${student.student_id}\n\nHãy truy cập vào hệ thống tại địa chỉ: https://kltn-fe-alpha.vercel.app/\n\nMật khẩu mặc định là: 1111\n\nSau khi đăng nhập, bạn nên thay đổi mật khẩu của mình để bảo mật tài khoản.\n\nNếu bạn có bất kỳ câu hỏi nào, vui lòng liên hệ với chúng tôi.\n\nTrân trọng,\nHệ thống quản lý bài báo nghiên cứu khoa học`,
       };
 
       console.log("Sending email to:", student.email);
