@@ -119,7 +119,7 @@ const formulaController = {
   // Lấy tất cả
   getAllFormula: async (req, res) => {
     try {
-      const dateRanges = await ScoringFormula.find();
+      const dateRanges = await ScoringFormula.find().sort({ startDate: -1 });
       res.status(200).json(dateRanges);
     } catch (error) {
       res.status(500).json({ message: error.message });

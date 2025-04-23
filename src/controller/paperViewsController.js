@@ -84,12 +84,25 @@ const paperViewsController = {
             { path: "department", select: "department_name" },
           ],
         });
+
       if (!paperViews || paperViews.length === 0) {
         return res
           .status(404)
           .json({ message: "No paper views found for this user" });
       }
-      res.status(200).json(paperViews);
+
+      // Loại bỏ các bản ghi trùng lặp dựa trên `paper_id`
+      const uniquePaperViews = [];
+      const seenPaperIds = new Set();
+
+      for (const view of paperViews) {
+        if (!seenPaperIds.has(view.paper_id.toString())) {
+          uniquePaperViews.push(view);
+          seenPaperIds.add(view.paper_id.toString());
+        }
+      }
+
+      res.status(200).json(uniquePaperViews);
     } catch (error) {
       console.error("Error fetching paper views:", error);
       res.status(500).json({ message: error.message });
