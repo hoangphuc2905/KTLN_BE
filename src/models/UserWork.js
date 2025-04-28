@@ -19,7 +19,7 @@ const userWorkSchema = new Schema(
     },
     end_date: {
       type: Date,
-      required: true,
+      required: false,
     },
     role_vi: {
       type: String,
