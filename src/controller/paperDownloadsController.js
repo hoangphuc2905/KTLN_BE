@@ -1,5 +1,15 @@
 const PaperDownloads = require("../models/PaperDownloads");
 const mongoose = require("mongoose");
+const rateLimit = require("express-rate-limit");
+
+const createPaperDownloadLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000,
+  max: 5,
+  message: {
+    message:
+      "Bạn đã tải xuống quá nhiều lần trong thời gian ngắn. Vui lòng thử lại sau.",
+  },
+});
 
 const paperDownloadsController = {
   createPaperDownload: async (req, res) => {
@@ -90,7 +100,6 @@ const paperDownloadsController = {
   getAllPaperDownloadsByUser: async (req, res) => {
     try {
       const { user_id } = req.params;
-      console.log("Fetching paper downloads for user_id:", user_id);
       const paperDownloads = await PaperDownloads.find({ user_id })
         .sort({ download_time: -1 })
         .populate({
@@ -113,4 +122,4 @@ const paperDownloadsController = {
   },
 };
 
-module.exports = paperDownloadsController;
+module.exports = { paperDownloadsController, createPaperDownloadLimiter };

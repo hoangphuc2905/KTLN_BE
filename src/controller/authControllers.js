@@ -96,7 +96,6 @@ const authController = {
     try {
       const { user_id, oldPassword, newPassword } = req.body;
 
-      // Tìm kiếm trong cả hai mô hình Student và Lecturer
       let user = await Student.findOne({ student_id: user_id });
       if (!user) {
         user = await Lecturer.findOne({ lecturer_id: user_id });
@@ -106,13 +105,11 @@ const authController = {
         return res.status(400).json({ message: "Invalid user_id" });
       }
 
-      // Tìm tài khoản trong mô hình Account
       const account = await Account.findOne({ user_id: user._id });
       if (!account) {
         return res.status(400).json({ message: "Account not found" });
       }
 
-      // Kiểm tra mật khẩu cũ
       const isPasswordValid = await bcrypt.compare(
         oldPassword,
         account.password
@@ -121,7 +118,6 @@ const authController = {
         return res.status(400).json({ message: "Invalid password" });
       }
 
-      // Cập nhật mật khẩu mới
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(newPassword, salt);
 
@@ -136,7 +132,6 @@ const authController = {
 
   updateUserInfo: async (req, res) => {
     try {
-      console.log("Decoded user from token:", req.user);
 
       if (req.user.user_type === "Student") {
         req.params.student_id = req.user.userId;
@@ -154,7 +149,6 @@ const authController = {
 
   registerStudent: async (req, res) => {
     try {
-      // Lấy thông tin từ body
       const {
         student_id,
         full_name,
@@ -197,12 +191,10 @@ const authController = {
       });
       await student.save();
 
-      // Tạo mật khẩu mặc định
       const defaultPassword = "1111";
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(defaultPassword, salt);
 
-      // Tạo tài khoản cho sinh viên
       const account = new Account({
         user_id: student._id,
         user_type: "Student",
@@ -228,22 +220,18 @@ const authController = {
     try {
       const { studentId } = req.params;
 
-      // Tìm sinh viên theo ID
       const student = await Student.findOne({ student_id: studentId });
       if (!student) {
         return res.status(404).json({ message: "Student not found" });
       }
 
-      // Kiểm tra nếu sinh viên đã được duyệt
       if (student.isActive) {
         return res.status(400).json({ message: "Student is already approved" });
       }
 
-      // Cập nhật trạng thái isActive thành true
       student.isActive = true;
       await student.save();
 
-      // Lấy tài khoản đã tạo khi đăng ký
       const account = await Account.findOne({ user_id: student._id });
       if (!account) {
         return res
@@ -251,19 +239,17 @@ const authController = {
           .json({ message: "Account not found for this student" });
       }
 
-      // Cấu hình transporter của nodemailer
       const transporter = nodemailer.createTransport({
         service: "gmail",
         auth: {
-          user: process.env.EMAIL_USER, // Email của bạn
-          pass: process.env.EMAIL_PASS, // Mật khẩu ứng dụng
+          user: process.env.EMAIL_USER, 
+          pass: process.env.EMAIL_PASS, 
         },
       });
 
-      // Nội dung email
       const mailOptions = {
-        from: process.env.EMAIL_USER, // Email người gửi
-        to: student.email, // Email người nhận
+        from: process.env.EMAIL_USER, 
+        to: student.email, 
         subject:
           "Hệ thống quản lý các bài báo nghiên cứu khoa học của sinh viên và giảng viên trường Đại học Công Nghiệp TPHCM",
         text: `Chào ${student.full_name},\n\nTài khỏan của bạn đã được phê duyệt thành công trên hệ thống quản lý bài báo nghiên cứu khoa học của sinh viên và giảng viên trường Đại học Công Nghiệp TPHCM.\n\nBạn có thể đăng nhập vào hệ thống bằng mã số sinh viên của bạn: ${student.student_id}\n\nHãy truy cập vào hệ thống tại địa chỉ: https://kltn-fe-alpha.vercel.app/\n\nMật khẩu mặc định là: 1111\n\nSau khi đăng nhập, bạn nên thay đổi mật khẩu của mình để bảo mật tài khoản.\n\nNếu bạn có bất kỳ câu hỏi nào, vui lòng liên hệ với chúng tôi.\n\nTrân trọng,\nHệ thống quản lý bài báo nghiên cứu khoa học`,
@@ -271,7 +257,6 @@ const authController = {
 
       console.log("Sending email to:", student.email);
 
-      // Gửi email
       await transporter.sendMail(mailOptions);
 
       res.status(200).json({

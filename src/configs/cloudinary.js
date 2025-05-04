@@ -1,4 +1,4 @@
-require("dotenv").config(); // Tải file .env trực tiếp trong file này
+require("dotenv").config(); 
 
 const cloudinary = require("cloudinary").v2;
 cloudinary.config({

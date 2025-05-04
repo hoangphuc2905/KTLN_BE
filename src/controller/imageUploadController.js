@@ -1,8 +1,6 @@
 const multer = require("multer");
-const cloudinary = require("../configs/cloudinary"); // Import cấu hình Cloudinary
+const cloudinary = require("../configs/cloudinary"); 
 
-
-// Cấu hình Multer (lưu vào bộ nhớ tạm)
 const storage = multer.memoryStorage();
 const upload = multer({ storage }).single("image");
 
@@ -14,7 +12,7 @@ const uploadImageToCloudinary = async (buffer, folderName) => {
         if (error) {
           reject(error);
         } else {
-          resolve(result.url); // Trả về URL của ảnh đã upload
+          resolve(result.url); 
         }
       }
     );
@@ -22,14 +20,13 @@ const uploadImageToCloudinary = async (buffer, folderName) => {
   });
 };
 
-// Middleware xử lý upload ảnh
 const uploadImage = async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ message: "No image uploaded" });
     }
 
-    const folderName = "article_images"; // Tên thư mục trên Cloudinary
+    const folderName = "article_images"; 
     const imageUrl = await uploadImageToCloudinary(req.file.buffer, folderName);
 
     res.status(200).json({

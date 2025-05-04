@@ -18,9 +18,6 @@ const { semanticSearch } = require("../controller/searchAIControllers");
  *               query:
  *                 type: string
  *                 description: The search query (required)
- *               department:
- *                 type: string
- *                 description: The department to filter by (optional)
  *               criteria:
  *                 type: string
  *                 description: The search criteria (title, author, year, keywords) (optional)
@@ -38,9 +35,6 @@ const { semanticSearch } = require("../controller/searchAIControllers");
  *                 filters:
  *                   type: object
  *                   properties:
- *                     department:
- *                       type: string
- *                       description: The department filter applied
  *                     criteria:
  *                       type: string
  *                       description: The search criteria applied

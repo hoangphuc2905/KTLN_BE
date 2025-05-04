@@ -1,6 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const paperDownloadsController = require("../controller/paperDownloadsController");
+const {
+  paperDownloadsController,
+  createPaperDownloadLimiter,
+} = require("../controller/paperDownloadsController");
 
 /**
  * @swagger
@@ -42,7 +45,11 @@ const paperDownloadsController = require("../controller/paperDownloadsController
  *       400:
  *         description: Bad request
  */
-router.post("/", paperDownloadsController.createPaperDownload);
+router.post(
+  "/",
+  createPaperDownloadLimiter,
+  paperDownloadsController.createPaperDownload
+);
 
 /**
  * @swagger

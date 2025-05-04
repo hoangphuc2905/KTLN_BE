@@ -74,7 +74,6 @@ const paperViewsController = {
   getAllPaperViewsByUser: async (req, res) => {
     try {
       const { user_id } = req.params;
-      console.log("Fetching paper views for user_id:", user_id);
       const paperViews = await PaperViews.find({ user_id })
         .sort({ view_time: -1 })
         .populate({

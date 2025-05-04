@@ -215,6 +215,8 @@ router.post("/", scientificPaperController.createScientificPaper);
  *         description: Server error
  */
 router.get("/", scientificPaperController.getAllScientificPapers);
+
+
 /**
  * @swagger
  * /scientificPapers/top5-newest:

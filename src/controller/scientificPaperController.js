@@ -20,10 +20,8 @@ const scientificPaperController = {
     session.startTransaction();
 
     try {
-      // Lấy bài báo gần nhất dựa trên paper_id (chuyển đổi sang số)
       const lastPaper = await ScientificPaper.findOne().sort({ paper_id: -1 });
 
-      // Tạo mã bài báo mới
       let newPaperId;
       if (lastPaper && lastPaper.paper_id) {
         const lastIdNumber = parseInt(lastPaper.paper_id, 10) || 0;
@@ -32,102 +30,90 @@ const scientificPaperController = {
         newPaperId = "000001";
       }
 
-      // Upload file lên Cloudinary
       let fileUrl = null;
       if (req.file) {
-        const folderName = "scientific_papers"; // Tên thư mục trên Cloudinary
-        fileUrl = await uploadFileToCloudinary(req.file.path, folderName); // Upload file và lấy URL
+        const folderName = "scientific_papers";
+        fileUrl = await uploadFileToCloudinary(req.file.path, folderName);
       }
 
-      // Tạo bài báo mới
       const scientificPaper = new ScientificPaper({
         ...req.body,
         paper_id: newPaperId,
-        file_url: fileUrl, // Lưu URL của file vào cơ sở dữ liệu
+        file_url: fileUrl,
         author: [],
       });
 
       await scientificPaper.save({ session });
       console.log("Scientific paper saved:", scientificPaper);
 
-      // Xử lý danh sách tác giả
       const authorIds = [];
-      let senderUserId = null; // Biến để lưu `user_id` của người gửi
+      let senderUserId = null;
       if (Array.isArray(req.body.author)) {
         for (const authorData of req.body.author) {
           const newAuthor = new PaperAuthor({
             ...authorData,
-            paper_id: scientificPaper._id, // Gán paper_id của bài báo
+            paper_id: scientificPaper._id,
           });
           const savedAuthor = await newAuthor.save({ session });
-          authorIds.push(savedAuthor._id); // Lưu ObjectId của tác giả
+          authorIds.push(savedAuthor._id);
 
-          // Lấy `user_id` của tác giả đầu tiên làm người gửi
           if (!senderUserId) {
             senderUserId = savedAuthor.user_id;
           }
         }
       }
 
-      // Cập nhật danh sách tác giả vào bài báo
       await ScientificPaper.updateOne(
         { _id: scientificPaper._id },
         { $set: { author: authorIds } },
         { session }
       );
 
-      // **Gửi thông báo tới các vai trò trong khoa**
-      const departmentId = req.body.department; // Lấy khoa từ request body
+      const departmentId = req.body.department;
       const roleNames = [
         "head_of_department",
         "deputy_head_of_department",
         "department_in_charge",
-      ]; // Các vai trò cần gửi thông báo
+      ];
 
-      // Tìm các vai trò tương ứng
       const roles = await Role.find({ role_name: { $in: roleNames } });
 
-      // Tìm giảng viên thuộc khoa và có vai trò phù hợp
       const lecturers = await Lecturer.find({
         department: departmentId,
         roles: { $in: roles.map((role) => role._id) },
       });
 
-      senderUserId = senderUserId || authorIds[0]; // Nếu không có `user_id` của tác giả, sử dụng tác giả đầu tiên
+      senderUserId = senderUserId || authorIds[0];
 
       for (const lecturer of lecturers) {
         const messageData = {
-          message_id: uuidv4(), // Tạo ID duy nhất cho thông báo
-          message_type: "Request for Approval", // Đặt loại thông báo là "Yêu cầu duyệt"
+          message_id: uuidv4(),
+          message_type: "Request for Approval",
           status: "Pending Response",
           sender_id: senderUserId,
-          sender_model: "Student", // Model của người gửi là `Student`
-          receiver_id: lecturer.lecturer_id, // ID của người nhận
-          receiver_model: "Lecturer", // Vai trò của người nhận
-          paper_id: scientificPaper._id, // ID của bài báo
-          content: `Có một bài báo mới cần duyệt: ${scientificPaper.title_vn}`, // Nội dung thông báo
+          sender_model: "Student",
+          receiver_id: lecturer.lecturer_id,
+          receiver_model: "Lecturer",
+          paper_id: scientificPaper._id,
+          content: `Có một bài báo mới cần duyệt: ${scientificPaper.title_vn}`,
           isread: false,
           time: new Date(),
         };
-        // Gọi hàm createMessage từ messagesController
         await messagesController.createMessage(
-          { body: messageData }, // Giả lập req.body
-          { status: () => ({ json: () => {} }) } // Giả lập res (không cần trả về gì)
+          { body: messageData },
+          { status: () => ({ json: () => {} }) }
         );
       }
 
-      // Tạo nội dung để sinh embedding
       const contentToEmbed = `${scientificPaper.title_vn} ${scientificPaper.title_en} ${scientificPaper.summary} ${scientificPaper.keywords}`;
       const embedding = await generateEmbedding(contentToEmbed);
 
-      // Cập nhật embedding vào bài báo
       await ScientificPaper.updateOne(
         { _id: scientificPaper._id },
         { $set: { embedding } },
         { session }
       );
 
-      // Commit transaction
       await session.commitTransaction();
       session.endSession();
 
@@ -139,7 +125,6 @@ const scientificPaperController = {
         },
       });
     } catch (error) {
-      // Rollback transaction nếu có lỗi và chưa commit
       if (session.inTransaction()) {
         await session.abortTransaction();
       }
@@ -148,14 +133,18 @@ const scientificPaperController = {
     }
   },
 
-  // Backend logic for getAllScientificPapers
   getAllScientificPapers: async (req, res) => {
     try {
-      const { academicYear } = req.query; // Get academicYear from query string
+      const { academicYear } = req.query;
 
-      let filter = {}; // Default filter is empty (fetch all papers)
+      if (academicYear && !/^\d{4}-\d{4}$/.test(academicYear)) {
+        return res.status(400).json({
+          message: "Invalid academicYear format. Expected format: YYYY-YYYY",
+        });
+      }
 
-      // If academicYear is provided, calculate the date range and add to the filter
+      let filter = { status: "approved" }; 
+
       if (academicYear) {
         const { startDate, endDate } = getAcademicYearRange(academicYear);
         filter.createdAt = { $gte: startDate, $lte: endDate };
@@ -178,18 +167,27 @@ const scientificPaperController = {
           select: "department_name",
         });
 
-      console.log("Scientific papers retrieved:", scientificPapers);
+      if (!scientificPapers || scientificPapers.length === 0) {
+        return res.status(404).json({
+          message: academicYear
+            ? `No approved scientific papers found for academic year ${academicYear}`
+            : "No approved scientific papers found",
+        });
+      }
 
       res.status(200).json({
         message: academicYear
-          ? `Scientific papers for academic year ${academicYear}`
-          : "All scientific papers retrieved successfully",
+          ? `Approved scientific papers for academic year ${academicYear}`
+          : "All approved scientific papers retrieved successfully",
         academicYear: academicYear || "All",
         scientificPapers,
       });
     } catch (error) {
       console.error("Error fetching scientific papers:", error);
-      res.status(500).json({ message: error.message });
+      res.status(500).json({
+        message: "An error occurred while fetching scientific papers",
+        error: error.message,
+      });
     }
   },
 
@@ -218,10 +216,9 @@ const scientificPaperController = {
 
   getScientificPapersByAuthorId: async (req, res) => {
     try {
-      const { userId } = req.params; // Lấy `userId` từ URL params
-      const { academicYear } = req.query; // Lấy `academicYear` từ query string
+      const { userId } = req.params;
+      const { academicYear } = req.query;
 
-      // Tìm tất cả các tác giả có `user_id` khớp
       const authors = await PaperAuthor.find({ user_id: userId });
 
       if (!authors || authors.length === 0) {
@@ -232,16 +229,13 @@ const scientificPaperController = {
 
       const authorIds = authors.map((author) => author._id);
 
-      // Bộ lọc mặc định theo `author`
       let filter = { author: { $in: authorIds } };
 
-      // Nếu có năm học, thêm điều kiện lọc theo khoảng thời gian
       if (academicYear) {
         const { startDate, endDate } = getAcademicYearRange(academicYear);
         filter.createdAt = { $gte: startDate, $lte: endDate };
       }
 
-      // Tìm tất cả bài viết theo bộ lọc
       const scientificPapers = await ScientificPaper.find(filter)
         .populate("article_type")
         .populate("article_group")
@@ -280,13 +274,11 @@ const scientificPaperController = {
 
       let filter = { department };
 
-      // Nếu có năm học, tính khoảng thời gian và thêm vào bộ lọc
       if (academicYear) {
         const { startDate, endDate } = getAcademicYearRange(academicYear);
         filter.createdAt = { $gte: startDate, $lte: endDate };
       }
 
-      // Tìm tất cả bài viết theo bộ lọc
       const scientificPapers = await ScientificPaper.find(filter)
         .populate("article_type")
         .populate("article_group")
@@ -326,9 +318,6 @@ const scientificPaperController = {
     try {
       const { id } = req.params;
       const { status } = req.body;
-
-      console.log("Received status:", status);
-      console.log("Received id:", id);
 
       const validStatuses = ["pending", "approved", "refused", "revision"];
       if (!validStatuses.includes(status)) {
@@ -373,20 +362,17 @@ const scientificPaperController = {
     try {
       const { id } = req.params;
 
-      // Tìm bài báo cần cập nhật
       const existingPaper = await ScientificPaper.findById(id);
       if (!existingPaper) {
         return res.status(404).json({ message: "ScientificPaper not found" });
       }
 
-      // Upload file mới lên Cloudinary nếu có
       let fileUrl = existingPaper.file_url;
       if (req.file && req.file.path) {
         const folderName = "scientific_papers";
         fileUrl = await uploadFileToCloudinary(req.file.path, folderName);
       }
 
-      // Xử lý danh sách tác giả
       const authorIds = [];
       let senderUserId = null;
       if (Array.isArray(req.body.author) && req.body.author.length > 0) {
@@ -406,7 +392,6 @@ const scientificPaperController = {
         }
       }
 
-      // Cập nhật thông tin bài báo
       const updatedPaperData = {
         ...req.body,
         file_url: fileUrl,
@@ -419,7 +404,6 @@ const scientificPaperController = {
         { new: true, runValidators: true, session }
       );
 
-      // Gửi thông báo tới các vai trò trong khoa
       const departmentId = req.body.department;
       if (!departmentId) {
         throw new Error("Department ID is required.");
@@ -460,7 +444,6 @@ const scientificPaperController = {
         );
       }
 
-      // Commit transaction
       await session.commitTransaction();
       session.endSession();
 
@@ -475,6 +458,7 @@ const scientificPaperController = {
       res.status(500).json({ message: error.message });
     }
   },
+
   getTop5NewestScientificPapers: async (req, res) => {
     try {
       const topPapers = await ScientificPaper.find({ status: "approved" })
@@ -504,9 +488,8 @@ const scientificPaperController = {
 
   getTop5MostViewedAndDownloadedPapers: async (req, res) => {
     try {
-      const { academicYear } = req.query; // Lấy `academicYear` từ query string
+      const { academicYear } = req.query;
 
-      // Nếu có năm học, tính khoảng thời gian
       let dateFilter = {};
       if (academicYear) {
         const { startDate, endDate } = getAcademicYearRange(academicYear);
@@ -516,7 +499,7 @@ const scientificPaperController = {
       const topPapers = await ScientificPaper.aggregate([
         {
           $lookup: {
-            from: "paperviews", // Tên collection chứa lượt xem
+            from: "paperviews",
             localField: "_id",
             foreignField: "paper_id",
             as: "views",
@@ -524,7 +507,7 @@ const scientificPaperController = {
         },
         {
           $lookup: {
-            from: "paperdownloads", // Tên collection chứa lượt tải xuống
+            from: "paperdownloads",
             localField: "_id",
             foreignField: "paper_id",
             as: "downloads",
@@ -532,7 +515,7 @@ const scientificPaperController = {
         },
         {
           $lookup: {
-            from: "paperauthors", // Tên collection chứa tác giả
+            from: "paperauthors",
             localField: "author",
             foreignField: "_id",
             as: "author",
@@ -552,7 +535,7 @@ const scientificPaperController = {
                           { $lte: ["$$view.createdAt", dateFilter.$lte] },
                         ],
                       }
-                    : true, // Không áp dụng bộ lọc nếu không có `academicYear`
+                    : true,
                 },
               },
             },
@@ -568,7 +551,7 @@ const scientificPaperController = {
                           { $lte: ["$$download.createdAt", dateFilter.$lte] },
                         ],
                       }
-                    : true, // Không áp dụng bộ lọc nếu không có `academicYear`
+                    : true,
                 },
               },
             },
@@ -576,17 +559,14 @@ const scientificPaperController = {
         },
         {
           $match: {
-            $or: [
-              { viewCount: { $gt: 0 } }, // Chỉ lấy bài có lượt xem > 0
-              { downloadCount: { $gt: 0 } }, // Hoặc lượt tải xuống > 0
-            ],
+            $or: [{ viewCount: { $gt: 0 } }, { downloadCount: { $gt: 0 } }],
           },
         },
         {
-          $sort: { viewCount: -1, downloadCount: -1 }, // Sắp xếp theo lượt xem và tải xuống giảm dần
+          $sort: { viewCount: -1, downloadCount: -1 },
         },
         {
-          $limit: 5, // Giới hạn 5 bài
+          $limit: 5,
         },
         {
           $project: {
@@ -606,7 +586,6 @@ const scientificPaperController = {
         },
       ]);
 
-      // Kiểm tra nếu không có bài nghiên cứu nào
       if (!topPapers || topPapers.length === 0) {
         return res.status(200).json({
           message: "No scientific papers found",
@@ -615,7 +594,6 @@ const scientificPaperController = {
         });
       }
 
-      // Trả về kết quả
       res.status(200).json({
         message:
           "Top 5 most viewed and downloaded scientific papers retrieved successfully",

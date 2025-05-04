@@ -4,16 +4,16 @@ const messagesController = {
   // Tạo một thông báo mới
   createMessage: async (req, res) => {
     try {
-      console.log("Data received in createMessage:", req.body); // Kiểm tra dữ liệu đầu vào
+      console.log("Data received in createMessage:", req.body); 
       const message = new Messages(req.body);
       await message.save();
-      console.log("Message saved successfully:", message); // Kiểm tra xem dữ liệu có được lưu không
+      console.log("Message saved successfully:", message); 
       res.status(201).json({
         message: "Message created successfully",
         data: message,
       });
     } catch (error) {
-      console.error("Error in createMessage:", error.message); // Ghi log lỗi
+      console.error("Error in createMessage:", error.message); 
       res.status(400).json({ message: error.message });
     }
   },

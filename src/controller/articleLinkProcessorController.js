@@ -53,11 +53,10 @@ const processArticleFromLink = async (req, res) => {
 
     const $ = cheerio.load(htmlContent);
 
-    // Trích xuất thông tin từ trang web
     const title_vn = cleanText(
       $("meta[property='og:title']").attr("content") || $("title").text()
     );
-    const title_en = title_vn; // Nếu không có tiêu đề tiếng Anh, dùng tiếng Việt
+    const title_en = title_vn; 
 
     const authors = [];
     $(".author, .authors, .article-author").each((_, el) => {
@@ -91,12 +90,11 @@ const processArticleFromLink = async (req, res) => {
       $("meta[name='citation_doi']").attr("content")
     );
 
-    const status = true; // Mặc định bài báo được hiển thị
-    const featured = false; // Chưa có logic để xác định bài báo nổi bật
-    const order_no = false; // Chưa có logic để sắp xếp thứ tự
+    const status = true;
+    const featured = false; 
+    const order_no = false; 
     const department = cleanText($(".department").text() || "Không rõ khoa");
 
-    // Trả về dữ liệu JSON nhưng **KHÔNG LƯU VÀO MONGODB**
     return res.status(200).json({
       message: "Dữ liệu bài báo đã được trích xuất thành công!",
       data: {
