@@ -612,5 +612,51 @@ const scientificPaperController = {
       });
     }
   },
+
+  getScientificPapersByTitle: async (req, res) => {
+    try {
+      const { title } = req.query;
+  
+      if (!title) {
+        return res.status(400).json({ message: "Title is required" });
+      }
+  
+      const scientificPapers = await ScientificPaper.find({
+        $or: [
+          { title_vn: { $regex: `^${title}$`, $options: "i" } }, 
+          { title_en: { $regex: `^${title}$`, $options: "i" } }, 
+        ],
+      })
+        .populate("article_type")
+        .populate("article_group")
+        .populate({
+          path: "author",
+          populate: {
+            path: "work_unit_id",
+            model: "WorkUnit",
+          },
+        })
+        .populate("views")
+        .populate("downloads")
+        .populate({
+          path: "department",
+          select: "department_name",
+        });
+  
+      if (!scientificPapers || scientificPapers.length === 0) {
+        return res.status(404).json({
+          message: `No scientific papers found with the title "${title}"`,
+        });
+      }
+  
+      res.status(200).json({
+        message: `Scientific papers with the title "${title}" retrieved successfully`,
+        scientificPapers,
+      });
+    } catch (error) {
+      console.error("Error in getScientificPapersByTitle:", error.message);
+      res.status(500).json({ message: error.message });
+    }
+  },
 };
 module.exports = scientificPaperController;

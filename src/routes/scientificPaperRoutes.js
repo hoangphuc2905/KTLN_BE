@@ -216,6 +216,68 @@ router.post("/", scientificPaperController.createScientificPaper);
  */
 router.get("/", scientificPaperController.getAllScientificPapers);
 
+/**
+ * @swagger
+ * /scientificPapers/by-title:
+ *   get:
+ *     summary: Get scientific papers by title
+ *     tags: [ScientificPapers]
+ *     parameters:
+ *       - in: query
+ *         name: title
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The title of the scientific paper to search for
+ *     responses:
+ *       200:
+ *         description: List of scientific papers with the matching title
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 scientificPapers:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       paper_id:
+ *                         type: string
+ *                       title_vn:
+ *                         type: string
+ *                       title_en:
+ *                         type: string
+ *                       author:
+ *                         type: array
+ *                         items:
+ *                           type: object
+ *                           properties:
+ *                             user_id:
+ *                               type: string
+ *                             author_name_vi:
+ *                               type: string
+ *                             author_name_en:
+ *                               type: string
+ *                             role:
+ *                               type: string
+ *                       publish_date:
+ *                         type: string
+ *                         format: date
+ *                       department:
+ *                         type: string
+ *                       keywords:
+ *                         type: string
+ *       400:
+ *         description: Title is required
+ *       404:
+ *         description: No scientific papers found with the given title
+ *       500:
+ *         description: Server error
+ */
+router.get("/by-title", scientificPaperController.getScientificPapersByTitle);
 
 /**
  * @swagger
