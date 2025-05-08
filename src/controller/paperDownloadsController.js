@@ -100,21 +100,45 @@ const paperDownloadsController = {
   getAllPaperDownloadsByUser: async (req, res) => {
     try {
       const { user_id } = req.params;
-      const paperDownloads = await PaperDownloads.find({ user_id })
-        .sort({ download_time: -1 })
-        .populate({
-          path: "paper_id",
-          populate: [
-            { path: "author", select: "author_name_vi" },
-            { path: "department", select: "department_name" },
-          ],
-        });
-      if (!paperDownloads || paperDownloads.length === 0) {
+
+      // Kiểm tra nếu user_id là chuỗi hợp lệ
+      if (!user_id) {
+        return res.status(400).json({ message: "User ID is required" });
+      }
+
+      // Sử dụng aggregation để lấy bài báo mới nhất cho mỗi paper_id
+      const paperDownloads = await PaperDownloads.aggregate([
+        { $match: { user_id: user_id } }, // Lọc theo user_id
+        { $sort: { download_time: -1 } }, // Sắp xếp theo thời gian tải xuống (mới nhất trước)
+        {
+          $group: {
+            _id: "$paper_id", // Nhóm theo paper_id
+            latestDownload: { $first: "$$ROOT" }, // Lấy bản ghi mới nhất trong nhóm
+          },
+        },
+        {
+          $replaceRoot: { newRoot: "$latestDownload" }, // Thay thế root bằng bản ghi mới nhất
+        },
+      ]);
+
+      // Populate các trường liên quan
+      const populatedDownloads = await PaperDownloads.populate(paperDownloads, {
+        path: "paper_id",
+        populate: [
+          { path: "author", select: "author_name_vi" },
+          { path: "department", select: "department_name" },
+        ],
+      });
+
+      // Kiểm tra nếu không có bản ghi nào
+      if (!populatedDownloads || populatedDownloads.length === 0) {
         return res
           .status(404)
           .json({ message: "No paper downloads found for this user" });
       }
-      res.status(200).json(paperDownloads);
+
+      // Trả về kết quả
+      res.status(200).json(populatedDownloads);
     } catch (error) {
       console.error("Error fetching paper downloads:", error);
       res.status(500).json({ message: error.message });

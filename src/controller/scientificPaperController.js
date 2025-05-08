@@ -143,7 +143,64 @@ const scientificPaperController = {
         });
       }
 
-      let filter = { status: "approved" }; 
+      let filter = { status: "approved" };
+
+      if (academicYear) {
+        const { startDate, endDate } = getAcademicYearRange(academicYear);
+        filter.createdAt = { $gte: startDate, $lte: endDate };
+      }
+
+      const scientificPapers = await ScientificPaper.find(filter)
+        .populate("article_type")
+        .populate("article_group")
+        .populate({
+          path: "author",
+          populate: {
+            path: "work_unit_id",
+            model: "WorkUnit",
+          },
+        })
+        .populate("views")
+        .populate("downloads")
+        .populate({
+          path: "department",
+          select: "department_name",
+        });
+
+      if (!scientificPapers || scientificPapers.length === 0) {
+        return res.status(404).json({
+          message: academicYear
+            ? `No approved scientific papers found for academic year ${academicYear}`
+            : "No approved scientific papers found",
+        });
+      }
+
+      res.status(200).json({
+        message: academicYear
+          ? `Approved scientific papers for academic year ${academicYear}`
+          : "All approved scientific papers retrieved successfully",
+        academicYear: academicYear || "All",
+        scientificPapers,
+      });
+    } catch (error) {
+      console.error("Error fetching scientific papers:", error);
+      res.status(500).json({
+        message: "An error occurred while fetching scientific papers",
+        error: error.message,
+      });
+    }
+  },
+
+  getAllScientificPapersByAllStatus: async (req, res) => {
+    try {
+      const { academicYear } = req.query;
+
+      if (academicYear && !/^\d{4}-\d{4}$/.test(academicYear)) {
+        return res.status(400).json({
+          message: "Invalid academicYear format. Expected format: YYYY-YYYY",
+        });
+      }
+      let filter = {};
 
       if (academicYear) {
         const { startDate, endDate } = getAcademicYearRange(academicYear);
@@ -616,15 +673,15 @@ const scientificPaperController = {
   getScientificPapersByTitle: async (req, res) => {
     try {
       const { title } = req.query;
-  
+
       if (!title) {
         return res.status(400).json({ message: "Title is required" });
       }
-  
+
       const scientificPapers = await ScientificPaper.find({
         $or: [
-          { title_vn: { $regex: `^${title}$`, $options: "i" } }, 
-          { title_en: { $regex: `^${title}$`, $options: "i" } }, 
+          { title_vn: { $regex: `^${title}$`, $options: "i" } },
+          { title_en: { $regex: `^${title}$`, $options: "i" } },
         ],
       })
         .populate("article_type")
@@ -642,13 +699,13 @@ const scientificPaperController = {
           path: "department",
           select: "department_name",
         });
-  
+
       if (!scientificPapers || scientificPapers.length === 0) {
         return res.status(404).json({
           message: `No scientific papers found with the title "${title}"`,
         });
       }
-  
+
       res.status(200).json({
         message: `Scientific papers with the title "${title}" retrieved successfully`,
         scientificPapers,

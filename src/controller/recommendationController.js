@@ -135,7 +135,7 @@ exports.getRecommendationsByUserHistory = async (req, res) => {
     // 7. Trả về top 10 gợi ý
     const topPapers = scored
       .sort((a, b) => b.similarity - a.similarity)
-      .slice(0, 50);
+      .slice(0, 100);
 
     return res.status(200).json({
       message: "Recommended papers based on views and downloads",

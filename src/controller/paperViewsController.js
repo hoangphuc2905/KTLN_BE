@@ -74,34 +74,38 @@ const paperViewsController = {
   getAllPaperViewsByUser: async (req, res) => {
     try {
       const { user_id } = req.params;
-      const paperViews = await PaperViews.find({ user_id })
-        .sort({ view_time: -1 })
-        .populate({
-          path: "paper_id",
-          populate: [
-            { path: "author", select: "author_name_vi" },
-            { path: "department", select: "department_name" },
-          ],
-        });
-
-      if (!paperViews || paperViews.length === 0) {
+  
+      // Sử dụng aggregation để lấy bài báo mới nhất cho mỗi paper_id
+      const paperViews = await PaperViews.aggregate([
+        { $match: { user_id: user_id } }, // Lọc theo user_id
+        { $sort: { view_time: -1 } }, // Sắp xếp theo thời gian xem (mới nhất trước)
+        {
+          $group: {
+            _id: "$paper_id", // Nhóm theo paper_id
+            latestView: { $first: "$$ROOT" }, // Lấy bản ghi mới nhất trong nhóm
+          },
+        },
+        {
+          $replaceRoot: { newRoot: "$latestView" }, // Thay thế root bằng bản ghi mới nhất
+        },
+      ]);
+  
+      // Populate các trường liên quan
+      const populatedViews = await PaperViews.populate(paperViews, {
+        path: "paper_id",
+        populate: [
+          { path: "author", select: "author_name_vi" },
+          { path: "department", select: "department_name" },
+        ],
+      });
+  
+      if (!populatedViews || populatedViews.length === 0) {
         return res
           .status(404)
           .json({ message: "No paper views found for this user" });
       }
-
-      // Loại bỏ các bản ghi trùng lặp dựa trên `paper_id`
-      const uniquePaperViews = [];
-      const seenPaperIds = new Set();
-
-      for (const view of paperViews) {
-        if (!seenPaperIds.has(view.paper_id.toString())) {
-          uniquePaperViews.push(view);
-          seenPaperIds.add(view.paper_id.toString());
-        }
-      }
-
-      res.status(200).json(uniquePaperViews);
+  
+      res.status(200).json(populatedViews);
     } catch (error) {
       console.error("Error fetching paper views:", error);
       res.status(500).json({ message: error.message });

@@ -113,7 +113,7 @@ exports.semanticSearch = async (req, res) => {
     res.status(200).json({
       query,
       filters: { criteria },
-      results: results.slice(0, 10), // Lấy top 10 kết quả
+      results: results.slice(0, 100), // Lấy top 10 kết quả
     });
   } catch (error) {
     console.error("Semantic search error:", error);

@@ -218,6 +218,96 @@ router.get("/", scientificPaperController.getAllScientificPapers);
 
 /**
  * @swagger
+ * /scientificPapers:
+ *   get:
+ *     summary: Get all scientific papers
+ *     tags: [ScientificPapers]
+ *     parameters:
+ *       - in: query
+ *         name: academicYear
+ *         schema:
+ *           type: string
+ *           example: "2024-2025"
+ *         required: false
+ *         description: The academic year to filter scientific papers (e.g., "2024-2025")
+ *     responses:
+ *       200:
+ *         description: List of scientific papers
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 academicYear:
+ *                   type: string
+ *                   example: "2024-2025"
+ *                 scientificPapers:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       paper_id:
+ *                         type: string
+ *                       article_type:
+ *                         type: string
+ *                       article_group:
+ *                         type: string
+ *                       title_vn:
+ *                         type: string
+ *                       title_en:
+ *                         type: string
+ *                       author_count:
+ *                         type: number
+ *                       author:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                           description: IDs of authors
+ *                       publish_date:
+ *                         type: string
+ *                         format: date
+ *                       magazine_vi:
+ *                         type: string
+ *                       magazine_en:
+ *                         type: string
+ *                       magazine_type:
+ *                         type: string
+ *                       page:
+ *                         type: number
+ *                       issn_isbn:
+ *                         type: string
+ *                       file:
+ *                         type: string
+ *                       link:
+ *                         type: string
+ *                       doi:
+ *                         type: string
+ *                       status:
+ *                         type: boolean
+ *                       order_no:
+ *                         type: boolean
+ *                       featured:
+ *                         type: boolean
+ *                       keywords:
+ *                         type: string
+ *                       summary:
+ *                         type: string
+ *                       department:
+ *                         type: string
+ *                       cover_image:
+ *                         type: string
+ *       500:
+ *         description: Server error
+ */
+router.get(
+  "/getAllScientificPapersByAllStatus",
+  scientificPaperController.getAllScientificPapersByAllStatus
+);
+
+/**
+ * @swagger
  * /scientificPapers/by-title:
  *   get:
  *     summary: Get scientific papers by title
