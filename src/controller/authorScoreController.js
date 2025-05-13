@@ -63,8 +63,9 @@ exports.calculateScoreFromInput = async (req, res) => {
             }
             break;
           case "featured":
-            if (attribute.values.has(!!featured)) {
-              attrValue = attribute.values.get(!!featured);
+            const featuredKey = String(!!featured);
+            if (attribute.values.has(featuredKey)) {
+              attrValue = attribute.values.get(featuredKey);
             }
             break;
           default:
