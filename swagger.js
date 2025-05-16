@@ -12,7 +12,6 @@ const swaggerOptions = {
       {
         url: "https://ktln-be.onrender.com",
         // url: "http://localhost:5000",
-
         description: "Render Production Server",
       },
     ],
