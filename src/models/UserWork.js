@@ -10,7 +10,7 @@ const userWorkSchema = new Schema(
     },
     user_id: {
       type: String,
-      ref: "User",
+      ref: "Lecturer" || "Student",
       required: true,
     },
     start_date: {
