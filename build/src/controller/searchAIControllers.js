@@ -2,11 +2,11 @@ const {
   generateEmbedding
 } = require("../utils/embeddingUtils");
 const ScientificPaper = require("../models/ScientificPaper");
+const PaperAuthor = require("../models/PaperAuthor");
 exports.semanticSearch = async (req, res) => {
   try {
     const {
       query,
-      department,
       criteria
     } = req.body;
     if (!query) return res.status(400).json({
@@ -22,8 +22,7 @@ exports.semanticSearch = async (req, res) => {
         $exists: true
       },
       status: "approved"
-    }; // Chỉ lấy bài báo đã được phê duyệt và có embedding
-    if (department) filter.department = department; // Lọc theo khoa
+    };
     if (criteria) {
       switch (criteria) {
         case "title":
@@ -32,39 +31,61 @@ exports.semanticSearch = async (req, res) => {
               $regex: query,
               $options: "i"
             }
-          },
-          // Tìm kiếm theo tiêu đề tiếng Việt
-          {
+          }, {
             title_en: {
               $regex: query,
               $options: "i"
             }
-          } // Tìm kiếm theo tiêu đề tiếng Anh
-          ];
+          }];
           break;
         case "author":
-          filter.$or = [{
-            "author.author_name_vi": {
+          const authorMatch = [{
+            author_name_vi: {
               $regex: query,
               $options: "i"
             }
           },
-          // Tìm kiếm theo tên tác giả tiếng Việt
+          // Tìm kiếm theo tên tiếng Việt
           {
-            "author.author_name_en": {
+            author_name_en: {
               $regex: query,
               $options: "i"
             }
-          } // Tìm kiếm theo tên tác giả tiếng Anh
+          } // Tìm kiếm theo tên tiếng Anh
           ];
+
+          // Tìm các tác giả phù hợp
+          const matchingAuthors = await PaperAuthor.find({
+            $or: authorMatch
+          }).select("_id");
+          if (matchingAuthors.length === 0) {
+            return res.status(200).json({
+              query,
+              filters: {
+                criteria
+              },
+              results: [],
+              message: "No papers found matching the author criteria"
+            });
+          }
+
+          // Lấy danh sách các ObjectId của tác giả
+          const authorIds = matchingAuthors.map(author => author._id);
+
+          // Lọc các bài báo có tác giả phù hợp
+          filter.author = {
+            $in: authorIds
+          };
           break;
         case "year":
-          if (!isNaN(parseInt(query, 10))) {
+          const year = parseInt(query, 10); // Chuyển query thành số nguyên
+          if (!isNaN(year)) {
+            const startOfYear = new Date(`${year}-01-01T00:00:00.000Z`); // Ngày đầu năm
+            const endOfYear = new Date(`${year + 1}-01-01T00:00:00.000Z`); // Ngày đầu năm tiếp theo
             filter.publish_date = {
-              $regex: `^${query}`,
-              // Tìm kiếm theo năm xuất bản
-              $options: "i"
-            };
+              $gte: startOfYear,
+              $lt: endOfYear
+            }; // Lọc theo khoảng thời gian
           } else {
             return res.status(400).json({
               message: "Invalid year format"
@@ -101,7 +122,6 @@ exports.semanticSearch = async (req, res) => {
       return res.status(200).json({
         query,
         filters: {
-          department,
           criteria
         },
         results: [],
@@ -130,10 +150,9 @@ exports.semanticSearch = async (req, res) => {
     res.status(200).json({
       query,
       filters: {
-        department,
         criteria
       },
-      results: results.slice(0, 10) // Lấy top 10 kết quả
+      results: results.slice(0, 100) // Lấy top 10 kết quả
     });
   } catch (error) {
     console.error("Semantic search error:", error);

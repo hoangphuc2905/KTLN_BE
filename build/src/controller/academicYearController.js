@@ -3,11 +3,8 @@ const academicYearController = {
     try {
       const now = new Date();
       const currentYear = now.getFullYear();
-
-      // Tính toán danh sách năm học từ 5 năm trước đến năm hiện tại
       const years = [];
       for (let i = -3; i < 0; i++) {
-        // Chỉ tính đến năm hiện tại
         const startYear = currentYear + i;
         const endYear = startYear + 1;
         years.push(`${startYear}-${endYear}`);

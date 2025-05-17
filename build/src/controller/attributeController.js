@@ -1,6 +1,6 @@
 const Attribute = require("../models/Attribute");
+const ScoringFormula = require("../models/ScoringFormula");
 const attributeController = {
-  // Tạo mới một Attribute
   createAttribute: async (req, res) => {
     try {
       const {
@@ -11,13 +11,20 @@ const attributeController = {
       });
       if (existingAttribute) {
         return res.status(400).json({
-          message: "Attribute name already exists"
+          message: "Thuộc tính đã tồn tại"
         });
       }
       const attribute = new Attribute(req.body);
       await attribute.save();
       res.status(201).json(attribute);
     } catch (error) {
+      if (error.name === "ValidationError") {
+        const errors = Object.values(error.errors).map(err => err.message);
+        return res.status(400).json({
+          message: "Lỗi xác thực",
+          errors
+        });
+      }
       res.status(400).json({
         message: error.message
       });
@@ -89,7 +96,17 @@ const attributeController = {
     try {
       const {
         name
-      } = req.body;
+      } = req.params;
+
+      // Kiểm tra xem thuộc tính có đang được dùng trong công thức điểm không
+      const formulaUsingAttribute = await ScoringFormula.findOne({
+        attributeName: name
+      });
+      if (formulaUsingAttribute) {
+        return res.status(400).json({
+          message: "Không thể xóa thuộc tính vì đang được sử dụng trong công thức điểm."
+        });
+      }
       const attribute = await Attribute.findOneAndDelete({
         name
       });

@@ -324,6 +324,48 @@ router.put("/:id", paperAuthorController.updatePaperAuthorById);
  *         description: No authors found for this paper
  */
 router.get("/paper/:paper_id", paperAuthorController.getAuthorsByPaperId);
+/**
+ * @swagger
+ * /paperauthor/{user_id}/total-points:
+ *   get:
+ *     summary: Get total points of an author by academic year
+ *     tags: [PaperAuthors]
+ *     parameters:
+ *       - in: path
+ *         name: user_id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The user ID of the author
+ *       - in: query
+ *         name: academicYear
+ *         schema:
+ *           type: string
+ *           example: "2024-2025"
+ *         required: false
+ *         description: The academic year to filter total points (e.g., "2024-2025")
+ *     responses:
+ *       200:
+ *         description: Total points of the author retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 academicYear:
+ *                   type: string
+ *                   example: "2024-2025"
+ *                 total_points:
+ *                   type: number
+ *                   description: Total points of the author
+ *       404:
+ *         description: No points found for this author
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/:user_id/total-points", paperAuthorController.getTotalPointsByAuthorAndYear);
 
 /**
  * @swagger

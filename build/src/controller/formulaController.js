@@ -18,22 +18,15 @@ const formulaController = {
         id,
         ...updateData
       } = req.body;
-
-      // Kiểm tra xem ID có được cung cấp không
       if (!id) {
         return res.status(400).json({
           message: "ID is required"
         });
       }
-
-      // Tìm và cập nhật công thức
       const formula = await ScoringFormula.findByIdAndUpdate(id, updateData, {
         new: true,
-        // Trả về tài liệu đã được cập nhật
-        runValidators: true // Chạy các trình xác thực trong schema
+        runValidators: true
       });
-
-      // Nếu không tìm thấy công thức
       if (!formula) {
         return res.status(404).json({
           message: "Formula not found"
@@ -46,7 +39,6 @@ const formulaController = {
       });
     }
   },
-  // Lấy công thức theo khoảng thời gian
   getFormulaByDateRange: async (req, res) => {
     try {
       const {
@@ -76,7 +68,6 @@ const formulaController = {
       });
     }
   },
-  // Cập nhật công thức theo khoảng thời gian
   updateFormulaByDateRange: async (req, res) => {
     try {
       const {
@@ -142,10 +133,11 @@ const formulaController = {
       });
     }
   },
-  // Lấy tất cả
   getAllFormula: async (req, res) => {
     try {
-      const dateRanges = await ScoringFormula.find();
+      const dateRanges = await ScoringFormula.find().sort({
+        startDate: -1
+      });
       res.status(200).json(dateRanges);
     } catch (error) {
       res.status(500).json({
@@ -153,7 +145,6 @@ const formulaController = {
       });
     }
   },
-  // Thêm một khoảng thời gian mới
   addNewDateRange: async (req, res) => {
     try {
       const {

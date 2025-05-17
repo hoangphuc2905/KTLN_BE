@@ -215,6 +215,157 @@ router.post("/", scientificPaperController.createScientificPaper);
  *         description: Server error
  */
 router.get("/", scientificPaperController.getAllScientificPapers);
+
+/**
+ * @swagger
+ * /scientificPapers:
+ *   get:
+ *     summary: Get all scientific papers
+ *     tags: [ScientificPapers]
+ *     parameters:
+ *       - in: query
+ *         name: academicYear
+ *         schema:
+ *           type: string
+ *           example: "2024-2025"
+ *         required: false
+ *         description: The academic year to filter scientific papers (e.g., "2024-2025")
+ *     responses:
+ *       200:
+ *         description: List of scientific papers
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 academicYear:
+ *                   type: string
+ *                   example: "2024-2025"
+ *                 scientificPapers:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       paper_id:
+ *                         type: string
+ *                       article_type:
+ *                         type: string
+ *                       article_group:
+ *                         type: string
+ *                       title_vn:
+ *                         type: string
+ *                       title_en:
+ *                         type: string
+ *                       author_count:
+ *                         type: number
+ *                       author:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                           description: IDs of authors
+ *                       publish_date:
+ *                         type: string
+ *                         format: date
+ *                       magazine_vi:
+ *                         type: string
+ *                       magazine_en:
+ *                         type: string
+ *                       magazine_type:
+ *                         type: string
+ *                       page:
+ *                         type: number
+ *                       issn_isbn:
+ *                         type: string
+ *                       file:
+ *                         type: string
+ *                       link:
+ *                         type: string
+ *                       doi:
+ *                         type: string
+ *                       status:
+ *                         type: boolean
+ *                       order_no:
+ *                         type: boolean
+ *                       featured:
+ *                         type: boolean
+ *                       keywords:
+ *                         type: string
+ *                       summary:
+ *                         type: string
+ *                       department:
+ *                         type: string
+ *                       cover_image:
+ *                         type: string
+ *       500:
+ *         description: Server error
+ */
+router.get("/getAllScientificPapersByAllStatus", scientificPaperController.getAllScientificPapersByAllStatus);
+
+/**
+ * @swagger
+ * /scientificPapers/by-title:
+ *   get:
+ *     summary: Get scientific papers by title
+ *     tags: [ScientificPapers]
+ *     parameters:
+ *       - in: query
+ *         name: title
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The title of the scientific paper to search for
+ *     responses:
+ *       200:
+ *         description: List of scientific papers with the matching title
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 scientificPapers:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       paper_id:
+ *                         type: string
+ *                       title_vn:
+ *                         type: string
+ *                       title_en:
+ *                         type: string
+ *                       author:
+ *                         type: array
+ *                         items:
+ *                           type: object
+ *                           properties:
+ *                             user_id:
+ *                               type: string
+ *                             author_name_vi:
+ *                               type: string
+ *                             author_name_en:
+ *                               type: string
+ *                             role:
+ *                               type: string
+ *                       publish_date:
+ *                         type: string
+ *                         format: date
+ *                       department:
+ *                         type: string
+ *                       keywords:
+ *                         type: string
+ *       400:
+ *         description: Title is required
+ *       404:
+ *         description: No scientific papers found with the given title
+ *       500:
+ *         description: Server error
+ */
+router.get("/by-title", scientificPaperController.getScientificPapersByTitle);
+
 /**
  * @swagger
  * /scientificPapers/top5-newest:

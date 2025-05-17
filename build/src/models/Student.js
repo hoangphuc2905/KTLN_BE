@@ -58,7 +58,7 @@ const studentSchema = new Schema({
   },
   degree: {
     type: String,
-    enum: ["Bachelor", "Master", "Doctor", "Egineer", "Professor", "Ossociate_Professor"],
+    enum: ["None", "Bachelor", "Master", "Doctor", "Egineer", "Professor", "Ossociate_Professor"],
     required: false
   },
   isActive: {

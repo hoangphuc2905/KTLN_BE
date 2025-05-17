@@ -40,9 +40,16 @@ const workUnitController = {
   },
   updateWorkUnitById: async (req, res) => {
     try {
+      const workUnitId = req.params.work_unit_id;
+      const updateData = {
+        name_vi: req.body.name_vi,
+        name_en: req.body.name_en,
+        address_vi: req.body.address_vi,
+        address_en: req.body.address_en
+      };
       const workUnit = await WorkUnit.findOneAndUpdate({
-        work_unit_id: req.params.work_unit_id
-      }, req.body, {
+        work_unit_id: workUnitId
+      }, updateData, {
         new: true,
         runValidators: true
       });
@@ -53,6 +60,7 @@ const workUnitController = {
       }
       res.status(200).json(workUnit);
     } catch (error) {
+      console.error("Error in updateWorkUnitById:", error);
       res.status(400).json({
         message: error.message
       });

@@ -40,15 +40,16 @@ const userWorkController = {
   },
   updateUserWorkById: async (req, res) => {
     try {
-      const userWork = await UserWork.findByIdAndUpdate(req.params.id, req.body, {
+      const updated = await UserWork.findByIdAndUpdate(req.params.id, req.body, {
         new: true,
         runValidators: true
-      }).populate("work_unit_id").populate("user_id");
-      if (!userWork) {
+      });
+      if (!updated) {
         return res.status(404).json({
           message: "UserWork not found"
         });
       }
+      const userWork = await UserWork.findById(updated._id);
       res.status(200).json(userWork);
     } catch (error) {
       res.status(400).json({

@@ -1,6 +1,11 @@
 const express = require("express");
 const router = express.Router();
+const multer = require("multer");
+const upload = multer({
+  dest: "uploads/"
+});
 const studentController = require("../controller/studentControllers");
+const authMiddleware = require("../middleware/authMiddleware");
 
 /**
  * @swagger
@@ -64,6 +69,151 @@ const studentController = require("../controller/studentControllers");
  *         description: Bad request
  */
 router.post("/", studentController.createStudent);
+
+/**
+ * @swagger
+ * /students/inactive/{departmentId}:
+ *   get:
+ *     summary: Get all inactive students by department
+ *     tags: [Students]
+ *     parameters:
+ *       - in: path
+ *         name: departmentId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the department
+ *     responses:
+ *       200:
+ *         description: List of inactive students retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 students:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       student_id:
+ *                         type: string
+ *                       full_name:
+ *                         type: string
+ *                       email:
+ *                         type: string
+ *                       phone:
+ *                         type: string
+ *                       gender:
+ *                         type: string
+ *                       date_of_birth:
+ *                         type: string
+ *                         format: date
+ *                       cccd:
+ *                         type: string
+ *                       address:
+ *                         type: string
+ *                       start_date:
+ *                         type: string
+ *                         format: date
+ *                       department:
+ *                         type: object
+ *                         properties:
+ *                           department_name:
+ *                             type: string
+ *                       isActive:
+ *                         type: boolean
+ *       404:
+ *         description: No inactive students found for this department
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/inactive/:departmentId", studentController.getInactiveStudentsByDepartment);
+
+/**
+ * @swagger
+ * /students/import:
+ *   post:
+ *     summary: Import students from an Excel file
+ *     tags: [Students]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *                 description: The Excel file to upload
+ *     responses:
+ *       201:
+ *         description: Students and accounts created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 students:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       student:
+ *                         type: object
+ *                         properties:
+ *                           student_id:
+ *                             type: string
+ *                           full_name:
+ *                             type: string
+ *                           email:
+ *                             type: string
+ *                           phone:
+ *                             type: string
+ *                           gender:
+ *                             type: string
+ *                             enum: [male, female, other]
+ *                           date_of_birth:
+ *                             type: string
+ *                             format: date
+ *                           cccd:
+ *                             type: string
+ *                           address:
+ *                             type: string
+ *                           start_date:
+ *                             type: string
+ *                             format: date
+ *                           department:
+ *                             type: string
+ *                           score_year:
+ *                             type: number
+ *                           avatar:
+ *                             type: string
+ *                           role:
+ *                             type: string
+ *                           degree:
+ *                             type: string
+ *                             enum: [Bachelor, Master, Doctor, Engineer, Professor, Associate_Professor]
+ *                           isActive:
+ *                             type: boolean
+ *                       account:
+ *                         type: object
+ *                         properties:
+ *                           user_id:
+ *                             type: string
+ *                           user_type:
+ *                             type: string
+ *       400:
+ *         description: Bad request (e.g., no file uploaded or invalid file format)
+ *       500:
+ *         description: Internal server error
+ */
+router.post("/import", authMiddleware.authenticate, upload.single("file"), studentController.importStudentsFromExcel);
 
 /**
  * @swagger

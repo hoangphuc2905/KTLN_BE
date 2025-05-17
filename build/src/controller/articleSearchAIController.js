@@ -34,8 +34,6 @@ const processImageAndSearch = async (req, res) => {
         error: "Vui lòng tải lên một hình ảnh!"
       });
     }
-
-    // Tải ảnh lên Cloudinary
     let uploadResult;
     try {
       uploadResult = await uploadToCloudinary(req.file.buffer);
@@ -45,8 +43,6 @@ const processImageAndSearch = async (req, res) => {
         error: "Lỗi tải ảnh lên Cloudinary!"
       });
     }
-
-    // Dùng OCR để nhận dạng văn bản
     let extractedText;
     try {
       const {
@@ -67,12 +63,8 @@ const processImageAndSearch = async (req, res) => {
       });
     }
     console.log("Văn bản trích xuất:", extractedText);
-
-    // Làm sạch và giới hạn độ dài truy vấn
     const maxQueryLength = 100;
     const searchQuery = extractedText.replace(/\n/g, " ").replace(/\s+/g, " ").trim().substring(0, maxQueryLength);
-
-    // Tìm kiếm bài báo trên mạng
     let results;
     try {
       results = await searchWithGoogle(searchQuery);
@@ -82,8 +74,6 @@ const processImageAndSearch = async (req, res) => {
         error: "Lỗi tìm kiếm bài báo trên mạng!"
       });
     }
-
-    // Trả về kết quả
     res.status(200).json({
       imageUrl: uploadResult.secure_url,
       extractedText,

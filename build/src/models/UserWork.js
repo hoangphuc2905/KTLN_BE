@@ -8,7 +8,7 @@ const userWorkSchema = new Schema({
   },
   user_id: {
     type: String,
-    ref: "User",
+    ref: "Lecturer" || "Student",
     required: true
   },
   start_date: {
@@ -17,7 +17,7 @@ const userWorkSchema = new Schema({
   },
   end_date: {
     type: Date,
-    required: true
+    required: false
   },
   role_vi: {
     type: String,

@@ -98,6 +98,63 @@ const paperViewsController = {
         message: error.message
       });
     }
+  },
+  getAllPaperViewsByUser: async (req, res) => {
+    try {
+      const {
+        user_id
+      } = req.params;
+
+      // Sử dụng aggregation để lấy bài báo mới nhất cho mỗi paper_id
+      const paperViews = await PaperViews.aggregate([{
+        $match: {
+          user_id: user_id
+        }
+      },
+      // Lọc theo user_id
+      {
+        $sort: {
+          view_time: -1
+        }
+      },
+      // Sắp xếp theo thời gian xem (mới nhất trước)
+      {
+        $group: {
+          _id: "$paper_id",
+          // Nhóm theo paper_id
+          latestView: {
+            $first: "$$ROOT"
+          } // Lấy bản ghi mới nhất trong nhóm
+        }
+      }, {
+        $replaceRoot: {
+          newRoot: "$latestView"
+        } // Thay thế root bằng bản ghi mới nhất
+      }]);
+
+      // Populate các trường liên quan
+      const populatedViews = await PaperViews.populate(paperViews, {
+        path: "paper_id",
+        populate: [{
+          path: "author",
+          select: "author_name_vi"
+        }, {
+          path: "department",
+          select: "department_name"
+        }]
+      });
+      if (!populatedViews || populatedViews.length === 0) {
+        return res.status(404).json({
+          message: "No paper views found for this user"
+        });
+      }
+      res.status(200).json(populatedViews);
+    } catch (error) {
+      console.error("Error fetching paper views:", error);
+      res.status(500).json({
+        message: error.message
+      });
+    }
   }
 };
 module.exports = paperViewsController;

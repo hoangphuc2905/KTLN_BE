@@ -9,7 +9,6 @@ const messagesSchema = new Schema({
   message_type: {
     type: String,
     enum: ["Request for Edit", "Feedback", "Approved", "Request for Approval", "Rejection"],
-    // Đảm bảo giá trị hợp lệ
     required: true
   },
   status: {
@@ -28,7 +27,6 @@ const messagesSchema = new Schema({
   },
   receiver_id: {
     type: String,
-    // Thay đổi từ ObjectId thành String
     required: true
   },
   receiver_model: {

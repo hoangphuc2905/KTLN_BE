@@ -3,16 +3,16 @@ const messagesController = {
   // Tạo một thông báo mới
   createMessage: async (req, res) => {
     try {
-      console.log("Data received in createMessage:", req.body); // Kiểm tra dữ liệu đầu vào
+      console.log("Data received in createMessage:", req.body);
       const message = new Messages(req.body);
       await message.save();
-      console.log("Message saved successfully:", message); // Kiểm tra xem dữ liệu có được lưu không
+      console.log("Message saved successfully:", message);
       res.status(201).json({
         message: "Message created successfully",
         data: message
       });
     } catch (error) {
-      console.error("Error in createMessage:", error.message); // Ghi log lỗi
+      console.error("Error in createMessage:", error.message);
       res.status(400).json({
         message: error.message
       });
@@ -121,6 +121,70 @@ const messagesController = {
       console.error("Error in markMessageAsRead:", error.message);
       res.status(500).json({
         message: error.message
+      });
+    }
+  },
+  // Lấy thông báo thành công theo ID bài báo với trạng thái "Rejection"
+  getMessagesByStatusRejectionByPaperId: async (req, res) => {
+    try {
+      const {
+        paperId
+      } = req.params;
+      const messages = await Messages.findOne({
+        paper_id: paperId,
+        message_type: "Rejection"
+      }).sort({
+        time: -1
+      });
+      if (!messages || messages.length === 0) {
+        return res.status(404).json({
+          message: "No messages found for this paper"
+        });
+      }
+      const reasonIndex = messages.content.indexOf("Lý do:");
+      if (reasonIndex !== -1) {
+        messages.content = messages.content.substring(reasonIndex + 7).trim();
+      }
+      res.status(200).json(messages);
+    } catch (error) {
+      console.error("Error in getMessagesByPaperId:", error.messages);
+      res.status(500).json({
+        messages: error.messages
+      });
+    }
+  },
+  // Lấy thông báo thành công theo ID bài báo với trạng thái "RequestforEdit"
+  getMessagesByStatusRequestforEditByPaperId: async (req, res) => {
+    try {
+      const {
+        paperId
+      } = req.params;
+      const messages = await Messages.findOne({
+        paper_id: paperId,
+        message_type: "Request for Edit"
+      }).sort({
+        time: -1
+      });
+      if (!messages || messages.length === 0) {
+        return res.status(404).json({
+          message: "No messages found for this paper"
+        });
+      }
+
+      // Tách phần requestContent từ content
+      const contentPrefix = `Yêu cầu chỉnh sửa bài báo`;
+      const prefixIndex = messages.content.indexOf(contentPrefix);
+      if (prefixIndex !== -1) {
+        const requestContentStart = messages.content.indexOf(": ", prefixIndex);
+        if (requestContentStart !== -1) {
+          messages.content = messages.content.substring(requestContentStart + 2).trim();
+        }
+      }
+      res.status(200).json(messages);
+    } catch (error) {
+      console.error("Error in getRequestContentByPaperId:", error.messages);
+      res.status(500).json({
+        messages: error.messages
       });
     }
   },

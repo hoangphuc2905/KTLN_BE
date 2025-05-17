@@ -19,6 +19,8 @@ const ScoringFormulaSchema = new mongoose.Schema({
       required: true
     }
   }]
+}, {
+  timestamps: true
 });
 const ScoringFormula = mongoose.model("ScoringFormula", ScoringFormulaSchema);
 module.exports = ScoringFormula;

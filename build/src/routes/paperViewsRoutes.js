@@ -190,4 +190,49 @@ router.put("/:id", paperViewsController.updatePaperViewById);
  *         description: Internal server error
  */
 router.get("/count/:paper_id", paperViewsController.getViewCountByPaperId);
+
+/**
+ * @swagger
+ * /paperview/user/{user_id}:
+ *   get:
+ *     summary: Get all paper views by a specific user
+ *     tags: [PaperViews]
+ *     parameters:
+ *       - in: path
+ *         name: user_id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the user to retrieve paper views for
+ *     responses:
+ *       200:
+ *         description: List of paper views for the specified user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   view_id:
+ *                     type: string
+ *                   paper_id:
+ *                     type: object
+ *                     description: Details of the paper
+ *                   user_type:
+ *                     type: string
+ *                     enum: ["Lecturer", "Student"]
+ *                     description: Type of user viewing the paper
+ *                   user_id:
+ *                     type: object
+ *                     description: Details of the user
+ *                   view_time:
+ *                     type: string
+ *                     format: date
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/user/:user_id", paperViewsController.getAllPaperViewsByUser);
 module.exports = router;

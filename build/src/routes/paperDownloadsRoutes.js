@@ -1,6 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const paperDownloadsController = require("../controller/paperDownloadsController");
+const {
+  paperDownloadsController,
+  createPaperDownloadLimiter
+} = require("../controller/paperDownloadsController");
 
 /**
  * @swagger
@@ -42,7 +45,7 @@ const paperDownloadsController = require("../controller/paperDownloadsController
  *       400:
  *         description: Bad request
  */
-router.post("/", paperDownloadsController.createPaperDownload);
+router.post("/", createPaperDownloadLimiter, paperDownloadsController.createPaperDownload);
 
 /**
  * @swagger
@@ -223,4 +226,43 @@ router.delete("/:id", paperDownloadsController.deletePaperDownloadById);
  *         description: Internal server error
  */
 router.get("/count/:paper_id", paperDownloadsController.getDownloadCountByPaperId);
+
+/**
+ * @swagger
+ * /paperdownload/user/{user_id}:
+ *   get:
+ *     summary: Get all paper downloads by a specific user
+ *     tags: [PaperDownloads]
+ *     parameters:
+ *       - in: path
+ *         name: user_id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the user to get paper downloads for
+ *     responses:
+ *       200:
+ *         description: List of paper downloads for the user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   download_id:
+ *                     type: string
+ *                   paper_id:
+ *                     type: string
+ *                   user_id:
+ *                     type: string
+ *                   download_time:
+ *                     type: string
+ *                     format: date
+ *       404:
+ *         description: No paper downloads found for this user
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/user/:user_id", paperDownloadsController.getAllPaperDownloadsByUser);
 module.exports = router;
