@@ -35,12 +35,46 @@ const authMiddleware = require("../middleware/authMiddleware"); // Import middle
  *             schema:
  *               type: object
  *               properties:
- *                 token:
+ *                 accessToken:
+ *                   type: string
+ *                 refreshToken:
  *                   type: string
  *       400:
  *         description: Invalid user_id or password
  */
 router.post("/login", authController.login);
+
+/**
+ * @swagger
+ * /auth/refresh-token:
+ *   post:
+ *     summary: Refresh access token
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               refreshToken:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: New access token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 accessToken:
+ *                   type: string
+ *       401:
+ *         description: Refresh token required
+ *       403:
+ *         description: Invalid or expired refresh token
+ */
+router.post("/refresh-token", authController.refreshToken);
 
 /**
  * @swagger
