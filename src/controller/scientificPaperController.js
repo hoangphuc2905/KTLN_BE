@@ -286,7 +286,7 @@ const scientificPaperController = {
 
       const authorIds = authors.map((author) => author._id);
 
-      let filter = { author: { $in: authorIds } };
+      let filter = { author: { $in: authorIds }, status: "approved" };
 
       if (academicYear) {
         const { startDate, endDate } = getAcademicYearRange(academicYear);

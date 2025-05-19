@@ -154,9 +154,8 @@ const paperAuthorController = {
 
   getAllPaperAuthorsByTolalPointsAndTotalPapers: async (req, res) => {
     try {
-      const { academicYear } = req.query; // Lấy `academicYear` từ query string
+      const { academicYear } = req.query;
 
-      // Nếu có năm học, tính khoảng thời gian
       let dateFilter = {};
       if (academicYear) {
         const { startDate, endDate } = getAcademicYearRange(academicYear);
@@ -166,7 +165,6 @@ const paperAuthorController = {
       }
 
       const result = await PaperAuthor.aggregate([
-        // 1. Join vào bảng lecturers
         {
           $lookup: {
             from: "lecturers",
@@ -175,7 +173,6 @@ const paperAuthorController = {
             as: "lecturerInfo",
           },
         },
-        // 2. Join vào bảng students
         {
           $lookup: {
             from: "students",
@@ -184,7 +181,6 @@ const paperAuthorController = {
             as: "studentInfo",
           },
         },
-        // 3. Lấy department từ lecturer hoặc student
         {
           $addFields: {
             department_id: {
@@ -195,7 +191,6 @@ const paperAuthorController = {
             },
           },
         },
-        // 4. Join vào bảng scientificpapers để lấy thông tin bài báo
         {
           $lookup: {
             from: "scientificpapers",
@@ -204,14 +199,12 @@ const paperAuthorController = {
             as: "paperInfo",
           },
         },
-        // 5. Lọc chỉ những bài đã được duyệt và theo năm học (nếu có)
         {
           $match: {
             "paperInfo.status": "approved",
-            ...dateFilter, // Áp dụng bộ lọc theo năm học (nếu có)
+            ...dateFilter,
           },
         },
-        // 6. Nhóm theo department_id, dùng $addToSet để tránh đếm trùng paper
         {
           $group: {
             _id: "$department_id",
@@ -219,13 +212,11 @@ const paperAuthorController = {
             total_points: { $sum: "$point" },
           },
         },
-        // 7. Tính tổng số bài (sau khi loại trùng)
         {
           $addFields: {
             total_papers: { $size: "$unique_paper_ids" },
           },
         },
-        // 8. Join vào bảng departments để lấy tên khoa
         {
           $lookup: {
             from: "departments",
@@ -237,7 +228,6 @@ const paperAuthorController = {
         {
           $unwind: "$departmentInfo",
         },
-        // 9. Format kết quả trả về
         {
           $project: {
             _id: 0,
@@ -433,7 +423,7 @@ const paperAuthorController = {
   deletePaperAuthorById: async (req, res) => {
     try {
       const { id } = req.params;
-      const result = await PaperAuthor.findByIdAndDelete(id); // Use findByIdAndDelete for consistency
+      const result = await PaperAuthor.findByIdAndDelete(id); 
       if (!result) {
         return res.status(404).json({ message: "Paper author not found" });
       }

@@ -125,6 +125,32 @@ router.post("/get-by-date-range", formulaController.getFormulaByDateRange);
 
 /**
  * @swagger
+ * /formulas/get-by-date:
+ *   post:
+ *     summary: Get formula by a specific date
+ *     tags: [Formulas]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               date:
+ *                 type: string
+ *                 format: date
+ *     responses:
+ *       200:
+ *         description: Formula details
+ *       400:
+ *         description: Date is required
+ *       404:
+ *         description: Formula not found
+ */
+router.post("/get-by-date", formulaController.getFormulaByDate);
+
+/**
+ * @swagger
  * /formulas/update-by-date-range:
  *   put:
  *     summary: Update a formula by date range

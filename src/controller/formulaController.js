@@ -22,7 +22,7 @@ const formulaController = {
 
       const formula = await ScoringFormula.findByIdAndUpdate(id, updateData, {
         new: true,
-        runValidators: true, 
+        runValidators: true,
       });
 
       if (!formula) {
@@ -60,6 +60,43 @@ const formulaController = {
       res.status(500).json({ message: error.message });
     }
   },
+
+  // ...existing code...
+  getFormulaByDate: async (req, res) => {
+    try {
+      const { date } = req.body;
+      if (!date) {
+        return res.status(400).json({ message: "Date is required" });
+      }
+
+      const inputDate = new Date(date);
+
+      const formula = await ScoringFormula.findOne({
+        startDate: { $lte: inputDate },
+        $or: [{ endDate: { $gte: inputDate } }, { endDate: null }],
+      }).populate("formula.attribute");
+
+      if (!formula) {
+        return res.status(404).json({ message: "Formula not found" });
+      }
+
+      const result = {
+        _id: formula._id,
+        startDate: formula.startDate,
+        endDate: formula.endDate,
+        formula: formula.formula.map((f) => ({
+          attribute: f.attribute.name || f.attribute, // tên attribute
+          values: f.attribute.values || null, // giá trị values nếu có
+          weight: f.weight, // trọng số
+        })),
+      };
+
+      res.status(200).json(result);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  },
+  // ...existing code...
 
   updateFormulaByDateRange: async (req, res) => {
     try {

@@ -208,7 +208,7 @@ const statisticsController = {
           $match: {
             "authorDetails.user_id": author_id.toString(),
             status: "approved",
-            ...dateFilter, // Áp dụng bộ lọc theo năm học (nếu có)
+            ...dateFilter, 
           },
         },
         {
@@ -1477,7 +1477,7 @@ const statisticsController = {
           $match: {
             "authorDetails.user_id": author_id.toString(),
             status: "approved",
-            ...dateFilter, // Áp dụng bộ lọc theo năm học (nếu có)
+            ...dateFilter, 
           },
         },
         {
@@ -1485,15 +1485,15 @@ const statisticsController = {
             _id: "$_id",
             title_vn: { $first: "$title_vn" },
             title_en: { $first: "$title_en" },
-            contributionScore: { $sum: "$authorDetails.point" }, // Tính tổng điểm đóng góp
-            authorDetails: { $push: "$authorDetails" }, // Lưu danh sách tác giả
+            contributionScore: { $sum: "$authorDetails.point" },
+            authorDetails: { $push: "$authorDetails" }, 
           },
         },
         {
-          $sort: { contributionScore: -1 }, // Sắp xếp theo điểm đóng góp giảm dần
+          $sort: { contributionScore: -1 }, 
         },
         {
-          $limit: 5, // Lấy top 5 bài
+          $limit: 5, 
         },
         {
           $project: {
@@ -1512,14 +1512,12 @@ const statisticsController = {
         },
       ]);
 
-      // Kiểm tra nếu không có bài nghiên cứu nào
       if (!result || result.length === 0) {
         return res.status(404).json({
           message: "No papers found for this author",
         });
       }
 
-      // Trả về kết quả
       res.status(200).json({
         message: "Top 5 papers by author retrieved successfully",
         academicYear: academicYear || "All",
@@ -1537,10 +1535,10 @@ const statisticsController = {
 
   getTop5PaperTypesByUser: async (req, res) => {
     try {
-      const { user_id } = req.params; // Lấy user_id từ request params
-      const { academicYear } = req.query; // Lấy `academicYear` từ query string
+      const { user_id } = req.params; 
+      const { academicYear } = req.query; 
 
-      // Nếu có năm học, tính khoảng thời gian
+      
       let dateFilter = {};
       if (academicYear) {
         const { startDate, endDate } = getAcademicYearRange(academicYear);
