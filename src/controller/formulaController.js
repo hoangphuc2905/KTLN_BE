@@ -1,7 +1,7 @@
 const ScoringFormula = require("../models/ScoringFormula");
 
 const formulaController = {
-  // Tạo mới công thức
+
   createFormula: async (req, res) => {
     try {
       const formula = new ScoringFormula(req.body);
@@ -61,7 +61,6 @@ const formulaController = {
     }
   },
 
-  // ...existing code...
   getFormulaByDate: async (req, res) => {
     try {
       const { date } = req.body;
@@ -85,9 +84,9 @@ const formulaController = {
         startDate: formula.startDate,
         endDate: formula.endDate,
         formula: formula.formula.map((f) => ({
-          attribute: f.attribute.name || f.attribute, // tên attribute
-          values: f.attribute.values || null, // giá trị values nếu có
-          weight: f.weight, // trọng số
+          attribute: f.attribute.name || f.attribute,
+          values: f.attribute.values || null,
+          weight: f.weight,
         })),
       };
 
@@ -96,7 +95,6 @@ const formulaController = {
       res.status(500).json({ message: error.message });
     }
   },
-  // ...existing code...
 
   updateFormulaByDateRange: async (req, res) => {
     try {
@@ -124,7 +122,6 @@ const formulaController = {
     }
   },
 
-  // Xóa công thức theo khoảng thời gian
   deleteFormulaByDateRange: async (req, res) => {
     try {
       const { startDate, endDate } = req.body;

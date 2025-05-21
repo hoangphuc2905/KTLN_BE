@@ -44,13 +44,11 @@ const authController = {
         return res.status(400).json({ message: "Tài khoản không tồn tại" });
       }
 
-      // Kiểm tra mật khẩu
       const isPasswordValid = await bcrypt.compare(password, account.password);
       if (!isPasswordValid) {
         return res.status(400).json({ message: "Mật khẩu không đúng" });
       }
 
-      // Tạo Access Token (thời gian sống ngắn: 15 phút)
       const accessToken = jwt.sign(
         {
           userId: userIdentifier,
@@ -62,14 +60,12 @@ const authController = {
         { expiresIn: "15m" }
       );
 
-      // Tạo Refresh Token (thời gian sống dài: 7 ngày)
       const refreshToken = jwt.sign(
         { userId: userIdentifier, user_type: userType },
         process.env.MYREFRESHSECRET,
         { expiresIn: "7d" }
       );
 
-      // Xóa Refresh Token cũ và lưu Refresh Token mới
       const newToken = await UserToken.create({
         user_id: account._id,
         token: refreshToken,
@@ -102,11 +98,9 @@ const authController = {
         return res.status(403).json({ message: "Invalid refresh token" });
       }
 
-      // Xác minh Refresh Token
       const decoded = jwt.verify(refreshToken, process.env.MYREFRESHSECRET);
       const userId = decoded.userId;
 
-      // Tìm lại thông tin người dùng để tạo Access Token mới
       let user = await Student.findOne({ student_id: userId, isActive: true });
       let roleNames = ["Student"];
       let userType = "Student";
@@ -129,7 +123,6 @@ const authController = {
         return res.status(403).json({ message: "User not found" });
       }
 
-      // Tạo Access Token mới
       const accessToken = jwt.sign(
         {
           userId: userId,
@@ -273,7 +266,7 @@ const authController = {
       await account.save();
 
       res.status(201).json({
-        message: "Student registered successfully. Awaiting approval.",
+        message: "Sinh viên đã được đăng ký thành công",
         student,
         account: {
           user_id: account.user_id,

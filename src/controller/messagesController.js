@@ -1,46 +1,40 @@
 const Messages = require("../models/Messages");
 
 const messagesController = {
-  // Tạo một thông báo mới
+
   createMessage: async (req, res) => {
     try {
-      console.log("Data received in createMessage:", req.body); 
       const message = new Messages(req.body);
       await message.save();
-      console.log("Message saved successfully:", message); 
       res.status(201).json({
         message: "Message created successfully",
         data: message,
       });
     } catch (error) {
-      console.error("Error in createMessage:", error.message); 
       res.status(400).json({ message: error.message });
     }
   },
 
-  // Lấy tất cả thông báo
   getAllMessages: async (req, res) => {
     try {
       const messages = await Messages.find()
-        .populate("sender_id") // Populate thông tin người gửi
-        .populate("receiver_id") // Populate thông tin người nhận
-        .populate("paper_id"); // Populate thông tin bài báo
+        .populate("sender_id") 
+        .populate("receiver_id") 
+        .populate("paper_id"); 
       res.status(200).json(messages);
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
   },
 
-  // Lấy tất cả thông báo dành cho một người nhận cụ thể
   getMessagesByReceiverId: async (req, res) => {
     try {
-      const { receiverId } = req.params; // Lấy receiverId từ params
+      const { receiverId } = req.params; 
 
-      // Tìm tất cả thông báo có receiver_id khớp với receiverId
       const messages = await Messages.find({ receiver_id: receiverId })
-        .populate("sender_id") // Populate thông tin người gửi
-        .populate("receiver_id") // Populate thông tin người nhận
-        .populate("paper_id"); // Populate thông tin bài báo
+        .populate("sender_id") 
+        .populate("receiver_id") 
+        .populate("paper_id"); 
 
       if (!messages || messages.length === 0) {
         return res
@@ -55,7 +49,6 @@ const messagesController = {
     }
   },
 
-  // Lấy thông báo theo ID
   getMessageById: async (req, res) => {
     try {
       const message = await Messages.findById(req.params.id)
@@ -71,7 +64,6 @@ const messagesController = {
     }
   },
 
-  // Cập nhật thông báo theo ID
   updateMessageById: async (req, res) => {
     try {
       const message = await Messages.findByIdAndUpdate(
@@ -96,9 +88,8 @@ const messagesController = {
 
   markMessageAsRead: async (req, res) => {
     try {
-      const { id } = req.params; // Lấy ID của thông báo từ URL params
+      const { id } = req.params; 
 
-      // Cập nhật trạng thái isread thành true
       const message = await Messages.findByIdAndUpdate(
         id,
         { isread: true },
@@ -119,7 +110,6 @@ const messagesController = {
     }
   },
 
-  // Lấy thông báo thành công theo ID bài báo với trạng thái "Rejection"
   getMessagesByStatusRejectionByPaperId: async (req, res) => {
     try {
       const { paperId } = req.params;
@@ -147,7 +137,6 @@ const messagesController = {
     }
   },
 
-  // Lấy thông báo thành công theo ID bài báo với trạng thái "RequestforEdit"
   getMessagesByStatusRequestforEditByPaperId: async (req, res) => {
     try {
       const { paperId } = req.params;
@@ -163,7 +152,6 @@ const messagesController = {
           .json({ message: "No messages found for this paper" });
       }
 
-      // Tách phần requestContent từ content
       const contentPrefix = `Yêu cầu chỉnh sửa bài báo`;
       const prefixIndex = messages.content.indexOf(contentPrefix);
       if (prefixIndex !== -1) {
@@ -182,7 +170,6 @@ const messagesController = {
     }
   },
 
-  // Xóa thông báo theo ID
   deleteMessageById: async (req, res) => {
     try {
       const message = await Messages.findByIdAndDelete(req.params.id);

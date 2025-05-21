@@ -21,7 +21,6 @@ const attributeController = {
     }
   },
 
-  // Lấy all
   getAllAttributes: async (req, res) => {
     try {
       const attributes = await Attribute.find();
@@ -43,13 +42,12 @@ const attributeController = {
         return res.status(404).json({ message: "Attribute not found" });
       }
 
-      // Trả về toàn bộ thông tin của Attribute
       res.status(200).json(attribute);
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
   },
-  // Cập nhật Attribute theo tên
+
   updateAttributeByName: async (req, res) => {
     try {
       const { name, ...updateData } = req.body;
@@ -66,12 +64,10 @@ const attributeController = {
     }
   },
 
-  // Xóa Attribute theo tên
   deleteAttributeByName: async (req, res) => {
     try {
       const { name } = req.params;
 
-      // Kiểm tra xem thuộc tính có đang được dùng trong công thức điểm không
       const formulaUsingAttribute = await ScoringFormula.findOne({
         attributeName: name,
       });
