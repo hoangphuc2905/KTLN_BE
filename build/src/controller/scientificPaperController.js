@@ -21,6 +21,11 @@ const {
   getAcademicYearRange,
   getDefaultAcademicYear
 } = require("../utils/dateUtils");
+const {
+  compressPDF
+} = require("../utils/pdfUtils");
+const fs = require("fs");
+const path = require("path");
 const scientificPaperController = {
   createScientificPaper: async (req, res) => {
     const session = await ScientificPaper.startSession();
@@ -284,7 +289,8 @@ const scientificPaperController = {
       let filter = {
         author: {
           $in: authorIds
-        }
+        },
+        status: "approved"
       };
       if (academicYear) {
         const {
@@ -706,6 +712,49 @@ const scientificPaperController = {
       });
     } catch (error) {
       console.error("Error in getScientificPapersByTitle:", error.message);
+      res.status(500).json({
+        message: error.message
+      });
+    }
+  },
+  compressPDF: async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({
+          message: "No file uploaded"
+        });
+      }
+      const originalSize = fs.statSync(req.file.path).size;
+      const compressedPath = await compressPDF(req.file.path, 3.5);
+      const compressedSize = fs.statSync(compressedPath).size;
+      const percent = ((1 - compressedSize / originalSize) * 100).toFixed(2);
+
+      // Đọc file nén thành buffer để upload lên Cloudinary
+      const compressedBuffer = fs.readFileSync(compressedPath);
+      const cloudinaryUrl = await uploadFileToCloudinary(compressedBuffer, "compressed_pdfs");
+      fs.unlinkSync(req.file.path);
+      fs.unlinkSync(compressedPath);
+      function formatBytes(bytes) {
+        if (bytes === 0) return "0 Bytes";
+        const k = 1024;
+        const sizes = ["Bytes", "KB", "MB", "GB"];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        const num = bytes / Math.pow(k, i);
+        return `${num.toLocaleString(undefined, {
+          maximumFractionDigits: 2
+        })} ${sizes[i]}`;
+      }
+      res.status(200).json({
+        message: "Nén thành công",
+        originalName: req.file.originalname,
+        originalSize: formatBytes(originalSize),
+        compressedSize: formatBytes(compressedSize),
+        percent: percent + "%",
+        display: `Từ ${formatBytes(originalSize)} xuống ${formatBytes(compressedSize)} (${percent}%)`,
+        cloudinaryUrl
+      });
+    } catch (error) {
+      if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
       res.status(500).json({
         message: error.message
       });

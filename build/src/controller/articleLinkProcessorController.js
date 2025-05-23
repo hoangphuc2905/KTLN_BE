@@ -38,7 +38,6 @@ const processArticleFromLink = async (req, res) => {
       const response = await axios.get(articleUrl);
       htmlContent = response.data;
     } catch (error) {
-      console.error("Lỗi khi lấy nội dung bài báo:", error.message);
       return res.status(500).json({
         error: "Không thể truy cập liên kết bài báo!"
       });
@@ -91,7 +90,6 @@ const processArticleFromLink = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error("Lỗi xử lý:", error);
     return res.status(500).json({
       error: "Có lỗi xảy ra trong quá trình xử lý!"
     });

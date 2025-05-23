@@ -1,6 +1,5 @@
 const ScoringFormula = require("../models/ScoringFormula");
 const formulaController = {
-  // Tạo mới công thức
   createFormula: async (req, res) => {
     try {
       const formula = new ScoringFormula(req.body);
@@ -68,6 +67,51 @@ const formulaController = {
       });
     }
   },
+  getFormulaByDate: async (req, res) => {
+    try {
+      const {
+        date
+      } = req.body;
+      if (!date) {
+        return res.status(400).json({
+          message: "Date is required"
+        });
+      }
+      const inputDate = new Date(date);
+      const formula = await ScoringFormula.findOne({
+        startDate: {
+          $lte: inputDate
+        },
+        $or: [{
+          endDate: {
+            $gte: inputDate
+          }
+        }, {
+          endDate: null
+        }]
+      }).populate("formula.attribute");
+      if (!formula) {
+        return res.status(404).json({
+          message: "Formula not found"
+        });
+      }
+      const result = {
+        _id: formula._id,
+        startDate: formula.startDate,
+        endDate: formula.endDate,
+        formula: formula.formula.map(f => ({
+          attribute: f.attribute.name || f.attribute,
+          values: f.attribute.values || null,
+          weight: f.weight
+        }))
+      };
+      res.status(200).json(result);
+    } catch (error) {
+      res.status(500).json({
+        message: error.message
+      });
+    }
+  },
   updateFormulaByDateRange: async (req, res) => {
     try {
       const {
@@ -101,7 +145,6 @@ const formulaController = {
       });
     }
   },
-  // Xóa công thức theo khoảng thời gian
   deleteFormulaByDateRange: async (req, res) => {
     try {
       const {

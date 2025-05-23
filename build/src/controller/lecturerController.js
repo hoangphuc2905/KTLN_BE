@@ -21,7 +21,7 @@ const lecturerController = {
       });
       await account.save();
       res.status(201).json({
-        message: "Lecturer and account created successfully",
+        message: "Giảng viên và tài khoản đã được tạo thành công",
         lecturer,
         account: {
           user_id: account.user_id,
@@ -337,7 +337,6 @@ const lecturerController = {
         lecturerId,
         role
       } = req.body;
-      console.log("Request body:", req.body);
       if (!adminId || !lecturerId || !role) {
         return res.status(400).json({
           message: "Missing required fields"
@@ -354,7 +353,6 @@ const lecturerController = {
           message: "Admin not found"
         });
       }
-      console.log("Admin roles:", admin.roles);
       const lecturer = await Lecturer.findOne({
         lecturer_id: lecturerId
       }).populate({
@@ -366,8 +364,6 @@ const lecturerController = {
           message: "Lecturer not found"
         });
       }
-      console.log("Lecturer roles before removal:", lecturer.roles);
-      console.log("Role ID to remove:", role);
       const roleObjectId = new mongoose.Types.ObjectId(role);
       const roleIndex = lecturer.roles.findIndex(role => role._id.toString() === roleObjectId.toString());
       if (roleIndex === -1) {
@@ -377,12 +373,10 @@ const lecturerController = {
       }
       lecturer.roles.splice(roleIndex, 1);
       await lecturer.save();
-      console.log("Lecturer roles after removal:", lecturer.roles);
       res.status(200).json({
         message: `Role removed successfully from lecturer ${lecturer.full_name}`
       });
     } catch (error) {
-      console.error("Error in deleteRole:", error);
       res.status(500).json({
         message: error.message
       });

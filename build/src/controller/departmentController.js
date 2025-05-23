@@ -54,8 +54,6 @@ const departmentController = {
         department_name,
         roles
       } = req.body;
-
-      // Validate roles as an array of ObjectIds
       if (roles && !Array.isArray(roles)) {
         return res.status(400).json({
           message: "Roles must be an array"

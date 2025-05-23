@@ -3,6 +3,7 @@ const Lecturer = require("../models/Lecturer");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const Account = require("../models/Account");
+const UserToken = require("../models/UserToken");
 const studentControllers = require("./studentControllers");
 const lecturerController = require("./lecturerController");
 const nodemailer = require("nodemailer");
@@ -47,26 +48,33 @@ const authController = {
           message: "Tài khoản không tồn tại"
         });
       }
-
-      // Kiểm tra mật khẩu
       const isPasswordValid = await bcrypt.compare(password, account.password);
       if (!isPasswordValid) {
         return res.status(400).json({
-          message: "Mât khẩu không đúng"
+          message: "Mật khẩu không đúng"
         });
       }
-
-      // Tạo token JWT
-      const token = jwt.sign({
+      const accessToken = jwt.sign({
         userId: userIdentifier,
         roles: roleNames,
         user_type: userType,
         department: user.department
       }, process.env.MYSECRET, {
-        expiresIn: "1h"
+        expiresIn: "15m"
+      });
+      const refreshToken = jwt.sign({
+        userId: userIdentifier,
+        user_type: userType
+      }, process.env.MYREFRESHSECRET, {
+        expiresIn: "7d"
+      });
+      const newToken = await UserToken.create({
+        user_id: account._id,
+        token: refreshToken
       });
       res.status(200).json({
-        token,
+        accessToken,
+        refreshToken,
         [userIdField]: userIdentifier,
         roles: roleNames,
         email: user.email,
@@ -76,6 +84,67 @@ const authController = {
     } catch (error) {
       res.status(400).json({
         message: error.message
+      });
+    }
+  },
+  refreshToken: async (req, res) => {
+    const {
+      refreshToken
+    } = req.body;
+    if (!refreshToken) {
+      return res.status(401).json({
+        message: "Refresh token required"
+      });
+    }
+    try {
+      const tokenDoc = await UserToken.findOne({
+        token: refreshToken
+      });
+      if (!tokenDoc) {
+        return res.status(403).json({
+          message: "Invalid refresh token"
+        });
+      }
+      const decoded = jwt.verify(refreshToken, process.env.MYREFRESHSECRET);
+      const userId = decoded.userId;
+      let user = await Student.findOne({
+        student_id: userId,
+        isActive: true
+      });
+      let roleNames = ["Student"];
+      let userType = "Student";
+      let department = user?.department;
+      if (!user) {
+        user = await Lecturer.findOne({
+          lecturer_id: userId,
+          isActive: true
+        }).populate({
+          path: "roles",
+          select: "role_name"
+        });
+        roleNames = user?.roles?.map(role => role.role_name) || ["Lecturer"];
+        userType = "Lecturer";
+        department = user?.department;
+      }
+      if (!user) {
+        return res.status(403).json({
+          message: "User not found"
+        });
+      }
+      const accessToken = jwt.sign({
+        userId: userId,
+        roles: roleNames,
+        user_type: userType,
+        department: department
+      }, process.env.MYSECRET, {
+        expiresIn: "15m"
+      });
+      res.status(200).json({
+        accessToken
+      });
+    } catch (error) {
+      res.status(403).json({
+        message: "Refresh token expired or invalid"
       });
     }
   },
@@ -218,7 +287,7 @@ const authController = {
       });
       await account.save();
       res.status(201).json({
-        message: "Student registered successfully. Awaiting approval.",
+        message: "Sinh viên đã được đăng ký thành công",
         student,
         account: {
           user_id: account.user_id,

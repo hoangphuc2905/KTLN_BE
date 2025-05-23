@@ -228,7 +228,7 @@ const statisticsController = {
         $match: {
           "authorDetails.user_id": author_id.toString(),
           status: "approved",
-          ...dateFilter // Áp dụng bộ lọc theo năm học (nếu có)
+          ...dateFilter
         }
       }, {
         $addFields: {
@@ -1632,7 +1632,7 @@ const statisticsController = {
         $match: {
           "authorDetails.user_id": author_id.toString(),
           status: "approved",
-          ...dateFilter // Áp dụng bộ lọc theo năm học (nếu có)
+          ...dateFilter
         }
       }, {
         $group: {
@@ -1646,17 +1646,16 @@ const statisticsController = {
           contributionScore: {
             $sum: "$authorDetails.point"
           },
-          // Tính tổng điểm đóng góp
           authorDetails: {
             $push: "$authorDetails"
-          } // Lưu danh sách tác giả
+          }
         }
       }, {
         $sort: {
           contributionScore: -1
-        } // Sắp xếp theo điểm đóng góp giảm dần
+        }
       }, {
-        $limit: 5 // Lấy top 5 bài
+        $limit: 5
       }, {
         $project: {
           paper_id: "$_id",
@@ -1672,15 +1671,11 @@ const statisticsController = {
           }
         }
       }]);
-
-      // Kiểm tra nếu không có bài nghiên cứu nào
       if (!result || result.length === 0) {
         return res.status(404).json({
           message: "No papers found for this author"
         });
       }
-
-      // Trả về kết quả
       res.status(200).json({
         message: "Top 5 papers by author retrieved successfully",
         academicYear: academicYear || "All",
@@ -1698,12 +1693,10 @@ const statisticsController = {
     try {
       const {
         user_id
-      } = req.params; // Lấy user_id từ request params
+      } = req.params;
       const {
         academicYear
-      } = req.query; // Lấy `academicYear` từ query string
-
-      // Nếu có năm học, tính khoảng thời gian
+      } = req.query;
       let dateFilter = {};
       if (academicYear) {
         const {

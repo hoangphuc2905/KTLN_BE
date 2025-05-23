@@ -32,6 +32,7 @@ const specs = require("./swagger");
 
 dotenv.config();
 const app = express();
+app.use(express.static("public"));
 
 async function connectDB() {
   try {

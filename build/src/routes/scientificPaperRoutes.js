@@ -1,6 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const scientificPaperController = require("../controller/scientificPaperController");
+const multer = require("multer");
+const upload = multer({
+  dest: "uploads/"
+});
 
 /**
  * @swagger
@@ -767,4 +771,36 @@ router.put("/status/:id", scientificPaperController.updateScientificPaperStatus)
  *         description: Scientific paper not found
  */
 router.put("/:id", scientificPaperController.updateScientificPaperById);
+
+/**
+ * @swagger
+ * /scientificPapers/compress:
+ *   post:
+ *     summary: Nén file PDF và trả về file đã nén
+ *     tags: [ScientificPapers]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *                 description: File PDF cần nén
+ *     responses:
+ *       200:
+ *         description: File PDF đã nén trả về thành công
+ *         content:
+ *           application/pdf:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *       400:
+ *         description: Không có file upload hoặc file quá lớn sau khi nén
+ *       500:
+ *         description: Lỗi server
+ */
+router.post("/compress", upload.single("file"), scientificPaperController.compressPDF);
 module.exports = router;

@@ -2,7 +2,7 @@ const multer = require("multer");
 const cloudinary = require("../configs/cloudinary");
 
 const storage = multer.memoryStorage();
-const upload = multer({ storage }).single("file"); 
+const upload = multer({ storage }).single("file");
 
 const uploadFileToCloudinary = async (buffer, folderName) => {
   return new Promise((resolve, reject) => {
@@ -29,10 +29,10 @@ const uploadFile = async (req, res) => {
       return res.status(400).json({ message: "No file uploaded" });
     }
 
-    const folderName = "scientific_papers"; 
+    const folderName = "scientific_papers";
     const fileUrl = await uploadFileToCloudinary(req.file.buffer, folderName);
 
-    console.log("Uploaded file URL:", fileUrl); 
+    console.log("Uploaded file URL:", fileUrl);
 
     res.status(200).json({
       message: "File uploaded successfully",
@@ -49,4 +49,5 @@ const uploadFile = async (req, res) => {
 module.exports = {
   upload,
   uploadFile,
+  uploadFileToCloudinary,
 };

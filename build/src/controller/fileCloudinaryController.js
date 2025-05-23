@@ -43,5 +43,6 @@ const uploadFile = async (req, res) => {
 };
 module.exports = {
   upload,
-  uploadFile
+  uploadFile,
+  uploadFileToCloudinary
 };

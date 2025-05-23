@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: kltn-be
+    env: node
+    buildCommand: |
+      apt-get update && apt-get install -y ghostscript
+      npm install
+    startCommand: npm run production
+    envVars:
+      - key: NODE_ENV
+        value: production
