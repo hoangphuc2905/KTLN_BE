@@ -4,7 +4,9 @@ const {
 const fs = require("fs");
 async function compressPDF(inputPath, maxSizeMB = 3.5) {
   const outputPath = inputPath.replace(/(\.pdf)?$/i, "_compressed.pdf");
-  const gsCmd = `${process.platform === "win32" ? "gswin64c" : "gs"} -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/screen -dNOPAUSE -dQUIET -dBATCH -sOutputFile="${outputPath}" "${inputPath}"`;
+  const gsCmd = `${process.platform === "win32" ? "gswin64c" : "gs"} -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/screen \
+-dDetectDuplicateImages=true -dDownsampleColorImages=true -dColorImageResolution=72 \
+-dNOPAUSE -dQUIET -dBATCH -sOutputFile="${outputPath}" "${inputPath}"`;
   await new Promise((resolve, reject) => {
     exec(gsCmd, (error, stdout, stderr) => {
       if (error) {
